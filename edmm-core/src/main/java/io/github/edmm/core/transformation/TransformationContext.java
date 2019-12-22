@@ -19,6 +19,7 @@ public final class TransformationContext {
     private final Platform targetPlatform;
     private final File sourceDirectory;
     private final File targetDirectory;
+    private File targetSubDirectory;
 
     @Setter
     private State state = State.READY;
@@ -46,6 +47,13 @@ public final class TransformationContext {
     public PluginFileAccess getFileAccess() {
         return new PluginFileAccess(sourceDirectory, targetDirectory);
     }
+
+    public PluginFileAccess getSubDirAccess(String component){
+        File subdir= new File(this.targetDirectory, component);
+        return new PluginFileAccess(sourceDirectory,subdir);
+    }
+
+
 
     public enum State {
         READY,
