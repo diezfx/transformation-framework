@@ -71,6 +71,15 @@ public abstract class ModelEntity extends DescribableElement {
         }
     }
 
+    public void setPropertyValue(Attribute<String> attribute, String newVal){
+        Optional<Property> prop=getProperty(attribute.getName());
+        if(prop.isPresent()==false){
+            return;
+        }
+
+        prop.get().setValue(newVal);
+    }
+
     public Map<String, Operation> getOperations() {
         EntityGraph graph = entity.getGraph();
         Map<String, Operation> result = new HashMap<>();
