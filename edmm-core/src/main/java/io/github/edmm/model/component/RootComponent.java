@@ -25,6 +25,7 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
     public static final Attribute<String> TYPE = new Attribute<>("type", String.class);
     public static final Attribute<RootRelation> RELATIONS = new Attribute<>("relations", RootRelation.class);
+    public static final Attribute<String> DEPLOYMENT_TOOL = new Attribute<>("deployment_tool", String.class);
 
     private final List<RootRelation> relationCache = new ArrayList<>();
 
@@ -50,6 +51,11 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
             relationCache.addAll(Lists.reverse(result));
         }
         return relationCache;
+    }
+
+    public Optional<String> getDeploymentTool(){
+        return getProperty(DEPLOYMENT_TOOL);
+
     }
 
     public boolean hasRelations() {

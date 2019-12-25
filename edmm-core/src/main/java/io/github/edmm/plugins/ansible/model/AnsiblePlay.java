@@ -15,4 +15,5 @@ public class AnsiblePlay {
     private String becomeUser;
     private Map<String, String> vars;
     private List<AnsibleTask> tasks;
+    private List<AnsibleFile> files;
 }

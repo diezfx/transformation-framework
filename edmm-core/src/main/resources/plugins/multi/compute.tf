@@ -46,13 +46,10 @@ provider "openstack" {
   tenant_id =var.os_project_id
 }
 
-resource "aws_key_pair" "auth" {
-  key_name = var.key_name
-  public_key = file(var.public_key_path)
-}
+
 #TODO more of the vars in model
 resource "openstack_compute_instance_v2" "${ec2.name}" {
-  name            = ${ec2.name}
+  name            = "${ec2.name}"
   image_name        = "Ubuntu 18.04"
   flavor_name       = "m1.nano"
   key_pair        = "win10key"

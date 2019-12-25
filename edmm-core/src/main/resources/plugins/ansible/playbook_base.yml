@@ -1,5 +1,5 @@
 ---
-<#list plays as play>
+  <#list plays as play>
 # Play for component ${play.name}
 - name: ${play.name}
   <#if play.hosts??>
@@ -16,16 +16,26 @@
   <#else>
   </#if>
   tasks:
-    <#list play.tasks as task>
-    - name: ${task.name}
-      script: ${task.script}
-      <#if task.args?? && task.args?size != 0>
-      args:
-      <#list task.args as arg>
-        ${arg.name}: ${arg.value}
-      </#list>
-      <#else>
-      </#if>
-    </#list>
+      <#list play.files as file>
+        - name: Make sure destination dir exists
+        file:
+          path: ${file.target} | dirname
+          state: directory
+        - name: Copy file to remote
+          copy:
+            src: ${file.src}
+            dest: ${file.target}
+        </#list>
+        <#list play.tasks as task>
+        - name: ${task.name}
+          script: ${task.script}
+          <#if task.args?? && task.args?size != 0>
+          args:
+          <#list task.args as arg>
+          ${arg.name}: ${arg.value}
+          </#list>
+          <#else>
+          </#if>
+        </#list>
 
-</#list>
+  </#list>
