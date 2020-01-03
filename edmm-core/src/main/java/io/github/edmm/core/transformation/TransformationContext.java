@@ -19,7 +19,8 @@ public final class TransformationContext {
     private final Platform targetPlatform;
     private final File sourceDirectory;
     private final File targetDirectory;
-    private File targetSubDirectory;
+
+    private String subTargetDirectory;
 
     @Setter
     private State state = State.READY;
@@ -48,8 +49,14 @@ public final class TransformationContext {
         return new PluginFileAccess(sourceDirectory, targetDirectory);
     }
 
-    public PluginFileAccess getSubDirAccess(String component){
-        File subdir= new File(this.targetDirectory, component);
+    public void setSubFileAcess(String relativePath){
+       this.subTargetDirectory=relativePath;
+    }
+
+
+
+    public PluginFileAccess getSubDirAccess(){
+        File subdir= new File(this.targetDirectory, this.subTargetDirectory);
         return new PluginFileAccess(sourceDirectory,subdir);
     }
 
