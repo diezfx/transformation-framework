@@ -79,11 +79,6 @@ public abstract class ModelEntity extends DescribableElement {
         if(prop.isPresent()==false) {
             return;
         }
-
-        this.updateEntityChain(prop.get().getEntity());
-
-        this.entity.getChild()
-
         prop.get().setValue(newVal);
     }
 
