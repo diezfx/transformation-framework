@@ -1,6 +1,22 @@
 ---
   <#list plays as play>
 # Play for component ${play.name}
+# add hosts
+- hosts: localhost
+  vars:
+  tasks:
+    - include_vars:
+        file: compute_${play.hosts}.json
+        name: compute
+    - name: Add host to group 'just_created'
+      add_host:
+        name: ${play.hosts}
+        ansible_host: '{{compute.adress}}'
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: /home/diezfx/.ssh/id_rsa
+        ansible_python_interpreter: /usr/bin/python3
+        groups: just_created
+
 - name: ${play.name}
   <#if play.hosts??>
   hosts: ${play.hosts}

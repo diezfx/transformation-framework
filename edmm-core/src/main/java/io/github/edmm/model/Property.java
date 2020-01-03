@@ -57,7 +57,7 @@ public class Property extends DescribableElement {
         return resolveByEntityChain(DEFAULT_VALUE);
     }
 
-    // null is possible if default is nnot set?
+    // null is possible if default is not set?
     public String getValue() {
         String value = resolveByEntityChain(VALUE);
         if (Objects.isNull(value)) {
@@ -66,7 +66,7 @@ public class Property extends DescribableElement {
         return value.replaceAll(Consts.NL, Consts.EMPTY);
     }
 
-    public <T>void setValue(String value){
+    public void setValue(String value){
 
         set(VALUE,value);
     }

@@ -3,8 +3,6 @@ package io.github.edmm.model.component;
 import java.util.Optional;
 
 
-import io.github.edmm.core.parser.Entity;
-import io.github.edmm.core.parser.EntityId;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -19,13 +17,14 @@ public class Compute extends RootComponent {
     public static final Attribute<String> KEY_NAME = new Attribute<>("key_name", String.class);
     public static final Attribute<String> PUBLIC_KEY = new Attribute<>("public_key", String.class);
 
+    public static final Attribute<String> PRIVATE_KEY = new Attribute<>("private_key", String.class);
+
     // computed stuff not known at compile time
-    public static final Attribute<String> HOST_ADRESS = new Attribute<>("ip_adress", String.class);
+    public static final Attribute<String> HOST_ADDRESS = new Attribute<>("ip_address", String.class);
 
     public Compute(MappingEntity mappingEntity) {
 
         super(mappingEntity);
-        setPropertyValue(HOST_ADRESS, "newVal");
     }
 
     public Optional<String> getOsFamily() {
@@ -48,13 +47,15 @@ public class Compute extends RootComponent {
         return getProperty(PUBLIC_KEY);
     }
 
-    public Optional<String> getHostAdress() {
-        return getProperty(HOST_ADRESS);
+    public Optional<String> getPrivateKey() {return getProperty(PRIVATE_KEY);}
+
+    public Optional<String> getHostAddress() {
+        return getProperty(HOST_ADDRESS);
     }
 
     // only needed in orchestrator phase
-    public void setHostAdress(String adress) {
-        this.set(HOST_ADRESS, adress);
+    public void setHostAddress(String address) {
+        setPropertyValue(HOST_ADDRESS, address);
     }
 
     @Override

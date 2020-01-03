@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
+import io.github.edmm.core.parser.EntityId;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.model.Operation;
@@ -73,9 +75,14 @@ public abstract class ModelEntity extends DescribableElement {
 
     public void setPropertyValue(Attribute<String> attribute, String newVal){
         Optional<Property> prop=getProperty(attribute.getName());
-        if(prop.isPresent()==false){
+
+        if(prop.isPresent()==false) {
             return;
         }
+
+        this.updateEntityChain(prop.get().getEntity());
+
+        this.entity.getChild()
 
         prop.get().setValue(newVal);
     }
@@ -123,6 +130,8 @@ public abstract class ModelEntity extends DescribableElement {
             }
         }
     }
+
+
 
     private void populateOperations(Map<String, Operation> result, Entity entity) {
         Set<Entity> children = entity.getChildren();

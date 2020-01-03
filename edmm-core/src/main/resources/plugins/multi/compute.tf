@@ -66,9 +66,9 @@ resource "openstack_compute_instance_v2" "${ec2.name}" {
 }
 
 resource "local_file" "compute_${ec2.name}" {
-content=jsonencode( {"adress" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4})
+content=jsonencode( {"address" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4})
 filename  = "compute_${ec2.name}.json"
 }
-output "compute_${ec2.name}_adress"{
+output "compute_${ec2.name}_address"{
   value=openstack_compute_instance_v2.${ec2.name}.access_ip_v4
 }

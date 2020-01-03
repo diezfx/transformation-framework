@@ -25,6 +25,11 @@ public class Artifact extends BaseElement {
         return entity.getValue();
     }
 
+    public void setValue(String value) {
+        entity.setValue(value);
+    }
+
+
     public String getNormalizedValue() {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getValue().toLowerCase())
                 .replace(".", "_")

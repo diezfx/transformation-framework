@@ -50,8 +50,7 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(RootComponent component) {
         logger.info("Generate a play for component " + component.getName());
-        PluginFileAccess fileAccess = context.getSubDirAccess(component.getNormalizedName());
-
+        PluginFileAccess fileAccess = context.getSubDirAccess();
 
         Map<String, String> envVars = collectEnvVars(component);
         //scripts that are executed
@@ -82,7 +81,7 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         String filename = String.format("%s.yml", component.getNormalizedName());
 
         try {
-            fileAccess.append(filename, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
+            fileAccess.write(filename, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
         } catch (IOException e) {
             logger.error("Failed to write Ansible file", e);
         }

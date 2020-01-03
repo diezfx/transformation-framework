@@ -1,8 +1,10 @@
 package io.github.edmm.core.parser;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ScalarEntity extends Entity {
 
     private String value;
@@ -11,6 +13,7 @@ public class ScalarEntity extends Entity {
         super(id, graph);
         this.value = value;
     }
+
 
     @Override
     public String toString() {
