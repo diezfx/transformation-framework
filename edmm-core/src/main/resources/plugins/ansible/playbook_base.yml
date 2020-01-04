@@ -34,9 +34,9 @@
   tasks:
       <#list play.files as file>
         - name: Make sure destination dir exists
-        file:
-          path: ${file.target} | dirname
-          state: directory
+          file:
+            path: ${file.target} | dirname
+            state: directory
         - name: Copy file to remote
           copy:
             src: ${file.src}

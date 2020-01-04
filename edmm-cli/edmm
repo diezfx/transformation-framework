@@ -1,3 +1,3 @@
 #!/bin/bash
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
-java -jar ${SCRIPT_PATH}/lib/edmm-cli.jar "$@"
+java -jar ${SCRIPT_PATH}/target/edmm-cli-1.0.0-SNAPSHOT.jar "$@"
