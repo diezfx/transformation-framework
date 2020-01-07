@@ -1,28 +1,30 @@
 package io.github.edmm.plugins.multi.orchestration;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
+
 import com.google.gson.JsonObject;
+
+import org.jgrapht.Graph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
-import io.github.edmm.model.Artifact;
-import io.github.edmm.model.component.*;
+import io.github.edmm.model.component.Compute;
+import io.github.edmm.model.component.Database;
+import io.github.edmm.model.component.Dbms;
+import io.github.edmm.model.component.MysqlDatabase;
+import io.github.edmm.model.component.MysqlDbms;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.Tomcat;
+import io.github.edmm.model.component.WebApplication;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.MultiPlugin;
-import org.jgrapht.Graph;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class AnsibleOrchestratorVisitor implements ComponentVisitor {
     private static final Logger logger = LoggerFactory.getLogger(AnsibleOrchestratorVisitor.class);
