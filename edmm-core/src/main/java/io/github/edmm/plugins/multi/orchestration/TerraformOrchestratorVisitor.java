@@ -7,7 +7,6 @@ import io.github.edmm.model.Artifact;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
-import io.github.edmm.plugins.multi.MultiLifecycle;
 import io.github.edmm.plugins.multi.MultiPlugin;
 import lombok.SneakyThrows;
 import org.jgrapht.Graph;
@@ -18,13 +17,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 
 public class TerraformOrchestratorVisitor implements ComponentVisitor {
@@ -60,25 +57,21 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         List<Artifact> providerInfo = component.getArtifacts().stream().filter(a -> a.getName().equals("provider"))
                 .collect(Collectors.toList());
 
-        //todo clean solution
+        // todo clean solution
         if (providerInfo.isEmpty()) {
             throw new IllegalArgumentException("The providerinfo for openstack was not provided");
         }
 
         File openstackProviderInfo = new File(context.getSubDirAccess().getTargetDirectory(),
                 providerInfo.iterator().next().getValue());
-        try {
-            JsonReader reader = new JsonReader(new FileReader(openstackProviderInfo));
-            HashMap<String, String> obj = gson.fromJson(reader, HashMap.class);
 
-            Map<String, String> env = pb.environment();
+        JsonReader reader = new JsonReader(new FileReader(openstackProviderInfo));
+        HashMap<String, String> obj = gson.fromJson(reader, HashMap.class);
 
-            for (String key : obj.keySet()) {
-                logger.info(key.toString());
-                env.put("TF_VAR_" + key, (String) env.get(key));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        Map<String, String> env = pb.environment();
+
+        for (String key : obj.keySet()) {
+            env.put("TF_VAR_" + key, obj.get(key));
         }
 
         try {
@@ -96,16 +89,11 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
 
         File computeInfo = new File(context.getSubDirAccess().getTargetDirectory(),
                 "compute_" + component.getName() + ".json");
-        try {
-            JsonReader reader = new JsonReader(new FileReader(computeInfo));
-            HashMap<String, String> obj = gson.fromJson(reader, HashMap.class);
-            String address = obj.get("address");
-            logger.info(address);
-            component.setHostAddress(address);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        reader = new JsonReader(new FileReader(computeInfo));
+        obj = gson.fromJson(reader, HashMap.class);
+        String address = obj.get("address");
+        logger.info(address);
+        component.setHostAddress(address);
 
     }
 

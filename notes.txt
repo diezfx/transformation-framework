@@ -1,0 +1,37 @@
+hosted_on: -> resolve compute and get connection
+connects_to: -> resolve compute and get connection + port?
+
+
+
+variables may have computed values they are exported as a json
+
+software components always resolve host and try to get connection
+
+atm only ipaddress
+
+while orchestration phase set these vars in model as well
+super hard problem with properties are not set at component but parent
+
+
+
+
+e.g. image with tomcat
+next step use that as base and then execute own stuff
+
+
+
+hosted_on:
+    reiche properties durch bis compute
+connect_to:
+    nur properties vom aktuellen übergeben
+
+
+docker ideas:
+every step own docker image
+reference image from step before as base
+
+
+
+
+
+
