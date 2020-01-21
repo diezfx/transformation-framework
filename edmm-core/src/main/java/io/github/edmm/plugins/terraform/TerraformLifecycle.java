@@ -4,9 +4,8 @@ import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.support.CheckModelResult;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.Platform;
 import io.github.edmm.model.visitor.VisitorHelper;
-import io.github.edmm.plugins.ComputeSupportVisitor;
 import io.github.edmm.plugins.terraform.aws.TerraformAwsVisitor;
 
 import java.io.StringWriter;
@@ -18,15 +17,13 @@ public class TerraformLifecycle extends AbstractLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(TerraformLifecycle.class);
 
-    public static final String FILE_NAME = "deploy.tf";
-
     public TerraformLifecycle(TransformationContext context) {
         super(context);
     }
 
     @Override
     public CheckModelResult checkModel() {
-        ComputeSupportVisitor visitor = new ComputeSupportVisitor(context);
+        TerraformSupportVisitor visitor = new TerraformSupportVisitor(context);
         VisitorHelper.visit(context.getModel().getComponents(), visitor);
         return visitor.getResult();
     }
@@ -36,12 +33,7 @@ public class TerraformLifecycle extends AbstractLifecycle {
         logger.info("Begin transformation to Terraform...");
         TerraformVisitor visitor = new TerraformAwsVisitor(context);
         // Visit compute components first
-        
-        StringWriter yaml = new StringWriter();
-
-
-        
-        VisitorHelper.visit(context.getModel().getComponents(), visitor, component -> component instanceof Compute);
+        VisitorHelper.visit(context.getModel().getComponents(), visitor, component -> component instanceof Compute || component instanceof Platform);
         // ... then all others
         VisitorHelper.visit(context.getModel().getComponents(), visitor);
         VisitorHelper.visit(context.getModel().getRelations(), visitor);
