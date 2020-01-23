@@ -12,6 +12,7 @@ import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.EntityId;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.support.GraphHelper;
+import io.github.edmm.model.ComponentInterface;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
 import lombok.ToString;
@@ -22,6 +23,9 @@ public abstract class ModelEntity extends DescribableElement {
     public static final Attribute<String> EXTENDS = new Attribute<>("extends", String.class);
     public static final Attribute<Property> PROPERTIES = new Attribute<>("properties", Property.class);
     public static final Attribute<Operation> OPERATIONS = new Attribute<>("operations", Operation.class);
+    public static final Attribute<ComponentInterface> COMPONENT_INTERFACE= new Attribute<>("interface", ComponentInterface.class);
+    //public static final Attribute<Interfaces>
+
 
     private boolean transformed = false;
 
@@ -49,6 +53,12 @@ public abstract class ModelEntity extends DescribableElement {
             propertiesEntity.ifPresent(value -> populateProperties(result, value));
         }
         return result;
+    }
+
+    public Optional<ComponentInterface> getInterface(){
+
+        Optional<Entity> comp_interface = entity.getChild(COMPONENT_INTERFACE);
+        return comp_interface.ifPresent(e -> new ComponentInterface((MappingEntity) e););
     }
 
     public Optional<Property> getProperty(String name) {
@@ -82,6 +92,7 @@ public abstract class ModelEntity extends DescribableElement {
         prop.get().setValue(newVal);
     }
 
+
     public Map<String, Operation> getOperations() {
         EntityGraph graph = entity.getGraph();
         Map<String, Operation> result = new HashMap<>();
@@ -111,6 +122,7 @@ public abstract class ModelEntity extends DescribableElement {
     public void setTransformed(boolean transformed) {
         this.transformed = transformed;
     }
+
 
     private void populateProperties(Map<String, Property> result, Entity entity) {
         Set<Entity> children = entity.getChildren();

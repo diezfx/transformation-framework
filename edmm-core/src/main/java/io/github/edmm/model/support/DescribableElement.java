@@ -71,7 +71,7 @@ public abstract class DescribableElement extends BaseElement {
         }
     }
 
-    protected void updateEntityChain(MappingEntity entity) {
+    public void updateEntityChain(MappingEntity entity) {
         this.entityChain.add(entity);
     }
 }

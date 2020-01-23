@@ -11,6 +11,7 @@ import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.support.GraphHelper;
+import io.github.edmm.model.ComponentInterface;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.Attribute;
@@ -58,6 +59,7 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
     }
 
+
     public boolean hasRelations() {
         return getRelations().size() > 0;
     }
@@ -77,6 +79,9 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
             RootRelation relation = TypeWrapper.wrapRelation(relationEntity, this.entity);
             result.add(relation);
         }
+    }
+    public void test(){
+        System.out.println(this.entityChain);
     }
 
     @Override

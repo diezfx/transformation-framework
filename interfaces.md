@@ -10,9 +10,9 @@ Every component can expose or require specific properties.
 possible problems:
 ### components may not have a direct relation to their compute instance
 
-e.g. compute -> tomcat -> java_service. The java_service still need some kind of "connection" property from compute.
+1. e.g. compute -> tomcat -> java_service. The java_service still need some kind of "connection" property from compute.
 
-Second if another service connects to this java_service a "connection" is needed as well that stems from the compute instance. Something like the ip_adress.
+2. if another service connects to this java_service a "connection" is needed as well that needs info  from the underlying compute instance. Something like the ip_adress.
 
 ### interface properties could have name-collisions
 e.g. one service exposes 2 "ports". Solution: the properties are typed. So one port could be a mysql-port and another one for ssh.
@@ -54,8 +54,5 @@ Example:
             type: integer
           mysql-adress: 
             type: string 
-            
-
-          
 ```
     

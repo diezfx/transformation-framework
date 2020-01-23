@@ -8,10 +8,8 @@ import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
-import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -19,11 +17,6 @@ import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.ansible.model.AnsibleFile;
 import io.github.edmm.plugins.ansible.model.AnsiblePlay;
 import io.github.edmm.plugins.ansible.model.AnsibleTask;
-import io.github.edmm.plugins.terraform.TerraformPlugin;
-import io.github.edmm.plugins.terraform.aws.TerraformAwsVisitor;
-import io.github.edmm.plugins.terraform.model.FileProvisioner;
-import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
-import io.github.edmm.plugins.terraform.model.aws.Ec2;
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
@@ -36,7 +29,7 @@ import java.util.*;
 public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
     protected final TransformationContext context;
-    protected final Configuration cfg = TemplateHelper.forClasspath(TerraformPlugin.class, "/plugins/ansible");
+    protected final Configuration cfg = TemplateHelper.forClasspath(AnsibleVisitor.class, "/plugins/ansible");
     protected final Graph<RootComponent, RootRelation> graph;
     private static final Logger logger = LoggerFactory.getLogger(AnsibleVisitor.class);
     private List<AnsiblePlay> plays = new ArrayList<>();
@@ -49,6 +42,7 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
     @Override
     public void visit(RootComponent component) {
+        component.getInterface().ifPresent(c -> System.out.println(c.getProvided()));
         logger.info("Generate a play for component " + component.getName());
         PluginFileAccess fileAccess = context.getSubDirAccess();
 
@@ -63,6 +57,7 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         // host is the compute if exists
         String hosts = component.getNormalizedName();
         Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(context.getTopologyGraph(), component);
+        optionalCompute.ifPresent(c -> c.test());
         if (optionalCompute.isPresent()) {
             hosts = optionalCompute.get().getNormalizedName();
         }

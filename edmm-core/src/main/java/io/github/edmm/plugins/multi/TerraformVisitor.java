@@ -23,7 +23,7 @@ import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
-import io.github.edmm.plugins.terraform.model.aws.Ec2;
+import io.github.edmm.plugins.terraform.model.Aws;
 
 import java.io.IOException;
 import java.util.*;
@@ -59,7 +59,7 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(Compute component) {
 
-        Ec2 ec2 = Ec2.builder().name(component.getNormalizedName())
+        Aws.Instance ec2 = Aws.Instance.builder().name(component.getNormalizedName())
                 // TODO: Try to resolve image
                 .ami("ami-0bbc25e23a7640b9b")
                 // TODO: Try to resolve instance type
