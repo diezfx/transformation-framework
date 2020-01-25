@@ -1,14 +1,5 @@
 package io.github.edmm.plugins.juju;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import io.github.edmm.core.plugin.TemplateHelper;
@@ -25,17 +16,22 @@ import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JujuTransformer {
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
 
-    private static final Logger logger = LoggerFactory.getLogger(JujuTransformer.class);
+public class JujuTransformer {
 
     public static final String CHARM_FOLDER_PREAMBLE = "layer-";
     public static final String CHARM_SERIES = "xenial";
+    public static final String HOOKS_FOLDER = "hooks";
+    public static final String HOOK_INSTALL = "install";
+    public static final String LAYER_FILENAME = "layer.yaml";
+    public static final String METADATA_FILENAME = "metadata.yaml";
+    private static final Logger logger = LoggerFactory.getLogger(JujuTransformer.class);
     private static final String DEFAULT_ENV_VAR_CONNECTION = "_HOSTNAME";
     private static final String DEFAULT_STARTING_LAYER = "basic";
     private static final String DEFAULT_TARGET_LOCATION = "localhost";
-    public static final String HOOKS_FOLDER = "hooks";
-    public static final String HOOK_INSTALL = "install";
     private static final List<String> HOOK_PLACEHOLDERS = Arrays.asList(
             "config-changed",
             "leader-elected",
@@ -45,9 +41,6 @@ public class JujuTransformer {
             "upgrade-charm",
             "update-status"
     );
-    public static final String LAYER_FILENAME = "layer.yaml";
-    public static final String METADATA_FILENAME = "metadata.yaml";
-
     private final TransformationContext context;
     private final Configuration cfg = TemplateHelper.forClasspath(JujuPlugin.class, "/plugins/juju");
 

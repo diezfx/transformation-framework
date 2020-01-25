@@ -1,8 +1,8 @@
 package io.github.edmm.plugins.terraform.model;
 
-import java.util.List;
-
 import lombok.Value;
+
+import java.util.List;
 
 @Value
 public class RemoteExecProvisioner {

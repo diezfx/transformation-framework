@@ -1,10 +1,5 @@
 package io.github.edmm.plugins.kubernetes.support;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationException;
@@ -16,6 +11,11 @@ import io.github.edmm.plugins.kubernetes.model.KubernetesResource;
 import io.github.edmm.plugins.kubernetes.model.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class KubernetesResourceBuilder {
 

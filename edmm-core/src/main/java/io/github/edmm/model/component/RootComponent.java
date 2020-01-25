@@ -1,18 +1,14 @@
 package io.github.edmm.model.component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.collect.Lists;
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.support.GraphHelper;
+import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.model.ComponentInterface;
 import io.github.edmm.model.Operation;
+import io.github.edmm.model.Property;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.ModelEntity;
@@ -20,6 +16,9 @@ import io.github.edmm.model.support.TypeWrapper;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.VisitableComponent;
 import lombok.ToString;
+import org.jgrapht.Graph;
+
+import java.util.*;
 
 @ToString
 public class RootComponent extends ModelEntity implements VisitableComponent {
@@ -27,6 +26,12 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
     public static final Attribute<String> TYPE = new Attribute<>("type", String.class);
     public static final Attribute<RootRelation> RELATIONS = new Attribute<>("relations", RootRelation.class);
     public static final Attribute<String> DEPLOYMENT_TOOL = new Attribute<>("deployment_tool", String.class);
+
+
+    //interface stuff
+    public static final Attribute<Property> REQUIRES = new Attribute<>("requires", Property.class);
+    public static final Attribute<Property> PROVIDES = new Attribute<>("provides", Property.class);
+    public static final Attribute<ComponentInterface> COMPONENT_INTERFACE = new Attribute<>("interface", ComponentInterface.class);
 
     private final List<RootRelation> relationCache = new ArrayList<>();
 
@@ -39,6 +44,7 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         List<MappingEntity> typeChain = GraphHelper.resolveInheritanceChain(graph, typeRef);
         typeChain.forEach(this::updateEntityChain);
     }
+
 
     public String getType() {
         return get(TYPE);
@@ -54,7 +60,7 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         return relationCache;
     }
 
-    public Optional<String> getDeploymentTool(){
+    public Optional<String> getDeploymentTool() {
         return getProperty(DEPLOYMENT_TOOL);
 
     }
@@ -80,9 +86,86 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
             result.add(relation);
         }
     }
-    public void test(){
-        System.out.println(this.entityChain);
+
+    private Map<String, Property> getRequired() {
+
+        Map<String, Property> result = new HashMap<>();
+        // Resolve the chain of types
+        Optional<Entity> propertiesEntity = entity.getChild(COMPONENT_INTERFACE).flatMap(i -> i.getChild(REQUIRES));
+
+        propertiesEntity.ifPresent(value -> {
+            System.out.println(value);
+            populateProperties(result, value);
+        });
+        // Update current map by property definitions
+
+        for (MappingEntity typeEntity : getTypeChain()) {
+            propertiesEntity = typeEntity.getChild(COMPONENT_INTERFACE.getName())
+                    .flatMap(i -> i.getChild(REQUIRES.getName()));
+            propertiesEntity.ifPresent(value -> populateProperties(result, value));
+        }
+        return result;
     }
+
+    public Optional<ComponentInterface> getInterface(Graph<RootComponent, RootRelation> graph) {
+
+        return Optional.of(new ComponentInterface(getProvided(), getRequired(), getProvidedHostingProps(graph), getRequiredHostingProps(graph)));
+    }
+
+
+    private Map<String, Property> getProvidedHostingProps(Graph<RootComponent, RootRelation> graph) {
+        Map<String, Property> properties = new HashMap<>();
+
+        Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, this);
+        while (host.isPresent()) {
+            host.get().getProvided().forEach(properties::putIfAbsent);
+            host = TopologyGraphHelper.resolveHostingComponent(graph, host.get());
+        }
+
+        return properties;
+
+    }
+
+    private Map<String, Property> getRequiredHostingProps(Graph<RootComponent, RootRelation> graph) {
+        Map<String, Property> properties = new HashMap<>();
+
+        Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, this);
+        while (host.isPresent()) {
+            host.get().getRequired().forEach(properties::putIfAbsent);
+            host = TopologyGraphHelper.resolveHostingComponent(graph, host.get());
+        }
+
+        return properties;
+
+    }
+
+    private Map<String, Property> getProvided() {
+        Map<String, Property> result = new HashMap<>();
+        // Resolve the chain of types
+
+        // Get initial properties by assignments
+        Optional<Entity> propertiesEntity = entity.getChild(COMPONENT_INTERFACE).flatMap(i -> i.getChild(PROVIDES));
+        propertiesEntity.ifPresent(value -> populateProperties(result, value));
+        // Update current map by property definitions
+
+        for (MappingEntity typeEntity : getTypeChain()) {
+            propertiesEntity = typeEntity.getChild(COMPONENT_INTERFACE.getName())
+                    .flatMap(i -> i.getChild(PROVIDES.getName()));
+            propertiesEntity.ifPresent(value -> populateProperties(result, value));
+        }
+        return result;
+
+    }
+
+    public List<MappingEntity> getTypeChain() {
+        EntityGraph graph = entity.getGraph();
+        MappingEntity typeRef = GraphHelper.findTypeEntity(graph, entity).
+                orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
+
+        return GraphHelper.resolveInheritanceChain(graph, typeRef);
+
+    }
+
 
     @Override
     public void accept(ComponentVisitor v) {

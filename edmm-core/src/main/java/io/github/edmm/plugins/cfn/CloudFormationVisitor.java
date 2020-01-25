@@ -1,13 +1,5 @@
 package io.github.edmm.plugins.cfn;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
 import com.scaleset.cfbuilder.core.Fn;
 import com.scaleset.cfbuilder.ec2.Instance;
@@ -19,12 +11,7 @@ import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.MysqlDatabase;
-import io.github.edmm.model.component.MysqlDbms;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.component.Tomcat;
-import io.github.edmm.model.component.WebApplication;
+import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -35,11 +22,10 @@ import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_INIT;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_SETS;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.MODE_777;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.OWNER_GROUP_ROOT;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.SECURITY_GROUP;
+import java.io.IOException;
+import java.util.*;
+
+import static io.github.edmm.plugins.cfn.CloudFormationModule.*;
 
 public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor {
 

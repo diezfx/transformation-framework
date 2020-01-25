@@ -1,9 +1,6 @@
 package io.github.edmm.plugins.multi;
 
-import com.google.common.collect.Lists;
 import freemarker.template.Configuration;
-import freemarker.template.Template;
-import io.github.edmm.core.plugin.BashScript;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
@@ -28,11 +25,11 @@ import java.util.*;
 
 public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
+    private static final Logger logger = LoggerFactory.getLogger(AnsibleVisitor.class);
     protected final TransformationContext context;
     protected final Configuration cfg = TemplateHelper.forClasspath(AnsibleVisitor.class, "/plugins/ansible");
     protected final Graph<RootComponent, RootRelation> graph;
-    private static final Logger logger = LoggerFactory.getLogger(AnsibleVisitor.class);
-    private List<AnsiblePlay> plays = new ArrayList<>();
+    private final List<AnsiblePlay> plays = new ArrayList<>();
 
     public AnsibleVisitor(TransformationContext context) {
         this.context = context;
@@ -42,22 +39,31 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
     @Override
     public void visit(RootComponent component) {
-        component.getInterface().ifPresent(c -> System.out.println(c.getProvided()));
+
+        component.getInterface(context.getTopologyGraph()).ifPresent(c -> {
+
+
+            System.out.println(c.getAllProvided());
+            System.out.println(c.getAllRequired());
+
+            System.out.println("-----------------------");
+
+
+        });
         logger.info("Generate a play for component " + component.getName());
         PluginFileAccess fileAccess = context.getSubDirAccess();
 
         Map<String, String> envVars = collectEnvVars(component);
         //scripts that are executed
         List<AnsibleTask> tasks = prepareTasks(collectOperations(component));
-        List<AnsibleFile> files=collectFiles(component);
+        List<AnsibleFile> files = collectFiles(component);
 
-        logger.info("files: {}",files);
+        logger.info("files: {}", files);
 
 
         // host is the compute if exists
         String hosts = component.getNormalizedName();
         Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(context.getTopologyGraph(), component);
-        optionalCompute.ifPresent(c -> c.test());
         if (optionalCompute.isPresent()) {
             hosts = optionalCompute.get().getNormalizedName();
         }
@@ -130,13 +136,13 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
     private List<AnsibleFile> collectFiles(RootComponent component) {
 
-            List<AnsibleFile> fileList=new ArrayList<>();
-            for (Artifact artifact : component.getArtifacts()) {
-                String filename=FilenameUtils.getName(artifact.getValue());
-                String destination = "/opt/" + component.getNormalizedName()+"/";
-                fileList.add(new AnsibleFile("./files/"+ filename, destination+filename));
-            }
-            return fileList;
+        List<AnsibleFile> fileList = new ArrayList<>();
+        for (Artifact artifact : component.getArtifacts()) {
+            String filename = FilenameUtils.getName(artifact.getValue());
+            String destination = "/opt/" + component.getNormalizedName() + "/";
+            fileList.add(new AnsibleFile("./files/" + filename, destination + filename));
+        }
+        return fileList;
 
     }
 

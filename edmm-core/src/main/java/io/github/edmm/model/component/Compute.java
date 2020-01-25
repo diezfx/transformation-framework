@@ -1,12 +1,11 @@
 package io.github.edmm.model.component;
 
-import java.util.Optional;
-
-
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import lombok.ToString;
+
+import java.util.Optional;
 
 @ToString
 public class Compute extends RootComponent {
@@ -47,7 +46,9 @@ public class Compute extends RootComponent {
         return getProperty(PUBLIC_KEY);
     }
 
-    public Optional<String> getPrivateKey() {return getProperty(PRIVATE_KEY);}
+    public Optional<String> getPrivateKey() {
+        return getProperty(PRIVATE_KEY);
+    }
 
     public Optional<String> getHostAddress() {
         return getProperty(HOST_ADDRESS);

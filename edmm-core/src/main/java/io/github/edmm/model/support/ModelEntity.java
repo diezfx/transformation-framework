@@ -1,15 +1,7 @@
 package io.github.edmm.model.support;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
-import io.github.edmm.core.parser.EntityId;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.model.ComponentInterface;
@@ -17,13 +9,15 @@ import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
 import lombok.ToString;
 
+import java.util.*;
+
 @ToString
 public abstract class ModelEntity extends DescribableElement {
 
     public static final Attribute<String> EXTENDS = new Attribute<>("extends", String.class);
     public static final Attribute<Property> PROPERTIES = new Attribute<>("properties", Property.class);
     public static final Attribute<Operation> OPERATIONS = new Attribute<>("operations", Operation.class);
-    public static final Attribute<ComponentInterface> COMPONENT_INTERFACE= new Attribute<>("interface", ComponentInterface.class);
+    public static final Attribute<ComponentInterface> COMPONENT_INTERFACE = new Attribute<>("interface", ComponentInterface.class);
     //public static final Attribute<Interfaces>
 
 
@@ -55,11 +49,6 @@ public abstract class ModelEntity extends DescribableElement {
         return result;
     }
 
-    public Optional<ComponentInterface> getInterface(){
-
-        Optional<Entity> comp_interface = entity.getChild(COMPONENT_INTERFACE);
-        return comp_interface.ifPresent(e -> new ComponentInterface((MappingEntity) e););
-    }
 
     public Optional<Property> getProperty(String name) {
         return Optional.ofNullable(getProperties().get(name));
@@ -83,10 +72,10 @@ public abstract class ModelEntity extends DescribableElement {
         }
     }
 
-    public void setPropertyValue(Attribute<String> attribute, String newVal){
-        Optional<Property> prop=getProperty(attribute.getName());
+    public void setPropertyValue(Attribute<String> attribute, String newVal) {
+        Optional<Property> prop = getProperty(attribute.getName());
 
-        if(prop.isPresent()==false) {
+        if (!prop.isPresent()) {
             return;
         }
         prop.get().setValue(newVal);
@@ -124,7 +113,7 @@ public abstract class ModelEntity extends DescribableElement {
     }
 
 
-    private void populateProperties(Map<String, Property> result, Entity entity) {
+    protected void populateProperties(Map<String, Property> result, Entity entity) {
         Set<Entity> children = entity.getChildren();
         for (Entity child : children) {
             MappingEntity propertyEntity = (MappingEntity) child;
@@ -137,7 +126,6 @@ public abstract class ModelEntity extends DescribableElement {
             }
         }
     }
-
 
 
     private void populateOperations(Map<String, Operation> result, Entity entity) {

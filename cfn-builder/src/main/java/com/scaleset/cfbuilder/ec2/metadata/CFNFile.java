@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * Class representing Files in the AWS::Cloudformation::Init
  */
-@JsonPropertyOrder( {"content", "source", "encoding", "mode", "owner", "group"})
+@JsonPropertyOrder({"content", "source", "encoding", "mode", "owner", "group"})
 public class CFNFile {
 
     @JsonProperty("content")

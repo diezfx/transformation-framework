@@ -7,9 +7,13 @@ import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
-
 import io.github.edmm.plugins.multi.orchestration.AnsibleOrchestratorVisitor;
 import io.github.edmm.plugins.multi.orchestration.TerraformOrchestratorVisitor;
+import org.apache.commons.io.FilenameUtils;
+import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -18,12 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
-
-import org.apache.commons.io.FilenameUtils;
-import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MultiLifecycle extends AbstractLifecycle {
 
@@ -79,7 +77,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             String deploy = comp.getDeploymentTool().get();
 
             //TODO clean version
-            logger.info("deployment_tool: {} ",deploy);
+            logger.info("deployment_tool: {} ", deploy);
             if (deploy.equals("ansible")) {
                 comp.accept(ansibleVisitor);
             } else {
@@ -99,7 +97,7 @@ public class MultiLifecycle extends AbstractLifecycle {
         context.getModel().getGraph().generateYamlOutput(writer);
 
         try {
-            fileAccess.write("state.yaml",writer.toString());
+            fileAccess.write("state.yaml", writer.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -113,17 +111,15 @@ public class MultiLifecycle extends AbstractLifecycle {
 
 
     @Override
-    public void orchestrate(){
+    public void orchestrate() {
         PluginFileAccess fileAccess = context.getFileAccess();
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter y to continue with orchestration");
-        String input=scanner.next();
+        String input = scanner.next();
 
-        if(input.equals("y")==false){
+        if (input.equals("y") == false) {
             return;
         }
-
-
 
 
         logger.info("Begin orchestration ...");
@@ -145,7 +141,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             String deploy = comp.getDeploymentTool().get();
 
             //TODO clean version
-            logger.info("deployment_tool: {} ",deploy);
+            logger.info("deployment_tool: {} ", deploy);
             if (deploy.equals("ansible")) {
                 comp.accept(ansibleVisitor);
             } else {
@@ -165,13 +161,10 @@ public class MultiLifecycle extends AbstractLifecycle {
 
             Writer writer = new StringWriter();
             context.getModel().getGraph().generateYamlOutput(writer);
-            fileAccess.write("state.yaml",writer.toString());
+            fileAccess.write("state.yaml", writer.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
 
 
     }
@@ -182,7 +175,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             try {
                 //get basename
                 String basename = FilenameUtils.getName(artifact.getValue());
-                String newPath="./files/" + basename;
+                String newPath = "./files/" + basename;
                 fileAccess.copy(artifact.getValue(), newPath);
                 artifact.setValue(newPath);
             } catch (IOException e) {
@@ -195,7 +188,7 @@ public class MultiLifecycle extends AbstractLifecycle {
         for (Artifact artifact : operations) {
             try {
                 String basename = FilenameUtils.getName(artifact.getValue());
-                String newPath="./files/" + basename;
+                String newPath = "./files/" + basename;
                 fileAccess.copy(artifact.getValue(), newPath);
                 artifact.setValue(newPath);
             } catch (IOException e) {

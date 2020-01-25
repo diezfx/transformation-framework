@@ -1,11 +1,5 @@
 package io.github.edmm.web.controller;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
-
-import javax.validation.Valid;
-
 import io.github.edmm.core.plugin.PluginService;
 import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -24,6 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 
 @Slf4j
 @RestController

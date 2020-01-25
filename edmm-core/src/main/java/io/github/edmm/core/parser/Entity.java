@@ -1,14 +1,14 @@
 package io.github.edmm.core.parser;
 
+import io.github.edmm.core.parser.support.DefaultKeys;
+import io.github.edmm.model.support.Attribute;
+import lombok.Getter;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import io.github.edmm.core.parser.support.DefaultKeys;
-import io.github.edmm.model.support.Attribute;
-import lombok.Getter;
 
 @Getter
 public abstract class Entity implements Comparable<Entity> {

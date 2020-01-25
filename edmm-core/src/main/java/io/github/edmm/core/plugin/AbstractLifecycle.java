@@ -1,13 +1,12 @@
 package io.github.edmm.core.plugin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import io.github.edmm.core.plugin.support.CheckModelResult;
 import io.github.edmm.core.plugin.support.LifecyclePhaseAccess;
 import io.github.edmm.core.transformation.TransformationContext;
-import io.github.edmm.core.transformation.TransformationException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class AbstractLifecycle implements PluginLifecycle, LifecyclePhaseAccess {
 
@@ -26,7 +25,7 @@ public abstract class AbstractLifecycle implements PluginLifecycle, LifecyclePha
     }
 
     @Override
-    public void orchestrate(){
+    public void orchestrate() {
 
     }
 
@@ -50,7 +49,7 @@ public abstract class AbstractLifecycle implements PluginLifecycle, LifecyclePha
         })); */
         phases.add(new LifecyclePhase<>("prepare", this, PluginLifecycle::prepare));
         phases.add(new LifecyclePhase<>("transformation", this, PluginLifecycle::transform));
-        phases.add(new LifecyclePhase<>("orchestrate",this,PluginLifecycle::orchestrate));
+        phases.add(new LifecyclePhase<>("orchestrate", this, PluginLifecycle::orchestrate));
         phases.add(new LifecyclePhase<>("cleanup", this, PluginLifecycle::cleanup));
         return Collections.unmodifiableList(phases);
     }

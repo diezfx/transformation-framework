@@ -1,9 +1,5 @@
 package io.github.edmm.plugins.kubernetes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
@@ -23,6 +19,10 @@ import io.github.edmm.plugins.kubernetes.support.KubernetesResourceBuilder;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class KubernetesLifecycle extends AbstractLifecycle {
 

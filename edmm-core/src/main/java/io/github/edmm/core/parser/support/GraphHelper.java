@@ -1,13 +1,13 @@
 package io.github.edmm.core.parser.support;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.EntityId;
 import io.github.edmm.core.parser.MappingEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public abstract class GraphHelper {
 

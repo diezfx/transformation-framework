@@ -1,7 +1,5 @@
 package io.github.edmm.plugins.kubernetes.support;
 
-import java.util.Arrays;
-
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.docker.Container;
@@ -10,15 +8,12 @@ import io.github.edmm.docker.FileMapping;
 import io.github.edmm.docker.PortMapping;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.MysqlDatabase;
-import io.github.edmm.model.component.MysqlDbms;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.component.Tomcat;
-import io.github.edmm.model.component.WebApplication;
+import io.github.edmm.model.component.*;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 import static io.github.edmm.model.component.WebServer.PORT;
 

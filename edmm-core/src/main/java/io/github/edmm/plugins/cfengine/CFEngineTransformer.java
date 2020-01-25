@@ -28,19 +28,15 @@ import java.util.*;
 public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(CFEngineTransformer.class);
-
+    public final CFPolicy policy;
     private final TransformationContext context;
     private final Configuration cfg = TemplateHelper.forClasspath(CFEnginePlugin.class, "/plugins/cfengine");
-
     private final Graph<RootComponent, RootRelation> graph;
-    private PluginFileAccess fileAccess;
-
-    public final CFPolicy policy;
     private final String DEPLOYMENT_PATH = "/deployment";
     private final String DEPLOYMENT_NAME = "deployment.cf";
     private final String DEPLOYMENT_MASTERFILES = "/var/cfengine/masterfiles/deployment";
     private final Map<String, List<RootComponent>> runningOrder; //List<RootComponent> runningOrder
-
+    private PluginFileAccess fileAccess;
     private int last_ip = 0;
 
     public CFEngineTransformer(TransformationContext context) {
@@ -205,6 +201,7 @@ public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
 
     /**
      * For each artifact copy the files to CFEngine directory
+     *
      * @param component Component to be processed
      * @param compute   Compute node of component
      */
@@ -222,6 +219,7 @@ public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
 
     /**
      * Sanitize filepath
+     *
      * @param filePath path
      * @return [filePath, fileName]
      */
@@ -253,6 +251,7 @@ public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
 
     /**
      * Extract the script from the operation and create a command to execute it
+     *
      * @param operation operation
      * @param component component for this operation
      */
@@ -276,6 +275,7 @@ public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
 
     /**
      * For each property adds the env variable to policy
+     *
      * @param component EDMM component
      */
     private void handleProperties(RootComponent component, Compute compute) {

@@ -1,12 +1,11 @@
 package io.github.edmm.web.model.support;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import io.github.edmm.core.plugin.PluginService;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import io.github.edmm.core.plugin.PluginService;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TargetTechnologyValidator implements ConstraintValidator<ValidTargetTechnology, String> {
 

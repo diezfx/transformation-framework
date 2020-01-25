@@ -10,40 +10,28 @@ import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.Database;
-import io.github.edmm.model.component.Tomcat;
-import io.github.edmm.model.component.WebApplication;
-import io.github.edmm.model.component.Dbms;
-import io.github.edmm.model.component.MysqlDatabase;
-import io.github.edmm.model.component.MysqlDbms;
-import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
+import io.github.edmm.plugins.terraform.model.Aws;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
-import io.github.edmm.plugins.terraform.model.Aws;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
-
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+
 public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
 
+    private static final Logger logger = LoggerFactory.getLogger(TerraformVisitor.class);
     protected final TransformationContext context;
     protected final Configuration cfg = TemplateHelper.forClasspath(MultiPlugin.class, "/plugins/multi");
     protected final Graph<RootComponent, RootRelation> graph;
-
-
-
-
-    private static final Logger logger = LoggerFactory.getLogger(TerraformVisitor.class);
 
     public TerraformVisitor(TransformationContext context) {
         this.context = context;
@@ -131,7 +119,7 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
     private List<String> collectOperations(RootComponent component) {
         List<String> operations = new ArrayList<>();
         Consumer<Operation> artifactsConsumer = op -> op.getArtifacts()
-                .forEach(artifact -> operations.add("./files/"+FilenameUtils.getName(artifact.getValue())));
+                .forEach(artifact -> operations.add("./files/" + FilenameUtils.getName(artifact.getValue())));
         component.getStandardLifecycle().getCreate().ifPresent(artifactsConsumer);
         component.getStandardLifecycle().getConfigure().ifPresent(artifactsConsumer);
         component.getStandardLifecycle().getStart().ifPresent(artifactsConsumer);

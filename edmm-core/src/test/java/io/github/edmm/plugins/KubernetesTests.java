@@ -1,7 +1,5 @@
 package io.github.edmm.plugins;
 
-import java.nio.file.Files;
-
 import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.DeploymentModel;
@@ -11,6 +9,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import java.nio.file.Files;
 
 public class KubernetesTests extends PluginTest {
 

@@ -1,9 +1,5 @@
 package io.github.edmm.model.relation;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.support.Attribute;
@@ -11,6 +7,10 @@ import io.github.edmm.model.support.ModelEntity;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.model.visitor.VisitableRelation;
 import lombok.ToString;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @ToString
 public class RootRelation extends ModelEntity implements VisitableRelation {

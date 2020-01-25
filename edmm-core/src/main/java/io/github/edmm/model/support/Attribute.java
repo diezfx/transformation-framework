@@ -1,8 +1,8 @@
 package io.github.edmm.model.support;
 
-import java.util.Optional;
-
 import lombok.Getter;
+
+import java.util.Optional;
 
 @Getter
 public class Attribute<T> {

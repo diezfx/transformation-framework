@@ -1,10 +1,10 @@
 package com.scaleset.cfbuilder.ec2.metadata;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CFNService {
 

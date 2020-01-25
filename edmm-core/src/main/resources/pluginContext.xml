@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     <bean id="ansiblePlugin" class="io.github.edmm.plugins.ansible.AnsiblePlugin"/>
     <bean id="azurePlugin" class="io.github.edmm.plugins.azure.AzurePlugin"/>
@@ -13,6 +13,6 @@
     <bean id="terraformPlugin" class="io.github.edmm.plugins.terraform.TerraformPlugin"/>
     <bean id="jujuPlugin" class="io.github.edmm.plugins.juju.JujuPlugin"/>
     <bean id="saltStackPlugin" class="io.github.edmm.plugins.salt.SaltStackPlugin"/>
-    <bean id="multiPlugin" class ="io.github.edmm.plugins.multi.MultiPlugin"/>
+    <bean id="multiPlugin" class="io.github.edmm.plugins.multi.MultiPlugin"/>
     <bean id="cfenginePlugin" class="io.github.edmm.plugins.cfengine.CFEnginePlugin"/>
 </beans>

@@ -1,11 +1,5 @@
 package io.github.edmm.model.support;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.collect.Lists;
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.MappingEntity;
@@ -13,6 +7,8 @@ import io.github.edmm.core.parser.ScalarEntity;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Metadata;
 import lombok.ToString;
+
+import java.util.*;
 
 @ToString
 public abstract class DescribableElement extends BaseElement {

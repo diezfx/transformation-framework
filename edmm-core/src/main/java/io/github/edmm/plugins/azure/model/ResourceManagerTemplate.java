@@ -1,12 +1,12 @@
 package io.github.edmm.plugins.azure.model;
 
+import io.github.edmm.plugins.azure.model.resource.Resource;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.github.edmm.plugins.azure.model.resource.Resource;
-import lombok.Data;
 
 @Data
 public class ResourceManagerTemplate {

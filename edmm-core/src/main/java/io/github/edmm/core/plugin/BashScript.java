@@ -1,11 +1,11 @@
 package io.github.edmm.core.plugin;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import io.github.edmm.core.transformation.TransformationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class BashScript {
 

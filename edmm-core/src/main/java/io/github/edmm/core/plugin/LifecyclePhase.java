@@ -1,7 +1,5 @@
 package io.github.edmm.core.plugin;
 
-import java.util.function.Predicate;
-
 import io.github.edmm.core.plugin.support.ExecutionFunction;
 import io.github.edmm.core.plugin.support.LifecyclePhaseAccess;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -9,6 +7,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.Predicate;
 
 @Getter
 public class LifecyclePhase<L extends PluginLifecycle> {

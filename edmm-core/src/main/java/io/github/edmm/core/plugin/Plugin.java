@@ -1,13 +1,13 @@
 package io.github.edmm.core.plugin;
 
-import java.util.List;
-
 import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
 import lombok.Getter;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @Getter
 public abstract class Plugin<L extends AbstractLifecycle> {

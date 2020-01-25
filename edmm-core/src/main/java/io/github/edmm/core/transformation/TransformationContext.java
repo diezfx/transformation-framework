@@ -1,7 +1,5 @@
 package io.github.edmm.core.transformation;
 
-import java.io.File;
-
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.model.DeploymentModel;
 import io.github.edmm.model.component.RootComponent;
@@ -11,6 +9,8 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.jgrapht.Graph;
 import org.springframework.lang.Nullable;
+
+import java.io.File;
 
 @Getter
 public final class TransformationContext {
@@ -49,17 +49,15 @@ public final class TransformationContext {
         return new PluginFileAccess(sourceDirectory, targetDirectory);
     }
 
-    public void setSubFileAcess(String relativePath){
-       this.subTargetDirectory=relativePath;
+    public void setSubFileAcess(String relativePath) {
+        this.subTargetDirectory = relativePath;
     }
 
 
-
-    public PluginFileAccess getSubDirAccess(){
-        File subdir= new File(this.targetDirectory, this.subTargetDirectory);
-        return new PluginFileAccess(sourceDirectory,subdir);
+    public PluginFileAccess getSubDirAccess() {
+        File subdir = new File(this.targetDirectory, this.subTargetDirectory);
+        return new PluginFileAccess(sourceDirectory, subdir);
     }
-
 
 
     public enum State {

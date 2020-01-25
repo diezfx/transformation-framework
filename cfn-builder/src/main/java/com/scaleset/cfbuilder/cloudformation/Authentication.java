@@ -1,12 +1,12 @@
 package com.scaleset.cfbuilder.cloudformation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scaleset.cfbuilder.annotations.Type;
 import com.scaleset.cfbuilder.ec2.metadata.CFNInit;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Constructs an {@code Authentication} to specify authentication credentials for files or sources specified with the

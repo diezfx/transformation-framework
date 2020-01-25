@@ -1,13 +1,13 @@
 package io.github.edmm.model;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.DescribableElement;
 import io.github.edmm.utils.Consts;
 import lombok.ToString;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @ToString
 public class Property extends DescribableElement {
@@ -46,13 +46,14 @@ public class Property extends DescribableElement {
         return required;
     }
 
-    public Boolean isComputed(){
-        Boolean computed =resolveByEntityChain(COMPUTED);
+    public Boolean isComputed() {
+        Boolean computed = resolveByEntityChain(COMPUTED);
         if (Objects.isNull(computed)) {
             return false;
         }
         return computed;
     }
+
     public String getDefaultValue() {
         return resolveByEntityChain(DEFAULT_VALUE);
     }
@@ -66,8 +67,8 @@ public class Property extends DescribableElement {
         return value.replaceAll(Consts.NL, Consts.EMPTY);
     }
 
-    public void setValue(String value){
+    public void setValue(String value) {
 
-        set(VALUE,value);
+        set(VALUE, value);
     }
 }

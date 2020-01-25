@@ -1,12 +1,5 @@
 package io.github.edmm.core.plugin;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.Dbaas;
 import io.github.edmm.model.component.Paas;
@@ -14,6 +7,9 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import org.jgrapht.Graph;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class TopologyGraphHelper {
 

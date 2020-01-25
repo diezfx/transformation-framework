@@ -4,7 +4,7 @@ public abstract class Types {
 
     /**
      * Utility function to create a proper type definition using generics.
-     *
+     * <p>
      * Usage: Class<Map<String, String>> mapType = Types.generify(Map.class);
      *
      * @param clazz The type to generify

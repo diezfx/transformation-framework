@@ -1,7 +1,5 @@
 package io.github.edmm.plugins;
 
-import java.io.File;
-
 import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.Plugin;
 import io.github.edmm.core.plugin.support.CheckModelResult;
@@ -10,6 +8,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 import static io.github.edmm.core.plugin.support.CheckModelResult.State.OK;
 

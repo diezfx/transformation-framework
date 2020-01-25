@@ -1,5 +1,7 @@
 package io.github.edmm.model;
 
+import lombok.ToString;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,8 +9,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import lombok.ToString;
 
 @ToString
 public class Metadata implements Map<String, Object> {

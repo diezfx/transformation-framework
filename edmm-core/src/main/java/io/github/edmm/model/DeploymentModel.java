@@ -1,15 +1,5 @@
 package io.github.edmm.model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.amazonaws.util.StringInputStream;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.transformation.TransformationException;
@@ -27,6 +17,11 @@ import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -49,6 +44,21 @@ public final class DeploymentModel {
         initEdges();
     }
 
+    @SneakyThrows
+    public static DeploymentModel of(@NonNull File file) {
+        if (!file.isFile() || !file.canRead()) {
+            throw new IllegalStateException(String.format("File '%s' does not exist - failed to construct internal graph", file));
+        }
+        EntityGraph graph = new EntityGraph(new FileInputStream(file));
+        return new DeploymentModel(file.getName(), graph);
+    }
+
+    @SneakyThrows
+    public static DeploymentModel of(@NonNull String yaml) {
+        EntityGraph graph = new EntityGraph(new StringInputStream(yaml));
+        return new DeploymentModel(UUID.randomUUID().toString(), graph);
+    }
+
     private void initNodes() {
         componentMap.forEach((name, component) -> {
             topology.addVertex(component);
@@ -67,21 +77,6 @@ public final class DeploymentModel {
                 });
             }
         }
-    }
-
-    @SneakyThrows
-    public static DeploymentModel of(@NonNull File file) {
-        if (!file.isFile() || !file.canRead()) {
-            throw new IllegalStateException(String.format("File '%s' does not exist - failed to construct internal graph", file));
-        }
-        EntityGraph graph = new EntityGraph(new FileInputStream(file));
-        return new DeploymentModel(file.getName(), graph);
-    }
-
-    @SneakyThrows
-    public static DeploymentModel of(@NonNull String yaml) {
-        EntityGraph graph = new EntityGraph(new StringInputStream(yaml));
-        return new DeploymentModel(UUID.randomUUID().toString(), graph);
     }
 
     public Set<RootComponent> getComponents() {

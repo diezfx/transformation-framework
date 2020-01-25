@@ -1,7 +1,5 @@
 package io.github.edmm.plugins.kubernetes.model;
 
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
@@ -15,12 +13,13 @@ import io.github.edmm.docker.PortMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.stream.Collectors;
+
 public final class DeploymentResource implements KubernetesResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentResource.class);
-
-    private Deployment deployment;
     private final Container stack;
+    private Deployment deployment;
 
     public DeploymentResource(Container stack) {
         this.stack = stack;

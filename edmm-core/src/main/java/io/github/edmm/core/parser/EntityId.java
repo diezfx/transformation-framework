@@ -1,13 +1,9 @@
 package io.github.edmm.core.parser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import io.github.edmm.utils.Consts;
 import lombok.Getter;
+
+import java.util.*;
 
 @Getter
 public class EntityId implements Comparable<EntityId> {

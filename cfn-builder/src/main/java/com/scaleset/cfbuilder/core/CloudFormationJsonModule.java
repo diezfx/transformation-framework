@@ -1,23 +1,19 @@
 package com.scaleset.cfbuilder.core;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scaleset.cfbuilder.annotations.Type;
 import org.reflections.Reflections;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class CloudFormationJsonModule extends SimpleModule {
 
@@ -39,6 +35,15 @@ public class CloudFormationJsonModule extends SimpleModule {
             }
         }
         return this;
+    }
+
+    static class ResourceSerializer extends JsonSerializer<Resource> {
+
+        @Override
+        public void serialize(Resource resource, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+                throws IOException, JsonProcessingException {
+            jsonGenerator.writeObject(resource);
+        }
     }
 
     class ResourceDeserializer extends JsonDeserializer<Resource> {
@@ -67,15 +72,6 @@ public class CloudFormationJsonModule extends SimpleModule {
                 }
             }
             return result;
-        }
-    }
-
-    static class ResourceSerializer extends JsonSerializer<Resource> {
-
-        @Override
-        public void serialize(Resource resource, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
-                throws IOException, JsonProcessingException {
-            jsonGenerator.writeObject(resource);
         }
     }
 }

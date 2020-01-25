@@ -3,12 +3,7 @@ package com.scaleset.cfbuilder.ec2;
 import com.scaleset.cfbuilder.annotations.Type;
 import com.scaleset.cfbuilder.cloudformation.Authentication;
 import com.scaleset.cfbuilder.core.Taggable;
-import com.scaleset.cfbuilder.ec2.instance.CreditSpecification;
-import com.scaleset.cfbuilder.ec2.instance.EC2BlockDeviceMapping;
-import com.scaleset.cfbuilder.ec2.instance.EC2MountPoint;
-import com.scaleset.cfbuilder.ec2.instance.EC2NetworkInterface;
-import com.scaleset.cfbuilder.ec2.instance.ElasticGpuSpecification;
-import com.scaleset.cfbuilder.ec2.instance.SSMAssociation;
+import com.scaleset.cfbuilder.ec2.instance.*;
 import com.scaleset.cfbuilder.ec2.metadata.CFNInit;
 import com.scaleset.cfbuilder.ec2.networkinterface.Ipv6Address;
 

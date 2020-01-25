@@ -1,10 +1,5 @@
 package io.github.edmm.cli;
 
-import java.io.File;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
 import io.github.edmm.core.plugin.PluginService;
 import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -13,6 +8,11 @@ import io.github.edmm.model.DeploymentModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
+
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @Component
 @CommandLine.Command(

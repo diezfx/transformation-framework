@@ -1,10 +1,10 @@
 package io.github.edmm.plugins.terraform.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.github.edmm.utils.Consts;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Auth0ResourceServer {

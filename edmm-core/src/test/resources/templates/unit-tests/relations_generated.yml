@@ -4,12 +4,12 @@ components:
     type: compute
   tomcat:
     relations:
-    - depends_on:
-        type: depends_on
-        target: ubuntu
-    - hosted_on:
-        type: hosted_on
-        target: ubuntu
+      - depends_on:
+          type: depends_on
+          target: ubuntu
+      - hosted_on:
+          type: hosted_on
+          target: ubuntu
     type: software_component
 metadata:
   maintainer: Michael Wurster
@@ -18,22 +18,22 @@ relation_types:
     operations:
       pre_configure_source:
         artifacts:
-        - cmd: null
+          - cmd: null
       pre_configure_target:
         artifacts:
-        - cmd: null
+          - cmd: null
       target_removed:
         artifacts:
-        - cmd: null
+          - cmd: null
       post_configure_source:
         artifacts:
-        - cmd: null
+          - cmd: null
       post_configure_target:
         artifacts:
-        - cmd: null
+          - cmd: null
       target_changed:
         artifacts:
-        - cmd: null
+          - cmd: null
     extends: null
     properties: null
   hosted_on:
@@ -47,7 +47,7 @@ component_types:
     operations:
       configure:
         artifacts:
-        - cmd: configure.sh
+          - cmd: configure.sh
     extends: base
     properties:
       os_family:
@@ -61,19 +61,19 @@ component_types:
     operations:
       stop:
         artifacts:
-        - cmd: null
+          - cmd: null
       start:
         artifacts:
-        - cmd: null
+          - cmd: null
       create:
         artifacts:
-        - cmd: null
+          - cmd: null
       configure:
         artifacts:
-        - cmd: null
+          - cmd: null
       delete:
         artifacts:
-        - cmd: null
+          - cmd: null
     extends: null
     description: The base type
 properties:

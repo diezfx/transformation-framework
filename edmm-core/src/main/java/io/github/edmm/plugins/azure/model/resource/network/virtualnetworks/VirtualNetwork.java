@@ -1,9 +1,5 @@
 package io.github.edmm.plugins.azure.model.resource.network.virtualnetworks;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.edmm.plugins.azure.model.Parameter;
@@ -11,6 +7,10 @@ import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.network.virtualnetworks.subnets.Subnet;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VirtualNetwork extends Resource {

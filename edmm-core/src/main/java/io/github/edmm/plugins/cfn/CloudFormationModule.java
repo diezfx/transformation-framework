@@ -1,13 +1,5 @@
 package io.github.edmm.plugins.cfn;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import com.scaleset.cfbuilder.cloudformation.Authentication;
 import com.scaleset.cfbuilder.core.Fn;
 import com.scaleset.cfbuilder.core.Module;
@@ -28,13 +20,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+
 import static io.github.edmm.plugins.cfn.CloudFormationUtils.getUserDataFn;
 
 @Getter
 @Setter
 public class CloudFormationModule extends Module {
-
-    private static final Logger logger = LoggerFactory.getLogger(CloudFormationModule.class);
 
     public static final String SECURITY_GROUP = "_security_group";
     public static final String IP_OPEN = "0.0.0.0/0";
@@ -50,7 +42,7 @@ public class CloudFormationModule extends Module {
     public static final String KEY_NAME_CONSTRAINT_DESCRIPTION = "Must be the name of an existing EC2 key pair";
     public static final String MODE_777 = "000777";
     public static final String OWNER_GROUP_ROOT = "root";
-
+    private static final Logger logger = LoggerFactory.getLogger(CloudFormationModule.class);
     private final String region;
     private final Object keyNameVar;
     private final String stackName = CloudFormationUtils.getRandomStackName();

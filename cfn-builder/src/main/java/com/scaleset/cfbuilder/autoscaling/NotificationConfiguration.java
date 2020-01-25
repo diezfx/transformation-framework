@@ -13,12 +13,12 @@ public class NotificationConfiguration {
         return notificationTypes;
     }
 
-    public String getTopicARN() {
-        return topicARN;
-    }
-
     public void setNotificationTypes(String[] notificationTypes) {
         this.notificationTypes = notificationTypes;
+    }
+
+    public String getTopicARN() {
+        return topicARN;
     }
 
     public void setTopicARN(String topicARN) {

@@ -1,12 +1,12 @@
 package io.github.edmm.core.plugin.support;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import io.github.edmm.model.component.RootComponent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor

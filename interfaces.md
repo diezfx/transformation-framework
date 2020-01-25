@@ -30,6 +30,16 @@ solution for now: read the concrete value only after this component was instanti
 ip adress should change to localhost
 
 
+### interface vs properties 
+provided interface attributes may be properties as well.
+E.g. a port may be a property so that it can be set and needs to be exported to other components at the same time 
+
+solution for now: provided/required interface stuff is exported as env variable as well, so if it fits only write it there
+
+
+### later: name collisions
+a provided from hostingcomp could have same name e.g. port port
+
 Example:
 ```yaml
   pet_clinic:
@@ -55,4 +65,5 @@ Example:
           mysql-adress: 
             type: string 
 ```
-    
+
+

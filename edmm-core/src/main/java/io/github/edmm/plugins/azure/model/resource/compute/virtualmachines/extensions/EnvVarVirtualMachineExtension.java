@@ -1,15 +1,15 @@
 package io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.VirtualMachine;
 import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EnvVarVirtualMachineExtension extends VirtualMachineExtension {

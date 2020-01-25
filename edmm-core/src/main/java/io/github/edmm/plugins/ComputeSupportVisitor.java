@@ -1,24 +1,15 @@
 package io.github.edmm.plugins;
 
+import io.github.edmm.core.plugin.support.CheckModelResult;
+import io.github.edmm.core.transformation.TransformationContext;
+import io.github.edmm.model.component.*;
+import io.github.edmm.model.visitor.ComponentVisitor;
+import lombok.Getter;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import io.github.edmm.core.plugin.support.CheckModelResult;
-import io.github.edmm.core.transformation.TransformationContext;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.Database;
-import io.github.edmm.model.component.Dbms;
-import io.github.edmm.model.component.MysqlDatabase;
-import io.github.edmm.model.component.MysqlDbms;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.component.SoftwareComponent;
-import io.github.edmm.model.component.Tomcat;
-import io.github.edmm.model.component.WebApplication;
-import io.github.edmm.model.component.WebServer;
-import io.github.edmm.model.visitor.ComponentVisitor;
-import lombok.Getter;
 
 public class ComputeSupportVisitor implements ComponentVisitor {
 

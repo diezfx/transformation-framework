@@ -1,10 +1,5 @@
 package com.scaleset.cfbuilder.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -15,7 +10,12 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-@JsonPropertyOrder( {"AWSTemplateFormatVersion", "Description", "Parameters", "Mappings", "Resources", "Outputs"})
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+@JsonPropertyOrder({"AWSTemplateFormatVersion", "Description", "Parameters", "Mappings", "Resources", "Outputs"})
 public class Template {
 
     @JsonProperty("AWSTemplateFormatVersion")

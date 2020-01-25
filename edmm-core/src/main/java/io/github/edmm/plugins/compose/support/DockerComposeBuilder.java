@@ -1,11 +1,5 @@
 package io.github.edmm.plugins.compose.support;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import io.github.edmm.core.plugin.PluginFileAccess;
@@ -19,6 +13,8 @@ import io.github.edmm.plugins.compose.DockerComposePlugin;
 import io.github.edmm.plugins.compose.model.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class DockerComposeBuilder {
 

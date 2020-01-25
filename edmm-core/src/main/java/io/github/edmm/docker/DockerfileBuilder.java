@@ -1,30 +1,19 @@
 package io.github.edmm.docker;
 
+import io.github.edmm.docker.support.*;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.edmm.docker.support.AddEntry;
-import io.github.edmm.docker.support.CmdEntry;
-import io.github.edmm.docker.support.CopyEntry;
-import io.github.edmm.docker.support.DockerfileEntry;
-import io.github.edmm.docker.support.EntrypointEntry;
-import io.github.edmm.docker.support.EnvEntry;
-import io.github.edmm.docker.support.ExposeEntry;
-import io.github.edmm.docker.support.FromEntry;
-import io.github.edmm.docker.support.RunEntry;
-import io.github.edmm.docker.support.VolumeEntry;
-import io.github.edmm.docker.support.WorkdirEntry;
-
 public final class DockerfileBuilder {
 
+    private final List<DockerfileEntry> entries = new ArrayList<>();
     private boolean compress = false;
     private List<AddEntry> addEntries = new ArrayList<>();
     private List<EnvEntry> envEntries = new ArrayList<>();
     private int workdirIndex = -1;
-
-    private final List<DockerfileEntry> entries = new ArrayList<>();
 
     public DockerfileBuilder from(String baseImage) {
         entries.add(new FromEntry(baseImage));

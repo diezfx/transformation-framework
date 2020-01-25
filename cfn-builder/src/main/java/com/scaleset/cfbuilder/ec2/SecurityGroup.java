@@ -1,9 +1,9 @@
 package com.scaleset.cfbuilder.ec2;
 
-import java.util.function.Consumer;
-
 import com.scaleset.cfbuilder.annotations.Type;
 import com.scaleset.cfbuilder.core.Resource;
+
+import java.util.function.Consumer;
 
 /**
  * Constructs a {@code SecurityGroup} to create an an Amazon EC2 security group.
@@ -50,13 +50,13 @@ public interface SecurityGroup extends Resource {
         int from;
         int to;
 
-        public static PortRange range(int from, int to) {
-            return new PortRange(from, to);
-        }
-
         public PortRange(int from, int to) {
             this.from = from;
             this.to = to;
+        }
+
+        public static PortRange range(int from, int to) {
+            return new PortRange(from, to);
         }
     }
 

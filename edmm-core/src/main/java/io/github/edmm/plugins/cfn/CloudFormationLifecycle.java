@@ -1,7 +1,5 @@
 package io.github.edmm.plugins.cfn;
 
-import java.io.IOException;
-
 import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.support.CheckModelResult;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -10,6 +8,8 @@ import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.visitor.VisitorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class CloudFormationLifecycle extends AbstractLifecycle {
 

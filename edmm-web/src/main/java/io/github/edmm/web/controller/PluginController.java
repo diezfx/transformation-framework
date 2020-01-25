@@ -1,9 +1,5 @@
 package io.github.edmm.web.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import io.github.edmm.core.plugin.Plugin;
 import io.github.edmm.core.plugin.PluginService;
 import io.github.edmm.core.plugin.support.CheckModelResult;
@@ -20,6 +16,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController

@@ -57,12 +57,12 @@ inputs:
     type: string
     description:  The concatenation of the domain name label and the regionalized DNS zone, resulting in the fully qualified domain name associated with the public IP addresses
 
-<#list computes as k, compute>
-  ${compute.name}_agent_user:
-    description: The user name of the agent on the instance created from the image.
-    default: ubuntu
+  <#list computes as k, compute>
+${compute.name}_agent_user:
+  description: The user name of the agent on the instance created from the image.
+  default: ubuntu
 
-</#list>
+  </#list>
 
 dsl_definitions:
 
@@ -167,7 +167,7 @@ node_templates:
       retry_after: { get_input: retry_after }
       resource_config:
         securityRules:
-        # always add the ssh ports
+          # always add the ssh ports
           - name: ssh
             properties:
               description: SSH access
@@ -295,8 +295,8 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: ${compute.name}_extension_env
     <#list operation.previous as prev>
-      - type: cloudify.relationships.depends_on
-        target: ${prev.source}_extension_${prev.name}
+    - type: cloudify.relationships.depends_on
+      target: ${prev.source}_extension_${prev.name}
     </#list>
   </#list>
   </#list>

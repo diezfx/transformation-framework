@@ -1,20 +1,15 @@
 package io.github.edmm.plugins.cfn;
 
+import com.scaleset.cfbuilder.cloudformation.Authentication;
+import com.scaleset.cfbuilder.core.Fn;
+import com.scaleset.cfbuilder.core.Template;
+import com.scaleset.cfbuilder.iam.*;
+import io.github.edmm.utils.Consts;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import com.scaleset.cfbuilder.cloudformation.Authentication;
-import com.scaleset.cfbuilder.core.Fn;
-import com.scaleset.cfbuilder.core.Template;
-import com.scaleset.cfbuilder.iam.InstanceProfile;
-import com.scaleset.cfbuilder.iam.Policy;
-import com.scaleset.cfbuilder.iam.PolicyDocument;
-import com.scaleset.cfbuilder.iam.Principal;
-import com.scaleset.cfbuilder.iam.Role;
-import com.scaleset.cfbuilder.iam.Statement;
-import io.github.edmm.utils.Consts;
 
 import static com.scaleset.cfbuilder.core.Ref.ref;
 

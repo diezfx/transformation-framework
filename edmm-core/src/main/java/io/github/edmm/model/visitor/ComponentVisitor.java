@@ -1,22 +1,6 @@
 package io.github.edmm.model.visitor;
 
-import io.github.edmm.model.component.Auth0;
-import io.github.edmm.model.component.AwsAurora;
-import io.github.edmm.model.component.AwsBeanstalk;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.Database;
-import io.github.edmm.model.component.Dbaas;
-import io.github.edmm.model.component.Dbms;
-import io.github.edmm.model.component.MysqlDatabase;
-import io.github.edmm.model.component.MysqlDbms;
-import io.github.edmm.model.component.Paas;
-import io.github.edmm.model.component.Platform;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.component.Saas;
-import io.github.edmm.model.component.SoftwareComponent;
-import io.github.edmm.model.component.Tomcat;
-import io.github.edmm.model.component.WebApplication;
-import io.github.edmm.model.component.WebServer;
+import io.github.edmm.model.component.*;
 
 public interface ComponentVisitor {
 

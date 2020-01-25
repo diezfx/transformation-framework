@@ -1,9 +1,9 @@
 package io.github.edmm.plugins.ansible.model;
 
-import java.util.Map;
-
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Map;
 
 @Data
 @Builder

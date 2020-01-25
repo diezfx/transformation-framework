@@ -1,14 +1,14 @@
 package io.github.edmm.core.parser;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import io.github.edmm.model.Metadata;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.ModelEntity;
 import io.github.edmm.model.support.TypeWrapper;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class MappingEntity extends Entity {
 

@@ -1,7 +1,5 @@
 package io.github.edmm.plugins.cfn;
 
-import java.io.File;
-
 import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
 import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
 import io.github.edmm.model.Artifact;
@@ -9,12 +7,9 @@ import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 
-import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_CONFIGURE;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_CREATE;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_SETS;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_START;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.MODE_777;
-import static io.github.edmm.plugins.cfn.CloudFormationModule.OWNER_GROUP_ROOT;
+import java.io.File;
+
+import static io.github.edmm.plugins.cfn.CloudFormationModule.*;
 
 public class OperationHandler {
 

@@ -1,15 +1,10 @@
 package io.github.edmm.web.model;
 
-import java.util.List;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
-
 import lombok.Builder;
 import lombok.Getter;
+
+import javax.validation.constraints.*;
+import java.util.List;
 
 @Getter
 @Builder

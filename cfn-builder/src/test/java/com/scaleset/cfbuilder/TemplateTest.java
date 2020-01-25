@@ -1,7 +1,5 @@
 package com.scaleset.cfbuilder;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.scaleset.cfbuilder.autoscaling.AutoScalingGroup;
@@ -13,6 +11,8 @@ import com.scaleset.cfbuilder.ec2.SecurityGroup;
 import com.scaleset.cfbuilder.ec2.SecurityGroupIngress;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static com.scaleset.cfbuilder.ec2.SecurityGroup.PortRange.range;
 

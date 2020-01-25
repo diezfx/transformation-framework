@@ -1,14 +1,14 @@
 package io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.VirtualMachine;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class VirtualMachineExtension extends Resource {
     public VirtualMachineExtension(VirtualMachine vm, String componentName, String artifactName) {

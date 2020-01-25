@@ -1,8 +1,5 @@
 package io.github.edmm.core.transformation.support;
 
-import java.io.File;
-import java.util.concurrent.Callable;
-
 import io.github.edmm.core.plugin.Plugin;
 import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -10,9 +7,10 @@ import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.edmm.core.transformation.TransformationContext.State.DONE;
-import static io.github.edmm.core.transformation.TransformationContext.State.ERROR;
-import static io.github.edmm.core.transformation.TransformationContext.State.TRANSFORMING;
+import java.io.File;
+import java.util.concurrent.Callable;
+
+import static io.github.edmm.core.transformation.TransformationContext.State.*;
 
 public final class ExecutionTask implements Callable<Void> {
 

@@ -1,17 +1,5 @@
 package io.github.edmm.plugins.terraform.aws;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import io.github.edmm.core.plugin.BashScript;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
@@ -20,17 +8,7 @@ import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.component.Auth0;
-import io.github.edmm.model.component.AwsAurora;
-import io.github.edmm.model.component.AwsBeanstalk;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.Database;
-import io.github.edmm.model.component.Dbms;
-import io.github.edmm.model.component.MysqlDatabase;
-import io.github.edmm.model.component.MysqlDbms;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.component.Tomcat;
-import io.github.edmm.model.component.WebApplication;
+import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.plugins.terraform.TerraformVisitor;
 import io.github.edmm.plugins.terraform.model.Auth0ResourceServer;
@@ -42,6 +20,12 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static io.github.edmm.model.component.WebServer.PORT;
 

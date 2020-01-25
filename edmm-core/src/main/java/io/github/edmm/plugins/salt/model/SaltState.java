@@ -1,9 +1,5 @@
 package io.github.edmm.plugins.salt.model;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import io.github.edmm.core.plugin.TemplateHelper;
@@ -11,6 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder

@@ -1,5 +1,7 @@
 package io.github.edmm.plugins.multi.orchestration;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -20,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
 public class TerraformOrchestratorVisitor implements ComponentVisitor {
 

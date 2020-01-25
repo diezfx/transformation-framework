@@ -1,10 +1,5 @@
 package io.github.edmm.model.support;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
@@ -14,6 +9,10 @@ import io.github.edmm.model.Metadata;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public abstract class TypeWrapper {
 

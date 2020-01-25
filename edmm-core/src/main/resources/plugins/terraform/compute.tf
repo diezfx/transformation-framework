@@ -14,10 +14,10 @@ variable "ssh_user" {
   default = "ubuntu"
 }
 
-variable "aws_subnet_id"{
+variable "aws_subnet_id" {
 }
 
-variable "aws_security_group_id"{
+variable "aws_security_group_id" {
 
 }
 
@@ -30,6 +30,7 @@ resource "aws_instance" "${ec2.name}" {
   ami = "${ec2.ami}"
   instance_type = "${ec2.instanceType}"
   key_name = aws_key_pair.auth.id
-  vpc_security_group_ids = [var.aws_security_group_id]
+  vpc_security_group_ids = [
+    var.aws_security_group_id]
   subnet_id = var.aws_subnet_id
 }

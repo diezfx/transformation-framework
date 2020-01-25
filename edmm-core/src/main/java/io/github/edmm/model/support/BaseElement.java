@@ -1,12 +1,12 @@
 package io.github.edmm.model.support;
 
-import java.util.Collection;
-
 import com.google.common.base.CaseFormat;
 import io.github.edmm.core.parser.MappingEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.Collection;
 
 @Getter
 @Setter

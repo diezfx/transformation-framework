@@ -1,7 +1,5 @@
 package io.github.edmm.plugins.azure.model.resource.storage.storageaccounts;
 
-import java.util.Map;
-
 import io.github.edmm.plugins.azure.model.Parameter;
 import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.Properties;
@@ -9,6 +7,8 @@ import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Map;
 
 /**
  * Default configuration assumes: - a parameter called 'location' - a parameter called 'storageAccountName'

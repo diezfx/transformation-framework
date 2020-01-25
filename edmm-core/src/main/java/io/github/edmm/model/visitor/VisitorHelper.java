@@ -1,14 +1,14 @@
 package io.github.edmm.model.visitor;
 
-import java.util.Set;
-import java.util.function.Predicate;
-
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.function.Predicate;
 
 public abstract class VisitorHelper {
 
