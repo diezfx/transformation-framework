@@ -1,0 +1,174 @@
+---
+# Play for component ubuntu
+- name: ubuntu
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+  tasks:
+
+# Play for component pet_clinic_tomcat
+- name: pet_clinic_tomcat
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    pet_clinic_tomcat_port: 8080
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+  tasks:
+    - name: create
+      script: ./files/tomcat/create.sh
+    - name: start
+      script: ./files/tomcat/start.sh
+
+# Play for component dbms
+- name: dbms
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    dbms_root_password: petclinic
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+    dbms_port: 3306
+  tasks:
+    - name: create
+      script: ./files/mysql_dbms/create.sh
+    - name: start
+      script: ./files/mysql_dbms/start.sh
+
+# Play for component db
+- name: db
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    db_schema_name: petclinic
+    dbms_root_password: petclinic
+    ubuntu_os_family: linux
+    db_user: pc
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+    db_password: petclinic
+    dbms_port: 3306
+  tasks:
+    - name: configure
+      script: ./files/mysql_database/configure.sh
+
+# Play for component pet_clinic
+- name: pet_clinic
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    pet_clinic_tomcat_port: 8080
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+  tasks:
+    - name: configure
+      script: ./files/petclinic/configure.sh
+    - name: start
+      script: ./files/petclinic/start.sh
+
+
+---
+# Play for component ubuntu
+- name: ubuntu
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+  tasks:
+
+# Play for component pet_clinic_tomcat
+- name: pet_clinic_tomcat
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    pet_clinic_tomcat_deployment_tool: terraform
+    pet_clinic_tomcat_port: 8080
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+  tasks:
+    - name: create
+      script: ./files/tomcat/create.sh
+    - name: start
+      script: ./files/tomcat/start.sh
+
+# Play for component dbms
+- name: dbms
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    dbms_root_password: petclinic
+    ubuntu_os_family: linux
+    dbms_deployment_tool: terraform
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+    dbms_port: 3306
+  tasks:
+    - name: create
+      script: ./files/mysql_dbms/create.sh
+    - name: start
+      script: ./files/mysql_dbms/start.sh
+
+# Play for component db
+- name: db
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    db_schema_name: petclinic
+    dbms_root_password: petclinic
+    ubuntu_os_family: linux
+    dbms_deployment_tool: terraform
+    db_user: pc
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+    db_password: petclinic
+    dbms_port: 3306
+  tasks:
+    - name: configure
+      script: ./files/mysql_database/configure.sh
+
+# Play for component pet_clinic
+- name: pet_clinic
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  vars:
+    pet_clinic_tomcat_deployment_tool: terraform
+    pet_clinic_tomcat_port: 8080
+    ubuntu_os_family: linux
+    ubuntu_machine_image: ubuntu
+    ubuntu_ip_adress: newVal
+    ubuntu_instance_type: large
+  tasks:
+    - name: configure
+      script: ./files/petclinic/configure.sh
+    - name: start
+      script: ./files/petclinic/start.sh
+
+
