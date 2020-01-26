@@ -12,10 +12,9 @@ import java.util.Map;
 public class ComponentInterface {
 
     @NonNull Map<String, Property> provides;
-    @NonNull Map<String, Property> requires;
+    @NonNull RequiredProperties requires;
 
     @NonNull Map<String, Property> hostingCompsProvides;
-    @NonNull Map<String, Property> hostingCompsRequires;
 
 
     public Map<String, Property> getAllProvided() {
@@ -24,10 +23,7 @@ public class ComponentInterface {
         return properties;
     }
 
-    public Map<String, Property> getAllRequired() {
-        Map<String, Property> properties = new HashMap<>(requires);
-        hostingCompsRequires.forEach(properties::putIfAbsent);
-        return properties;
-    }
-
 }
+
+
+

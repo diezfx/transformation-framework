@@ -82,6 +82,7 @@ public abstract class ModelEntity extends DescribableElement {
     }
 
 
+
     public Map<String, Operation> getOperations() {
         EntityGraph graph = entity.getGraph();
         Map<String, Operation> result = new HashMap<>();

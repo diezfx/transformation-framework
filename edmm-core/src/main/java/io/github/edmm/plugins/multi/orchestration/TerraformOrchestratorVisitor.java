@@ -92,7 +92,7 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         obj = gson.fromJson(reader, HashMap.class);
         String address = obj.get("address");
         logger.info(address);
-        component.setHostAddress(address);
+        component.setHostAddress(address,context.getTopologyGraph());
 
     }
 

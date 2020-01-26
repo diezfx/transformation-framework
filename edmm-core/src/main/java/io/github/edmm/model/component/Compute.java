@@ -1,9 +1,12 @@
 package io.github.edmm.model.component;
 
 import io.github.edmm.core.parser.MappingEntity;
+import io.github.edmm.model.Property;
+import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import lombok.ToString;
+import org.jgrapht.Graph;
 
 import java.util.Optional;
 
@@ -19,7 +22,7 @@ public class Compute extends RootComponent {
     public static final Attribute<String> PRIVATE_KEY = new Attribute<>("private_key", String.class);
 
     // computed stuff not known at compile time
-    public static final Attribute<String> HOST_ADDRESS = new Attribute<>("ip_address", String.class);
+    public static final Attribute<String> HOST_ADDRESS = new Attribute<>("address", String.class);
 
     public Compute(MappingEntity mappingEntity) {
 
@@ -50,17 +53,30 @@ public class Compute extends RootComponent {
         return getProperty(PRIVATE_KEY);
     }
 
-    public Optional<String> getHostAddress() {
-        return getProperty(HOST_ADDRESS);
+    public Optional<String> getHostAddress(Graph<RootComponent, RootRelation> graph) {
+
+        return getProvidedProperty(HOST_ADDRESS.getName(), graph).map(Property::getValue);
     }
 
     // only needed in orchestrator phase
-    public void setHostAddress(String address) {
-        setPropertyValue(HOST_ADDRESS, address);
+    public void setHostAddress(String address, Graph<RootComponent,RootRelation> graph) {
+        setProvidedValue(HOST_ADDRESS.getName(),address, graph);
     }
 
     @Override
     public void accept(ComponentVisitor v) {
         v.visit(this);
     }
+
+
+    public void setInterfaceValue(Attribute<String> attribute, String newVal) {
+        Optional<Property> prop = getProperty(attribute.getName());
+
+        if (!prop.isPresent()) {
+            return;
+        }
+        prop.get().setValue(newVal);
+    }
+
+
 }

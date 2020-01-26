@@ -12,9 +12,7 @@ resource "null_resource" "cluster" {
 
   connection {
     user = "ubuntu"
-    host = var.compute_
-    $
-{compute}_address
+    host = var.compute_${compute}_address
 private_key = file(var.compute_${compute}_private_key_file)
 }
 

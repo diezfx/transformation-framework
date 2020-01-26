@@ -6,12 +6,12 @@
   vars:
   tasks:
     - include_vars:
-        file: compute_${play.hosts}.json
-        name: compute
+        file: ${play.name}.json
+        name: requiredProperties
     - name: Add host to group 'just_created'
       add_host:
         name: ${play.hosts}
-        ansible_host: '{{compute.address}}'
+        ansible_host: '{{requiredProperties.host.address}}'
         ansible_user: ubuntu
         ansible_ssh_private_key_file: /home/diezfx/.ssh/id_rsa
         ansible_python_interpreter: /usr/bin/python3
@@ -34,9 +34,9 @@
   tasks:
       <#list play.files as file>
         - name: Make sure destination dir exists
-        file:
-          path: ${file.target} | dirname
-          state: directory
+          file:
+            path: ${file.target} | dirname
+            state: directory
         - name: Copy file to remote
           copy:
             src: ${file.src}

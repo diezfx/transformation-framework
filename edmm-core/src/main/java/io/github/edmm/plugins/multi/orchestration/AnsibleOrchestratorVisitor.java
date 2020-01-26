@@ -3,8 +3,8 @@ package io.github.edmm.plugins.multi.orchestration;
 import com.google.gson.JsonObject;
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
+import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -13,8 +13,8 @@ import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 public class AnsibleOrchestratorVisitor implements ComponentVisitor {
@@ -36,13 +36,29 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         pb.inheritIO();
         pb.directory(context.getSubDirAccess().getTargetDirectory());
 
-        Optional<Compute> computeSource = TopologyGraphHelper.resolveHostingComputeComponent(graph, component);
+        JsonObject requiredProps = new JsonObject();
 
-        JsonObject connection = new JsonObject();
-        connection.addProperty("address", computeSource.get().getHostAddress().get());
+
+        // look for host requirements; special case
+        component.getInterface(context.getTopologyGraph()).ifPresent(i -> {
+            JsonObject hostR= new JsonObject();
+            Map<String,Property> hostRequirements=i.getRequires().getHostingRequirements();
+
+            hostRequirements.forEach((prop_name, prop_value) -> {
+                    //todo error checking if required stuff is not there
+                    Optional<String> prop = component.getProvidedProperty(prop_name, context.getTopologyGraph()).map(Property::getValue);
+                    prop.ifPresent(s -> hostR.addProperty(prop_name, s));
+                });
+            requiredProps.add("host",hostR);
+        });
+
+
+        // look for all other requirements through relations
+
+
 
         try {
-            context.getSubDirAccess().write("compute_" + computeSource.get().getNormalizedName() + ".json", connection.toString());
+            context.getSubDirAccess().write(component.getNormalizedName() + ".json", requiredProps.toString());
             pb.command("ansible-playbook", component.getNormalizedName() + ".yml");
 
             Process apply = pb.start();
@@ -50,7 +66,6 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        File computeInfo = new File(context.getSubDirAccess().getTargetDirectory(), "compute_" + component.getName() + ".json");
     }
 
 

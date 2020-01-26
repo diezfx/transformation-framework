@@ -9,6 +9,7 @@ import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.model.ComponentInterface;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
+import io.github.edmm.model.RequiredProperties;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.ModelEntity;
@@ -87,29 +88,52 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         }
     }
 
-    private Map<String, Property> getRequired() {
+    private RequiredProperties getRequired() {
 
-        Map<String, Property> result = new HashMap<>();
+        Map<String, Map<String, Property>> result = new HashMap<>();
         // Resolve the chain of types
         Optional<Entity> propertiesEntity = entity.getChild(COMPONENT_INTERFACE).flatMap(i -> i.getChild(REQUIRES));
 
         propertiesEntity.ifPresent(value -> {
-            System.out.println(value);
-            populateProperties(result, value);
+
+            value.getChildren().forEach(block -> {
+                Map<String, Property> requiredBlock = new HashMap<>();
+                System.out.println(block.getName());
+
+                populateProperties(requiredBlock, block);
+                result.put(block.getName(), requiredBlock);
+            });
+
         });
         // Update current map by property definitions
 
         for (MappingEntity typeEntity : getTypeChain()) {
             propertiesEntity = typeEntity.getChild(COMPONENT_INTERFACE.getName())
                     .flatMap(i -> i.getChild(REQUIRES.getName()));
-            propertiesEntity.ifPresent(value -> populateProperties(result, value));
+            propertiesEntity.ifPresent(value -> {
+
+                value.getChildren().forEach(block -> {
+                    Map<String, Property> requiredBlock = new HashMap<>();
+                    System.out.println(block.getName());
+
+                    populateProperties(requiredBlock, block);
+                    result.put(block.getName(), requiredBlock);
+                });
+
+            });
         }
-        return result;
+        return new RequiredProperties(result);
+    }
+
+    public void setProvidedValue(String attribute, String newVal, Graph<RootComponent, RootRelation> graph) {
+        Optional<Property> prop = getProvidedProperty(attribute, graph);
+
+        prop.ifPresent(p -> p.setValue(newVal));
     }
 
     public Optional<ComponentInterface> getInterface(Graph<RootComponent, RootRelation> graph) {
 
-        return Optional.of(new ComponentInterface(getProvided(), getRequired(), getProvidedHostingProps(graph), getRequiredHostingProps(graph)));
+        return Optional.of(new ComponentInterface(getProvided(), getRequired(), getProvidedHostingProps(graph)));
     }
 
 
@@ -119,19 +143,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, this);
         while (host.isPresent()) {
             host.get().getProvided().forEach(properties::putIfAbsent);
-            host = TopologyGraphHelper.resolveHostingComponent(graph, host.get());
-        }
-
-        return properties;
-
-    }
-
-    private Map<String, Property> getRequiredHostingProps(Graph<RootComponent, RootRelation> graph) {
-        Map<String, Property> properties = new HashMap<>();
-
-        Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, this);
-        while (host.isPresent()) {
-            host.get().getRequired().forEach(properties::putIfAbsent);
             host = TopologyGraphHelper.resolveHostingComponent(graph, host.get());
         }
 
@@ -166,6 +177,13 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
     }
 
+    public Optional<Property> getProvidedProperty(String name, Graph<RootComponent, RootRelation> graph) {
+        return getInterface(graph).map(ComponentInterface::getAllProvided).map(reqs -> reqs.get(name));
+    }
+
+    public Optional<Property> getRequiredProperty(String block, String name, Graph<RootComponent, RootRelation> graph) {
+        return getInterface(graph).map(i -> i.getRequires().getRequires().get(block)).map(reqs -> reqs.get(name));
+    }
 
     @Override
     public void accept(ComponentVisitor v) {

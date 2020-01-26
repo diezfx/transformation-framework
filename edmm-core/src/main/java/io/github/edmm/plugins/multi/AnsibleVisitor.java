@@ -42,13 +42,6 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
         component.getInterface(context.getTopologyGraph()).ifPresent(c -> {
 
-
-            System.out.println(c.getAllProvided());
-            System.out.println(c.getAllRequired());
-
-            System.out.println("-----------------------");
-
-
         });
         logger.info("Generate a play for component " + component.getName());
         PluginFileAccess fileAccess = context.getSubDirAccess();
