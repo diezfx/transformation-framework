@@ -1,16 +1,5 @@
 # new feature Interfaces
 
-
-
-
-2nd option
-
-enhance relations
-a connects to relation defines what is exported
-
-
-
-
 ## Idea
 Every component can expose or require specific properties.
 
@@ -18,20 +7,21 @@ Every component can expose or require specific properties.
 - requires: These properties have to be provided from another component for it to work
 
 
-possible problems:
+## Possible Problems
 ### components may not have a direct relation to their compute instance
 
 1. e.g. compute -> tomcat -> java_service. The java_service still need some kind of "connection" property from compute.
 
 2. if another service connects to this java_service a "connection" is needed as well that needs info  from the underlying compute instance. Something like the ip_address.
 
+Another option: make it explicit what is inherited
 ### interface properties could have name-collisions
 At the moment the name implies the type -> name them differently
 
 #### one service two ports
 e.g. one service exposes 2 "ports". Solution: the properties are typed. So one port could be a mysql-port and another one for ssh.
 
-#### addresses in different contexts
+#### requires addresses in different contexts
  e.g. ip address from compute that this service connects to and own compute; which one to take?
 Computes are generic so can't name their ip differently either
 idea: only when both appear together somewhere it is taken
@@ -67,7 +57,7 @@ interface:
         stuff #change to same grouping; but some are inherited from hosted_on
 ```
 This is more technology independent and the runtime needs to do more
-### more properties are bundled
+### more properties belong together
 e.g. ssh-conection consists of ssh-port, ssh-password, ssh-endpoint
 
 solution for now: 
