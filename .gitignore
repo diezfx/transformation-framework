@@ -1,6 +1,8 @@
 target
 !.mvn/wrapper/maven-wrapper.jar
 
+*.class
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -11,3 +13,4 @@ target
 .vscode/
 icsoc-demo/*
 *.prefs
+
