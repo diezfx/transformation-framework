@@ -1,5 +1,6 @@
 package io.github.edmm.core.parser;
 
+import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.core.parser.support.GraphNormalizer;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,10 +26,15 @@ public class EntityGraph extends SimpleDirectedGraph<Entity, EntityGraph.Edge> {
     public static final EntityId COMPONENTS = ROOT.extend("components");
     public static final EntityId COMPONENT_TYPES = ROOT.extend("component_types");
     public static final EntityId RELATION_TYPES = ROOT.extend("relation_types");
+    public static final EntityId ORCHESTRATION_TECHNOLOGY = ROOT.extend("orchestration_technology");
 
     public EntityGraph() {
         super((source, target) -> new Edge(target.getName(), source, target));
         addVertex(new MappingEntity(ROOT, this));
+    }
+
+    public Optional<Entity> getOrchestrationTechnologyEntity() {
+        return GraphHelper.findMappingEntity(this, ORCHESTRATION_TECHNOLOGY.getName(), ROOT);
     }
 
     public EntityGraph(InputStream is) {

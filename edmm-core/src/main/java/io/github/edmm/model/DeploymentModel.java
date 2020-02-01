@@ -2,11 +2,13 @@ package io.github.edmm.model;
 
 import com.amazonaws.util.StringInputStream;
 import io.github.edmm.core.parser.EntityGraph;
+import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.TypeWrapper;
+import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -79,6 +81,7 @@ public final class DeploymentModel {
         }
     }
 
+
     public Set<RootComponent> getComponents() {
         return topology.vertexSet();
     }
@@ -89,6 +92,11 @@ public final class DeploymentModel {
 
     public Set<RootRelation> getRelations() {
         return topology.edgeSet();
+    }
+
+    public Optional<OrchestrationTechnologyMapping> getTechnologyMapping() {
+        return graph.getOrchestrationTechnologyEntity().map(entity -> new OrchestrationTechnologyMapping((MappingEntity) entity, getComponents()));
+
     }
 
     public Graph<RootComponent, RootRelation> getTopology() {

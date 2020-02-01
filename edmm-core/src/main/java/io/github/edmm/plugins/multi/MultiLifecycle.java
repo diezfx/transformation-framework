@@ -7,6 +7,7 @@ import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
+import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import io.github.edmm.plugins.multi.orchestration.AnsibleOrchestratorVisitor;
 import io.github.edmm.plugins.multi.orchestration.TerraformOrchestratorVisitor;
 import org.apache.commons.io.FilenameUtils;
@@ -18,9 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class MultiLifecycle extends AbstractLifecycle {
@@ -64,6 +63,8 @@ public class MultiLifecycle extends AbstractLifecycle {
         int i = 0;
         while (iterator.hasNext()) {
 
+            logger.info(context.getModel().getTechnologyMapping().get().getListForTechnology(Technology.ANSIBLE).toString());
+
             RootComponent comp = iterator.next();
             context.setSubFileAcess(comp.getNormalizedName());
             try {
@@ -74,11 +75,13 @@ public class MultiLifecycle extends AbstractLifecycle {
             //copy files otherwise have to do in every step?
             copyFiles(comp);
 
-            String deploy = comp.getDeploymentTool().get();
+            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping().map(OrchestrationTechnologyMapping::getTechForComponents);
+            // use technology or ansible as default for now
+            Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.ANSIBLE);
 
             //TODO clean version
             logger.info("deployment_tool: {} ", deploy);
-            if (deploy.equals("ansible")) {
+            if (deploy == Technology.ANSIBLE) {
                 comp.accept(ansibleVisitor);
             } else {
                 comp.accept(visitor);
@@ -138,11 +141,13 @@ public class MultiLifecycle extends AbstractLifecycle {
             RootComponent comp = iterator.next();
             context.setSubFileAcess(comp.getNormalizedName());
 
-            String deploy = comp.getDeploymentTool().get();
+            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping().map(OrchestrationTechnologyMapping::getTechForComponents);
+            // use technology or ansible as default for now
+            Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.ANSIBLE);
 
             //TODO clean version
             logger.info("deployment_tool: {} ", deploy);
-            if (deploy.equals("ansible")) {
+            if (deploy == Technology.ANSIBLE) {
                 comp.accept(ansibleVisitor);
             } else {
                 comp.accept(terraformVisitor);

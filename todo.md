@@ -1,4 +1,4 @@
-- deployment technology in groupings instead of property
+[-] deployment technology in groupings instead of property
 ```yaml
 orchestration_technology:
     ansible:
@@ -15,10 +15,8 @@ requires:
     db:
         adress:
             type: ip # with type
-
-
 ```
-match with tyoes not name
+match with types not name
 define types; look at tosca
 
 - implement kubernetes -> not really modular anyway so only connects_to needs change

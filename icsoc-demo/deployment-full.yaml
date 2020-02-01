@@ -1,6 +1,17 @@
 ---
 version: edm_1_0
 
+orchestration_technology:
+  ansible:
+    - pet_clinic
+    - db
+    - dbms
+  terraform:
+    - ubuntu
+
+
+
+
 components:
 
   ## Spring PetClinic Application
@@ -22,8 +33,6 @@ components:
         mysql-db:
           mysql-port:
             type: integer
-          mysql-adress:
-            type: string
     provides:
       pet_port: 42
   pet_clinic_tomcat:

@@ -26,7 +26,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
     public static final Attribute<String> TYPE = new Attribute<>("type", String.class);
     public static final Attribute<RootRelation> RELATIONS = new Attribute<>("relations", RootRelation.class);
-    public static final Attribute<String> DEPLOYMENT_TOOL = new Attribute<>("deployment_tool", String.class);
 
 
     //interface stuff
@@ -61,11 +60,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         return relationCache;
     }
 
-    public Optional<String> getDeploymentTool() {
-        return getProperty(DEPLOYMENT_TOOL);
-
-    }
-
 
     public boolean hasRelations() {
         return getRelations().size() > 0;
@@ -98,7 +92,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
             value.getChildren().forEach(block -> {
                 Map<String, Property> requiredBlock = new HashMap<>();
-                System.out.println(block.getName());
 
                 populateProperties(requiredBlock, block);
                 result.put(block.getName(), requiredBlock);
@@ -114,8 +107,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
                 value.getChildren().forEach(block -> {
                     Map<String, Property> requiredBlock = new HashMap<>();
-                    System.out.println(block.getName());
-
                     populateProperties(requiredBlock, block);
                     result.put(block.getName(), requiredBlock);
                 });
