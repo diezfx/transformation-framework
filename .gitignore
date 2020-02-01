@@ -11,6 +11,8 @@ target
 
 ### VS Code ###
 .vscode/
-icsoc-demo/*
+icsoc-demo/multi/*
+icsoc-demo/terraform/*
+icsoc-demo/kubernetes/*
 *.prefs
 
