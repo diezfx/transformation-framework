@@ -21,8 +21,6 @@ public class Compute extends RootComponent {
 
     public static final Attribute<String> PRIVATE_KEY = new Attribute<>("private_key", String.class);
 
-    // computed stuff not known at compile time
-    public static final Attribute<String> HOST_ADDRESS = new Attribute<>("address", String.class);
 
     public Compute(MappingEntity mappingEntity) {
 
@@ -49,19 +47,9 @@ public class Compute extends RootComponent {
         return getProperty(PUBLIC_KEY);
     }
 
-    public Optional<String> getPrivateKey() {
-        return getProperty(PRIVATE_KEY);
-    }
 
-    public Optional<String> getHostAddress(Graph<RootComponent, RootRelation> graph) {
 
-        return getProvidedProperty(HOST_ADDRESS.getName(), graph).map(Property::getValue);
-    }
 
-    // only needed in orchestrator phase
-    public void setHostAddress(String address, Graph<RootComponent,RootRelation> graph) {
-        setProvidedValue(HOST_ADDRESS.getName(),address, graph);
-    }
 
     @Override
     public void accept(ComponentVisitor v) {

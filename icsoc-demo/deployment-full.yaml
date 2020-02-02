@@ -85,9 +85,10 @@ components:
     artifacts:
       - provider: ./files/ubuntu/openstack.json
     interface:
-      provides:
-        address:
-          type: ip
+      capabilities:
+        host:
+          address:
+            type: ip
 
 
 ###############################################
@@ -143,7 +144,7 @@ component_types:
       public_key:
         type: string
         description: The public key of the key pair to use for authentication
-
+        
   web_server:
     extends: software_component
     properties:
@@ -224,6 +225,3 @@ relation_types:
 
   connects_to:
     extends: depends_on
-  deployed_with:
-    extends: depends_on
-    properties:

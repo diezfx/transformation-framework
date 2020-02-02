@@ -1,16 +1,20 @@
 package io.github.edmm.plugins.multi.orchestration;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
+import io.github.edmm.model.Property;
+import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.MultiPlugin;
 import lombok.SneakyThrows;
+import lombok.var;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TerraformOrchestratorVisitor implements ComponentVisitor {
@@ -89,10 +94,24 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         File computeInfo = new File(context.getSubDirAccess().getTargetDirectory(),
                 "compute_" + component.getName() + ".json");
         reader = new JsonReader(new FileReader(computeInfo));
-        obj = gson.fromJson(reader, HashMap.class);
-        String address = obj.get("address");
-        logger.info(address);
-        component.setHostAddress(address,context.getTopologyGraph());
+        HashMap<String, HashMap<String, String>> output = gson.fromJson(reader, new TypeToken<HashMap<String, HashMap<String, String>>>(){}.getType());
+
+        PropertyBlocks capabilities = component.getCapabilities();
+
+        // set all properties
+        // object is a map of maps
+        for (var block : output.entrySet()) {
+            for (var prop : block.getValue().entrySet()) {
+
+                Optional<Property> capability = capabilities.getProperty(block.getKey(), prop.getKey());
+                if (!capability.isPresent()) {
+                    logger.warn(String.format("The capability(%s) was in the output but is not present", prop.getKey()));
+                    continue;
+                }
+                capability.get().setValue(prop.getValue());
+            }
+        }
+
 
     }
 

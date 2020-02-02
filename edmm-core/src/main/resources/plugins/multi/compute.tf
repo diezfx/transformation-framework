@@ -68,7 +68,9 @@ resource "openstack_compute_instance_v2" "${ec2.name}" {
 
 resource "local_file" "compute_${ec2.name}" {
   content = jsonencode( {
-    "address" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4
+    "host" = {
+      "address" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4
+    }
   })
   filename = "compute_${ec2.name}.json"
 }

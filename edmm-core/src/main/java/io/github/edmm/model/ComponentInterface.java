@@ -11,17 +11,12 @@ import java.util.Map;
 @ToString
 public class ComponentInterface {
 
-    @NonNull Map<String, Property> provides;
-    @NonNull RequiredProperties requires;
-
-    @NonNull Map<String, Property> hostingCompsProvides;
+    @NonNull PropertyBlocks capabilities;
+    @NonNull PropertyBlocks requirements;
 
 
-    public Map<String, Property> getAllProvided() {
-        Map<String, Property> properties = new HashMap<>(provides);
-        hostingCompsProvides.forEach(properties::putIfAbsent);
-        return properties;
-    }
+    @NonNull PropertyBlocks HostCapabilities;
+
 
 }
 

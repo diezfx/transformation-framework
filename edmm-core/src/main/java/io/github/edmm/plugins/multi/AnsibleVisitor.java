@@ -40,9 +40,7 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(RootComponent component) {
 
-        component.getInterface(context.getTopologyGraph()).ifPresent(c -> {
 
-        });
         logger.info("Generate a play for component " + component.getName());
         PluginFileAccess fileAccess = context.getSubDirAccess();
 

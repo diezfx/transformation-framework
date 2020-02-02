@@ -1,11 +1,14 @@
 package io.github.edmm.core.plugin;
 
+import io.github.edmm.model.Property;
+import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.Dbaas;
 import io.github.edmm.model.component.Paas;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
+import lombok.var;
 import org.jgrapht.Graph;
 
 import java.util.*;
@@ -94,6 +97,61 @@ public abstract class TopologyGraphHelper {
             // Leaf reached
             return Optional.empty();
         }
+    }
+
+    public static PropertyBlocks resolveHostCapabilities(Graph<RootComponent, RootRelation> graph, RootComponent component) {
+        var myCapabilities = new PropertyBlocks(new HashMap<>());
+        Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, component);
+        while (host.isPresent()) {
+            myCapabilities = myCapabilities.mergeBlocks(host.get().getCapabilities());
+
+
+            host = TopologyGraphHelper.resolveHostingComponent(graph, host.get());
+        }
+        return myCapabilities;
+    }
+
+
+    /**
+     * @param reqs
+     * @return all matched values; only returns if all values could be matched otherwise empty
+     */
+    public static Optional<Map<String, Property>> findMatchingProperties(Graph<RootComponent, RootRelation> graph, Map<String, Property> reqs, RootComponent component) {
+        Map<String, Property> matchedProperties = new HashMap<>();
+        for (var req : reqs.entrySet()) {
+
+            var prop = resolveCapabilityWithHosting(graph, req.getKey(), component);
+            if (!prop.isPresent()) {
+                return Optional.empty();
+            }
+            matchedProperties.put(req.getKey(), prop.get());
+
+        }
+        return Optional.of(matchedProperties);
+
+    }
+
+    /**
+     * resolve capability with the name; prefer the one from the component if not fulfillable look through hosted_on relatuions
+     *
+     * @param graph
+     * @param propName
+     * @param component
+     * @return
+     */
+    public static Optional<Property> resolveCapabilityWithHosting(Graph<RootComponent, RootRelation> graph, String propName, RootComponent component) {
+
+        Optional<Property> prop = component.getCapability(propName);
+
+        if (prop.isPresent()) {
+            return prop;
+        }
+
+        PropertyBlocks hostBlocks = resolveHostCapabilities(graph, component);
+
+
+        return hostBlocks.getPropertyByName(propName);
+
     }
 
     public static Optional<Compute> resolveHostingComputeComponent(Graph<RootComponent, RootRelation> graph, RootComponent component) {
