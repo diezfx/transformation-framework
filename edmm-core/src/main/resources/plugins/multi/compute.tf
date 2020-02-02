@@ -48,8 +48,8 @@ provider "openstack" {
 
 
 #TODO more of the vars in model
-resource "openstack_compute_instance_v2" "${ec2.name}" {
-  name = "${ec2.name}"
+resource "openstack_compute_instance_v2" ec2.name {
+  name = ec2.name
   image_name = "Ubuntu 18.04"
   flavor_name = "m1.nano"
   key_pair = "win10key"
@@ -69,10 +69,14 @@ resource "openstack_compute_instance_v2" "${ec2.name}" {
 resource "local_file" "compute_${ec2.name}" {
   content = jsonencode( {
     "host" = {
-      "address" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4
+      "address" = openstack_compute_instance_v2.
+      $
+      {ec2.name}
+      .
+      access_ip_v4
     }
   })
-  filename = "compute_${ec2.name}.json"
+  filename = "${ec2.name}_capabilities.json"
 }
 output "compute_${ec2.name}_address" {
   value = openstack_compute_instance_v2.${ec2.name}.access_ip_v4

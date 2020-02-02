@@ -1,4 +1,4 @@
-[-] deployment technology in groupings instead of property
+[x] deployment technology in groupings instead of property
 ```yaml
 orchestration_technology:
     ansible:
@@ -6,7 +6,7 @@ orchestration_technology:
         ...
 ```
 
-- implement requires provides model with explicit stuff
+[-] implement requires provides model with explicit stuff
 ```yaml
 capabilities: #change to tosca naming
     
@@ -16,6 +16,7 @@ requires:
         adress:
             type: ip # with type
 ```
+test it and change to types is missing
 match with types not name
 define types; look at tosca
 

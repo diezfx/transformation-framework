@@ -92,9 +92,10 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         apply.waitFor();
 
         File computeInfo = new File(context.getSubDirAccess().getTargetDirectory(),
-                "compute_" + component.getName() + ".json");
+                component.getName() + "capabilities" + ".json");
         reader = new JsonReader(new FileReader(computeInfo));
-        HashMap<String, HashMap<String, String>> output = gson.fromJson(reader, new TypeToken<HashMap<String, HashMap<String, String>>>(){}.getType());
+        HashMap<String, HashMap<String, String>> output = gson.fromJson(reader, new TypeToken<HashMap<String, HashMap<String, String>>>() {
+        }.getType());
 
         PropertyBlocks capabilities = component.getCapabilities();
 
