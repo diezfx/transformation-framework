@@ -17,9 +17,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-
 public class OrchestrationTechnologyMapping extends BaseElement {
-
 
     private Set<RootComponent> components;
 
@@ -35,22 +33,24 @@ public class OrchestrationTechnologyMapping extends BaseElement {
     }
 
     public Optional<Set<RootComponent>> getListForTechnology(Technology tech) {
-        Optional<Entity> otechList = entity.getChildren().stream().filter(child -> child.getName().equals(tech.name().toLowerCase())).findFirst();
+        Optional<Entity> otechList = entity.getChildren().stream()
+                .filter(child -> child.getName().equals(tech.name().toLowerCase())).findFirst();
 
         if (!otechList.isPresent())
             return Optional.empty();
-        Set<ScalarEntity> compTechList = otechList.get().getChildren().stream().map(c -> (ScalarEntity) c).collect(Collectors.toSet());
+        Set<ScalarEntity> compTechList = otechList.get().getChildren().stream().map(c -> (ScalarEntity) c)
+                .collect(Collectors.toSet());
 
         Set<RootComponent> referencedComps = new HashSet<>();
 
         // check which component is referenced
         for (ScalarEntity compEntity : compTechList) {
             Optional<RootComponent> referencedComp = components.stream()
-                    .filter(c -> c.getName().equals(compEntity.getValue()))
-                    .findFirst();
+                    .filter(c -> c.getName().equals(compEntity.getValue())).findFirst();
 
             referencedComp.ifPresentOrElse(referencedComps::add, () -> {
-                throw new IllegalArgumentException(String.format("the given component(%s) is not in the model", (compEntity.getValue())));
+                throw new IllegalArgumentException(
+                        String.format("the given component(%s) is not in the model", (compEntity.getValue())));
             });
         }
         return Optional.of(referencedComps);
@@ -59,16 +59,13 @@ public class OrchestrationTechnologyMapping extends BaseElement {
     public Map<RootComponent, Technology> getTechForComponents() {
 
         Map<RootComponent, Technology> result = new HashMap<>();
-        getListForTechnology(Technology.ANSIBLE).ifPresent(t -> t.forEach(
-                c -> result.put(c, Technology.ANSIBLE)
-        ));
 
-        getListForTechnology(Technology.TERRAFORM).ifPresent(t -> t.forEach(
-                c -> result.put(c, Technology.TERRAFORM)
-        ));
+        for (var tech : EnumSet.allOf(Technology.class)) {
+            getListForTechnology(tech).ifPresent(t -> t.forEach(c -> result.put(c, tech)));
+
+        }
 
         return result;
     }
-
 
 }

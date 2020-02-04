@@ -26,7 +26,6 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiLifecycle.class);
 
-
     public MultiLifecycle(TransformationContext context) {
         super(context);
     }
@@ -42,8 +41,10 @@ public class MultiLifecycle extends AbstractLifecycle {
         logger.info("Begin transformation to Multi...");
         TerraformVisitor visitor = new TerraformVisitor(context);
         AnsibleVisitor ansibleVisitor = new AnsibleVisitor(context);
+        KubernetesVisitor kubernetesVisitor = new KubernetesVisitor(context);
 
-        //context.getModel().getGraph().generateYamlOutput(new OutputStreamWriter(System.out));
+        // context.getModel().getGraph().generateYamlOutput(new
+        // OutputStreamWriter(System.out));
 
         PluginFileAccess fileAccess = context.getFileAccess();
 
@@ -63,8 +64,6 @@ public class MultiLifecycle extends AbstractLifecycle {
         int i = 0;
         while (iterator.hasNext()) {
 
-            logger.info(context.getModel().getTechnologyMapping().get().getListForTechnology(Technology.ANSIBLE).toString());
-
             RootComponent comp = iterator.next();
             context.setSubFileAcess(comp.getNormalizedName());
             try {
@@ -72,29 +71,35 @@ public class MultiLifecycle extends AbstractLifecycle {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            //copy files otherwise have to do in every step?
+            // copy files otherwise have to do in every step?
             copyFiles(comp);
 
-            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping().map(OrchestrationTechnologyMapping::getTechForComponents);
+            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
+                    .map(OrchestrationTechnologyMapping::getTechForComponents);
             // use technology or ansible as default for now
-            Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.ANSIBLE);
+            Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.UNDEFINED);
 
-            //TODO clean version
+            // TODO better version
             logger.info("deployment_tool: {} ", deploy);
             if (deploy == Technology.ANSIBLE) {
                 comp.accept(ansibleVisitor);
-            } else {
+            } else if (deploy == Technology.TERRAFORM) {
                 comp.accept(visitor);
+            } else if (deploy == Technology.KUBERNETES) {
+                comp.accept(kubernetesVisitor);
+            } else {
+                logger.error("could not find technology: {} for component {}", deploy, comp.getNormalizedName());
             }
             logger.info("{}", comp.getName());
 
             i++;
 
-            //reset for next round
+            // reset for next round
+            // later: only reset when necessary
             visitor = new TerraformVisitor(context);
             ansibleVisitor = new AnsibleVisitor(context);
+            kubernetesVisitor = new KubernetesVisitor(context);
         }
-
 
         Writer writer = new StringWriter();
         context.getModel().getGraph().generateYamlOutput(writer);
@@ -105,13 +110,13 @@ public class MultiLifecycle extends AbstractLifecycle {
             e.printStackTrace();
         }
 
-        //VisitorHelper.visit(context.getModel().getComponents(), visitor, component -> component instanceof Compute);
+        // VisitorHelper.visit(context.getModel().getComponents(), visitor, component ->
+        // component instanceof Compute);
         // ... then all others
-        //VisitorHelper.visit(context.getModel().getComponents(), visitor);
-        //VisitorHelper.visit(context.getModel().getRelations(), visitor);
+        // VisitorHelper.visit(context.getModel().getComponents(), visitor);
+        // VisitorHelper.visit(context.getModel().getRelations(), visitor);
         logger.info("Transformation to Multi successful");
     }
-
 
     @Override
     public void orchestrate() {
@@ -123,7 +128,6 @@ public class MultiLifecycle extends AbstractLifecycle {
         if (input.equals("y") == false) {
             return;
         }
-
 
         logger.info("Begin orchestration ...");
         TerraformOrchestratorVisitor terraformVisitor = new TerraformOrchestratorVisitor(context);
@@ -141,11 +145,12 @@ public class MultiLifecycle extends AbstractLifecycle {
             RootComponent comp = iterator.next();
             context.setSubFileAcess(comp.getNormalizedName());
 
-            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping().map(OrchestrationTechnologyMapping::getTechForComponents);
+            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
+                    .map(OrchestrationTechnologyMapping::getTechForComponents);
             // use technology or ansible as default for now
             Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.ANSIBLE);
 
-            //TODO clean version
+            // TODO clean version
             logger.info("deployment_tool: {} ", deploy);
             if (deploy == Technology.ANSIBLE) {
                 comp.accept(ansibleVisitor);
@@ -156,11 +161,10 @@ public class MultiLifecycle extends AbstractLifecycle {
 
             i++;
 
-            //reset for next round
+            // reset for next round
             terraformVisitor = new TerraformOrchestratorVisitor(context);
             ansibleVisitor = new AnsibleOrchestratorVisitor(context);
         }
-
 
         try {
 
@@ -171,17 +175,16 @@ public class MultiLifecycle extends AbstractLifecycle {
             e.printStackTrace();
         }
 
-
     }
 
     private void copyFiles(RootComponent comp) {
-        PluginFileAccess fileAccess = context.getSubDirAccess();
+        PluginFileAccess fileAccess = context.getFileAccess();
         for (Artifact artifact : comp.getArtifacts()) {
             try {
-                //get basename
+                // get basename
                 String basename = FilenameUtils.getName(artifact.getValue());
                 String newPath = "./files/" + basename;
-                fileAccess.copy(artifact.getValue(), newPath);
+                fileAccess.copy(artifact.getValue(), comp.getNormalizedName()+"/"+newPath);
                 artifact.setValue(newPath);
             } catch (IOException e) {
                 logger.warn("Failed to copy file '{}'", artifact.getValue());
@@ -194,14 +197,13 @@ public class MultiLifecycle extends AbstractLifecycle {
             try {
                 String basename = FilenameUtils.getName(artifact.getValue());
                 String newPath = "./files/" + basename;
-                fileAccess.copy(artifact.getValue(), newPath);
+                fileAccess.copy(artifact.getValue(), comp.getNormalizedName()+"/"+newPath);
                 artifact.setValue(newPath);
             } catch (IOException e) {
                 logger.warn("Failed to copy file '{}'", artifact.getValue());
             }
 
         }
-
 
     }
 

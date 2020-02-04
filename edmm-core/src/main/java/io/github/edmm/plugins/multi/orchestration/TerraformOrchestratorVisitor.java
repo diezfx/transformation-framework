@@ -66,11 +66,9 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
             throw new IllegalArgumentException("The providerinfo for openstack was not provided");
         }
 
-        File openstackProviderInfo = new File(context.getSubDirAccess().getTargetDirectory(),
-                providerInfo.iterator().next().getValue());
+        String openstackProviderInfo = context.getSubDirAccess().readToString(providerInfo.iterator().next().getValue());
 
-        JsonReader reader = new JsonReader(new FileReader(openstackProviderInfo));
-        HashMap<String, String> obj = gson.fromJson(reader, HashMap.class);
+        HashMap<String, String> obj = gson.fromJson(openstackProviderInfo, HashMap.class);
 
         Map<String, String> env = pb.environment();
 
@@ -91,10 +89,8 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         Process apply = pb.start();
         apply.waitFor();
 
-        File computeInfo = new File(context.getSubDirAccess().getTargetDirectory(),
-                component.getName() + "capabilities" + ".json");
-        reader = new JsonReader(new FileReader(computeInfo));
-        HashMap<String, HashMap<String, String>> output = gson.fromJson(reader, new TypeToken<HashMap<String, HashMap<String, String>>>() {
+        String computeInfo = context.getSubDirAccess().readToString(component.getName() + "capabilities" + ".json");
+        HashMap<String, HashMap<String, String>> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, HashMap<String, String>>>() {
         }.getType());
 
         PropertyBlocks capabilities = component.getCapabilities();

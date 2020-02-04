@@ -14,5 +14,6 @@ target
 icsoc-demo/multi/*
 icsoc-demo/terraform/*
 icsoc-demo/kubernetes/*
+icsoc-demo/cfn/*
 *.prefs
 

@@ -99,6 +99,12 @@ public abstract class TopologyGraphHelper {
         }
     }
 
+    /**
+     * resolve all capabilities that are provided and are "inherited" through hosted on
+     * @param graph
+     * @param component
+     * @return
+     */
     public static PropertyBlocks resolveHostCapabilities(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         var myCapabilities = new PropertyBlocks(new HashMap<>());
         Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, component);
@@ -178,5 +184,47 @@ public abstract class TopologyGraphHelper {
             children.add(child);
             resolveChildComponents(graph, children, child);
         }
+    }
+    /**
+     * get the complete stack this component is hosted on including itself
+     * e.g. compute -> tomcat -> application
+     * @param graph
+     * @param component
+     * @return
+     */
+    public static List<RootComponent> resolveAllHostingComponents(Graph<RootComponent, RootRelation> graph,RootComponent component){
+
+        List<RootComponent> componentStack= new ArrayList<>();
+        componentStack.add(component);
+
+
+        Optional<RootComponent> host = TopologyGraphHelper.resolveComponentHostedOn(graph, component);
+        while (host.isPresent()) {
+            componentStack.add(host.get());
+
+
+            host = TopologyGraphHelper.resolveComponentHostedOn(graph, host.get());
+        }
+        Collections.reverse(componentStack);
+        return componentStack;
+
+    }
+
+    public static Optional<RootComponent> resolveComponentHostedOn(Graph<RootComponent, RootRelation> graph,RootComponent component){
+
+        Set<RootComponent> targetComponents = getTargetComponents(graph, component, HostedOn.class);
+        return targetComponents.stream().findFirst();
+    }
+    /**
+     * leaf in the sense of no other comp is hosted on this one
+     * @return true if no other component is hosted on this one
+     */
+    public static boolean isComponentHostedOnLeaf(Graph<RootComponent, RootRelation> graph,RootComponent component){
+        Set<RootComponent> sourceComponents = getSourceComponents(graph, component, HostedOn.class);
+        if(sourceComponents.isEmpty()){
+            return true;
+        }
+        return false;
+
     }
 }

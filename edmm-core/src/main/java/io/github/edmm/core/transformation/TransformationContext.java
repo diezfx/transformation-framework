@@ -56,7 +56,7 @@ public final class TransformationContext {
 
     public PluginFileAccess getSubDirAccess() {
         File subdir = new File(this.targetDirectory, this.subTargetDirectory);
-        return new PluginFileAccess(sourceDirectory, subdir);
+        return new PluginFileAccess(subdir, subdir);
     }
 
 
