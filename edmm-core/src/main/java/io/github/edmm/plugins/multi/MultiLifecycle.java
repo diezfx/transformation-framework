@@ -71,8 +71,6 @@ public class MultiLifecycle extends AbstractLifecycle {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // copy files otherwise have to do in every step?
-            copyFiles(comp);
 
             Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
                     .map(OrchestrationTechnologyMapping::getTechForComponents);
@@ -177,43 +175,8 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     }
 
-    private void copyFiles(RootComponent comp) {
-        PluginFileAccess fileAccess = context.getFileAccess();
-        for (Artifact artifact : comp.getArtifacts()) {
-            try {
-                // get basename
-                String basename = FilenameUtils.getName(artifact.getValue());
-                String newPath = "./files/" + basename;
-                fileAccess.copy(artifact.getValue(), comp.getNormalizedName()+"/"+newPath);
-                artifact.setValue(newPath);
-            } catch (IOException e) {
-                logger.warn("Failed to copy file '{}'", artifact.getValue());
-            }
+    
 
-        }
-        List<Artifact> operations = collectOperations(comp);
-
-        for (Artifact artifact : operations) {
-            try {
-                String basename = FilenameUtils.getName(artifact.getValue());
-                String newPath = "./files/" + basename;
-                fileAccess.copy(artifact.getValue(), comp.getNormalizedName()+"/"+newPath);
-                artifact.setValue(newPath);
-            } catch (IOException e) {
-                logger.warn("Failed to copy file '{}'", artifact.getValue());
-            }
-
-        }
-
-    }
-
-    private List<Artifact> collectOperations(RootComponent component) {
-        List<Artifact> operations = new ArrayList<>();
-        Consumer<Operation> artifactsConsumer = op -> operations.addAll(op.getArtifacts());
-        component.getStandardLifecycle().getCreate().ifPresent(artifactsConsumer);
-        component.getStandardLifecycle().getConfigure().ifPresent(artifactsConsumer);
-        component.getStandardLifecycle().getStart().ifPresent(artifactsConsumer);
-        return operations;
-    }
+  
 
 }

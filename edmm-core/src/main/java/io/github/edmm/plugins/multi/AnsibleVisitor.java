@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-
+import java.util.function.Consumer;
 
 public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
@@ -36,36 +36,30 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         this.graph = context.getTopologyGraph();
     }
 
-
     @Override
     public void visit(RootComponent component) {
 
-
         logger.info("Generate a play for component " + component.getName());
         PluginFileAccess fileAccess = context.getSubDirAccess();
+        copyFiles(component);
 
         Map<String, String> envVars = collectEnvVars(component);
-        //scripts that are executed
+        // scripts that are executed
         List<AnsibleTask> tasks = prepareTasks(collectOperations(component));
         List<AnsibleFile> files = collectFiles(component);
 
         logger.info("files: {}", files);
 
-
         // host is the compute if exists
         String hosts = component.getNormalizedName();
-        Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(context.getTopologyGraph(), component);
+        Optional<Compute> optionalCompute = TopologyGraphHelper
+                .resolveHostingComputeComponent(context.getTopologyGraph(), component);
         if (optionalCompute.isPresent()) {
             hosts = optionalCompute.get().getNormalizedName();
         }
 
-        AnsiblePlay play = AnsiblePlay.builder()
-                .name(component.getName())
-                .hosts(hosts)
-                .vars(envVars)
-                .tasks(tasks)
-                .files(files)
-                .build();
+        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(hosts).vars(envVars).tasks(tasks)
+                .files(files).build();
 
         plays.add(play);
         Map<String, Object> templateData = new HashMap<>();
@@ -113,11 +107,9 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
     private Map<String, String> collectEnvVars(RootComponent component) {
 
         Map<String, String> envVars = new HashMap<>();
-        String[] blacklist = {"key_name", "public_key"};
-        component.getProperties().values().stream()
-                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                .filter(p -> p.getValue() != null || !p.isComputed())
-                .forEach(p -> {
+        String[] blacklist = { "key_name", "public_key" };
+        component.getProperties().values().stream().filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                .filter(p -> p.getValue() != null || !p.isComputed()).forEach(p -> {
                     String name = (component.getNormalizedName() + "_" + p.getNormalizedName());
                     envVars.put(name, p.getValue());
                 });
@@ -129,37 +121,63 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
         List<AnsibleFile> fileList = new ArrayList<>();
         for (Artifact artifact : component.getArtifacts()) {
-            String filename = FilenameUtils.getName(artifact.getValue());
+            String basename = FilenameUtils.getName(artifact.getValue());
+            String newPath = "./files/" + basename;
             String destination = "/opt/" + component.getNormalizedName() + "/";
-            fileList.add(new AnsibleFile("./files/" + filename, destination + filename));
+            fileList.add(new AnsibleFile(newPath, destination + basename));
         }
         return fileList;
 
     }
 
     // convert operations to tasks
-    private List<AnsibleTask> prepareTasks(List<Operation> operations) {
+    private List<AnsibleTask> prepareTasks(List<Artifact> operations) {
         List<AnsibleTask> taskQueue = new ArrayList<>();
         operations.forEach(operation -> {
-            if (!operation.getArtifacts().isEmpty()) {
-                String file = operation.getArtifacts().get(0).getValue();
-                AnsibleTask task = AnsibleTask.builder()
-                        .name(operation.getNormalizedName())
-                        .script(file)
-                        .build();
-                taskQueue.add(task);
-            }
+            String basename = FilenameUtils.getName(operation.getValue());
+            String newPath = "./files/" + basename;
+            AnsibleTask task = AnsibleTask.builder().name(operation.getNormalizedName()).script(newPath).build();
+            taskQueue.add(task);
+
         });
         return taskQueue;
     }
 
-    private List<Operation> collectOperations(RootComponent component) {
-        List<Operation> operations = new ArrayList<>();
-        component.getStandardLifecycle().getCreate().ifPresent(operations::add);
-        component.getStandardLifecycle().getConfigure().ifPresent(operations::add);
-        component.getStandardLifecycle().getStart().ifPresent(operations::add);
-        return operations;
+    private void copyFiles(RootComponent comp) {
+        PluginFileAccess fileAccess = context.getFileAccess();
+        for (Artifact artifact : comp.getArtifacts()) {
+            try {
+                // get basename
+                String basename = FilenameUtils.getName(artifact.getValue());
+                String newPath = "./files/" + basename;
+                fileAccess.copy(artifact.getValue(), comp.getNormalizedName() + "/" + newPath);
+            } catch (IOException e) {
+                logger.warn("Failed to copy file '{}'", artifact.getValue());
+            }
+
+        }
+        List<Artifact> operations = collectOperations(comp);
+
+        for (Artifact artifact : operations) {
+            try {
+                String basename = FilenameUtils.getName(artifact.getValue());
+                String newPath = "./files/" + basename;
+                fileAccess.copy(artifact.getValue(), comp.getNormalizedName() + "/" + newPath);
+            } catch (IOException e) {
+                logger.warn("Failed to copy file '{}'", artifact.getValue());
+            }
+
+        }
+
     }
 
+    private List<Artifact> collectOperations(RootComponent component) {
+        List<Artifact> operations = new ArrayList<>();
+        Consumer<Operation> artifactsConsumer = op -> operations.addAll(op.getArtifacts());
+        component.getStandardLifecycle().getCreate().ifPresent(artifactsConsumer);
+        component.getStandardLifecycle().getConfigure().ifPresent(artifactsConsumer);
+        component.getStandardLifecycle().getStart().ifPresent(artifactsConsumer);
+        return operations;
+    }
 
 }

@@ -44,11 +44,7 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
 
 
         PropertyBlocks requiredProps = findHostRequirements(component);
-        logger.info(requiredProps.getBlockByName("host").toString());
         requiredProps.mergeBlocks(findAllRequirements(component));
-
-
-
 
 
         // look for all other requirements through relations
@@ -83,9 +79,13 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         }
 
         hostRequirements.get().forEach((propName, propValue) -> {
-            //todo error checking if required stuff is not there
-            var prop = TopologyGraphHelper.resolveCapabilityWithHosting(graph, propName, component);
-            prop.ifPresent(p -> hostR.put(propName, p));
+            var prop = TopologyGraphHelper.resolveCapabilityWithHostingByType(graph, propValue.getType(), component);
+            if(prop.isPresent()){
+                hostR.put(propName, prop.get());
+            }
+            else{
+                logger.warn("the property {} could not be fulfilled",propName);
+            }
         });
         result.addBlock("host",hostR);
         return result;

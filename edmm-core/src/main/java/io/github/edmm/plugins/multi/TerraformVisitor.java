@@ -38,11 +38,6 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
         this.graph = context.getTopologyGraph();
     }
 
-    public void populateFiles() {
-
-    }
-
-    ;
 
     @Override
     public void visit(Compute component) {
@@ -139,18 +134,6 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
         return envVars;
     }
 
-    private Map<String, Property> collectComputedVars(RootComponent component) {
-        Map<String, Property> envVars = new HashMap<>();
-        String[] blacklist = {"key_name", "public_key"};
-        component.getProperties().values().stream().filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                .filter(p -> p.getValue() != null || p.isComputed() == false).forEach(p -> {
-            String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
-            envVars.put(name, p);
-        });
-
-        return envVars;
-
-    }
 
     @Override
     public void visit(Tomcat component) {

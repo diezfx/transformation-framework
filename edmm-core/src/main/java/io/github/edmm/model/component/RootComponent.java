@@ -175,12 +175,31 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
      * @param name
      * @return
      */
-    public Optional<Property> getCapability(String name) {
+    public Optional<Property> getCapabilityByName(String name) {
 
 
         PropertyBlocks blocks = getCapabilities();
 
         var prop = blocks.getPropertyByName(name);
+        if (prop.isPresent()) {
+            return prop;
+        }
+
+        return Optional.empty();
+    }
+
+
+     /**
+     * finds the given capability but only on the own component; no search through dependency
+     * @param name
+     * @return
+     */
+    public Optional<Property> getCapabilityByType(String type) {
+
+
+        PropertyBlocks blocks = getCapabilities();
+
+        var prop = blocks.getPropertyByType(type);
         if (prop.isPresent()) {
             return prop;
         }

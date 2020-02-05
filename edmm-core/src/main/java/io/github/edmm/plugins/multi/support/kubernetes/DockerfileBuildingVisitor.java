@@ -37,18 +37,20 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
         String targetDirectory = stack.getName();
         stack.getComponents().forEach(component -> component.accept(this));
         try {
-
             for (FileMapping mapping : stack.getArtifacts()) {
-                logger.info(mapping.getArtifact().getValue());
-                String filename = determineFilename(mapping.getArtifact());
                 String sourcePath = mapping.getArtifact().getValue();
-                builder.add(sourcePath, filename);
+                String filename = determineFilename(mapping.getArtifact());
+                String targetPath = targetDirectory + "/" + filename;
+                fileAccess.copy(sourcePath, targetPath);
+                builder.add("./" + filename, filename);
             }
             for (FileMapping mapping : stack.getOperations()) {
-                String filename = mapping.getComponent().getNormalizedName() + "_"
-                        + determineFilename(mapping.getArtifact());
                 String sourcePath = mapping.getArtifact().getValue();
-                builder.add(sourcePath, filename);
+                String filename = mapping.getComponent().getNormalizedName() +
+                        "_" + determineFilename(mapping.getArtifact());
+                String targetPath = targetDirectory + "/" + filename;
+                fileAccess.copy(sourcePath, targetPath);
+                builder.add("./" + filename, filename);
                 builder.run("./" + filename);
             }
             // Expose ports
@@ -57,10 +59,11 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
             if (!stack.getStartOperations().isEmpty()) {
                 FileMapping mapping = stack.getStartOperations().get(stack.getStartOperations().size() - 1);
                 String sourcePath = mapping.getArtifact().getValue();
-                String filename = mapping.getComponent().getNormalizedName() + "_"
-                        + determineFilename(mapping.getArtifact());
+                String filename = mapping.getComponent().getNormalizedName() +
+                        "_" + determineFilename(mapping.getArtifact());
                 String targetPath = targetDirectory + "/" + filename;
-                builder.add( sourcePath, filename);
+                fileAccess.copy(sourcePath, targetPath);
+                builder.add("./" + filename, filename);
                 builder.cmd("./" + filename);
             }
             fileAccess.write(targetDirectory + "/Dockerfile", builder.build());
@@ -85,8 +88,9 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
     }
 
     private void collectEnvVars(RootComponent component) {
-        String[] blacklist = { "key_name", "public_key" };
-        component.getProperties().values().stream().filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+        String[] blacklist = {"key_name", "public_key"};
+        component.getProperties().values().stream()
+                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
                 .forEach(p -> {
                     String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
                     builder.env(name, p.getValue());

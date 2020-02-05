@@ -39,6 +39,26 @@ public class PropertyBlocks {
         return Optional.empty();
     }
 
+    /**
+     * @param name the name of the property
+     * @return looks through all blocks and their property; the first one with the specified name is returned
+     */
+    public Optional<Property> getPropertyByType(String type) {
+
+        for (var block : blocks.values()) {
+            for (var prop : block.entrySet()) {
+                if (prop.getValue().getType().equals(type)) {
+                    return Optional.of(prop.getValue());
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
+
+
     public Optional<Property> getProperty(String blockName, String propName) {
 
         if (!blocks.containsKey(blockName)) {

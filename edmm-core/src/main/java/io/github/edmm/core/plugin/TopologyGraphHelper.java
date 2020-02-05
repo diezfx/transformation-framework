@@ -126,7 +126,7 @@ public abstract class TopologyGraphHelper {
         Map<String, Property> matchedProperties = new HashMap<>();
         for (var req : reqs.entrySet()) {
 
-            var prop = resolveCapabilityWithHosting(graph, req.getKey(), component);
+            var prop = resolveCapabilityWithHostingByType(graph, req.getValue().getType(), component);
             if (!prop.isPresent()) {
                 return Optional.empty();
             }
@@ -147,7 +147,7 @@ public abstract class TopologyGraphHelper {
      */
     public static Optional<Property> resolveCapabilityWithHosting(Graph<RootComponent, RootRelation> graph, String propName, RootComponent component) {
 
-        Optional<Property> prop = component.getCapability(propName);
+        Optional<Property> prop = component.getCapabilityByName(propName);
 
         if (prop.isPresent()) {
             return prop;
@@ -159,6 +159,32 @@ public abstract class TopologyGraphHelper {
         return hostBlocks.getPropertyByName(propName);
 
     }
+
+
+      /**
+     * resolve capability by type; prefer the one from the component if not fulfillable look through hosted_on relatuions
+     *
+     * @param graph
+     * @param propName
+     * @param component
+     * @return
+     */
+    public static Optional<Property> resolveCapabilityWithHostingByType(Graph<RootComponent, RootRelation> graph, String propType, RootComponent component) {
+
+        Optional<Property> prop = component.getCapabilityByType(propType);
+
+        if (prop.isPresent()) {
+            return prop;
+        }
+
+        PropertyBlocks hostBlocks = resolveHostCapabilities(graph, component);
+
+
+        return hostBlocks.getPropertyByType(propType);
+
+    }
+
+
 
     public static Optional<Compute> resolveHostingComputeComponent(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         Set<RootComponent> targetComponents = getTargetComponents(graph, component, HostedOn.class);

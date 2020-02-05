@@ -3,11 +3,13 @@ version: edm_1_0
 
 orchestration_technology:
   ansible:
+    - dbms
+    - pet_clinic_tomcat
     - pet_clinic
     - db
-    - dbms
   terraform:
     - ubuntu
+
 
 
 
@@ -26,8 +28,6 @@ components:
     relations:
       - hosted_on: pet_clinic_tomcat
       - connects_to: db
-    properties:
-      deployment_tool: ansible
     interface:
       requires: # the values are calculated during runtime
         mysql-db:
@@ -108,17 +108,10 @@ component_types:
       start: ~
       stop: ~
       delete: ~
-    properties:
-      deployment_tool:
-        type: string
-        default_value: terraform
+
 
   software_component:
     extends: base
-    properties:
-      deployment_tool:
-        type: string
-        default_value: ansible
     interface:  
         requires:
           host:
@@ -149,7 +142,7 @@ component_types:
     extends: software_component
     properties:
       port:
-        type: integer
+        type: port
         default_value: 80
 
 
@@ -197,14 +190,14 @@ component_types:
     extends: web_server
     properties:
       port:
-        type: integer
+        type: port
         default_value: 8080
 
   mysql_dbms:
     extends: dbms
     properties:
       port:
-        type: integer
+        type: port
         default_value: 3306
 
   mysql_database:

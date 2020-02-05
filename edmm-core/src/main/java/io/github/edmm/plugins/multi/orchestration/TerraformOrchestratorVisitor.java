@@ -89,7 +89,7 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         Process apply = pb.start();
         apply.waitFor();
 
-        String computeInfo = context.getSubDirAccess().readToString(component.getName() + "capabilities" + ".json");
+        String computeInfo = context.getSubDirAccess().readToStringTargetDir(component.getName() + "_capabilities" + ".json");
         HashMap<String, HashMap<String, String>> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, HashMap<String, String>>>() {
         }.getType());
 
@@ -111,6 +111,7 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
 
 
     }
+
 
     @Override
     public void visit(Tomcat component) {
