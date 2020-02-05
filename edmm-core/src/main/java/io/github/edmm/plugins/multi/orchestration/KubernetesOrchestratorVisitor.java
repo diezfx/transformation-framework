@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
+import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Property;
@@ -19,14 +20,10 @@ import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class KubernetesOrchestratorVisitor implements ComponentVisitor {
 
@@ -43,11 +40,25 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
     @Override
     public void visit(RootComponent component) {
 
-        /*
-         * ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "dir");
-         * pb.inheritIO(); pb.directory(context.getSubDirAccess().getTargetDirectory());
-         * try { pb.start(); } catch (IOException e) { e.printStackTrace(); }
-         */
+        if(!TopologyGraphHelper.isComponentHostedOnLeaf(graph,component)){
+            logger.info("is not leaf");
+            return;
+        }
+
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.inheritIO();
+        pb.directory(context.getSubDirAccess().getTargetDirectory());
+
+
+
+        try {
+            pb.command("kubectl", "apply", "-f .");
+            Process init = pb.start();
+            init.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @SneakyThrows
@@ -85,5 +96,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
     public void visit(WebApplication component) {
         visit((RootComponent) component);
     }
+
+
 
 }

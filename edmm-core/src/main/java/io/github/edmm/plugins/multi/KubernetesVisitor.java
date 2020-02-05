@@ -66,7 +66,7 @@ public class KubernetesVisitor implements ComponentVisitor, RelationVisitor {
         resolveBaseImage(stack);
         buildDockerfile(stack, fileAccess);
 
-        KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, context.getTopologyGraph(), fileAccess);
+        KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, component,context.getTopologyGraph(), fileAccess);
         resourceBuilder.populateResources();
 
 
