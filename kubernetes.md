@@ -17,6 +17,7 @@ transformation only returns yaml.ftl that need will be replaced during runtime
 orchestrator:
 if kubernetes only deploy when top
 replace deployment and service and substitute with avaialable variables
+better use configmap!
 
 read external ips and other stuff(?)
 
