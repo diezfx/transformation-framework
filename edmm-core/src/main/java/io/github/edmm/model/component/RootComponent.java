@@ -136,14 +136,13 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
         for (MappingEntity typeEntity : getTypeChain()) {
             propertiesEntity = typeEntity.getChild(COMPONENT_INTERFACE.getName())
-                    .flatMap(i -> i.getChild(CAPABILITIES.getName()));
+                    .flatMap(i -> i.getChild(CAPABILITIES));
             if (!propertiesEntity.isPresent()) {
                 continue;
             }
+
+            Map<String, Property> blockList = new HashMap<>();
             for (Entity blockEnt : propertiesEntity.get().getChildren()) {
-
-
-                Map<String, Property> blockList = new HashMap<>();
 
                 populateProperties(blockList, blockEnt);
                 result.putIfAbsent(blockEnt.getName(), blockList);

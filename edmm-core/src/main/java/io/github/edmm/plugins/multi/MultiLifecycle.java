@@ -9,6 +9,7 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import io.github.edmm.plugins.multi.orchestration.AnsibleOrchestratorVisitor;
+import io.github.edmm.plugins.multi.orchestration.KubernetesOrchestratorVisitor;
 import io.github.edmm.plugins.multi.orchestration.TerraformOrchestratorVisitor;
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.graph.EdgeReversedGraph;
@@ -123,13 +124,14 @@ public class MultiLifecycle extends AbstractLifecycle {
         System.out.println("Enter y to continue with orchestration");
         String input = scanner.next();
 
-        if (input.equals("y") == false) {
+        if (!input.equals("y")) {
             return;
         }
 
         logger.info("Begin orchestration ...");
         TerraformOrchestratorVisitor terraformVisitor = new TerraformOrchestratorVisitor(context);
         AnsibleOrchestratorVisitor ansibleVisitor = new AnsibleOrchestratorVisitor(context);
+        KubernetesOrchestratorVisitor kubernetesVisitor = new KubernetesOrchestratorVisitor(context);
         // Reverse the graph to find sources
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
                 context.getModel().getTopology());
@@ -152,8 +154,10 @@ public class MultiLifecycle extends AbstractLifecycle {
             logger.info("deployment_tool: {} ", deploy);
             if (deploy == Technology.ANSIBLE) {
                 comp.accept(ansibleVisitor);
-            } else {
+            } else if (deploy == Technology.TERRAFORM) {
                 comp.accept(terraformVisitor);
+            } else if (deploy == Technology.KUBERNETES) {
+                comp.accept(kubernetesVisitor);
             }
             logger.info("{}", comp.getName());
 

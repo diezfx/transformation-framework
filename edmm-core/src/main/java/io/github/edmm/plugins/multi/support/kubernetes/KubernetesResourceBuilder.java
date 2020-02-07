@@ -36,11 +36,11 @@ public class KubernetesResourceBuilder {
     private final Graph<RootComponent, RootRelation> dependencyGraph;
     private final PluginFileAccess fileAccess;
 
-    public KubernetesResourceBuilder(Container stack,RootComponent topComp, Graph<RootComponent, RootRelation> dependencyGraph, PluginFileAccess fileAccess) {
+    public KubernetesResourceBuilder(Container stack, RootComponent topComp, Graph<RootComponent, RootRelation> dependencyGraph, PluginFileAccess fileAccess) {
         this.stack = stack;
         this.dependencyGraph = dependencyGraph;
         this.fileAccess = fileAccess;
-        this.topComp=topComp;
+        this.topComp = topComp;
     }
 
     public void populateResources() {
@@ -53,14 +53,14 @@ public class KubernetesResourceBuilder {
         try {
             String targetDirectory = stack.getName();
             for (KubernetesResource resource : resources) {
-                fileAccess.write(targetDirectory + "/" + resource.getName() + ".yaml.ftl", resource.toYaml());
+                fileAccess.write(targetDirectory + "/" + resource.getName() + ".yaml", resource.toYaml());
             }
         } catch (Exception e) {
             logger.error("Failed to create Kubernetes resource files for stack '{}'", stack.getName(), e);
             throw new TransformationException(e);
         }
     }
-    
+
     // build time stuff now
     // todo how to solve when both in same cluster?
     // todo flatten to env variables?
@@ -76,18 +76,18 @@ public class KubernetesResourceBuilder {
             
             stack.addEnvVar((target.getName() + "_HOSTNAME").toUpperCase(), target.getServiceName());
         }
-        */  
+        */
 
 
-        PropertyBlocks reqs=topComp.getRequirements();
-
-        for (var reqBlock : reqs.getBlocks().entrySet()){
-            for (var req: reqBlock.getValue().entrySet()){
-                String name=reqBlock.getKey()+"_"+req.getKey();
-                stack.addEnvVar(name,String.format("${%s}",name));
+        PropertyBlocks reqs = topComp.getRequirements();
+        //kubernetes ignores host for now
+        for (var prop : reqs.flattenBlocks().entrySet()) {
+            if (prop.getKey().startsWith("host")) {
+                continue;
             }
+            stack.addEnvVarRuntime(prop.getKey());
         }
     }
 
-    
+
 }

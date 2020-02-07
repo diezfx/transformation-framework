@@ -56,7 +56,26 @@ public class PropertyBlocks {
         return Optional.empty();
     }
 
+    /**
+     * flattens the propertyblocks so that only one array exists
+     * the block becomes the first part of the name
+     * <block>-<property-name>
+     */
+    public Map<String, Property> flattenBlocks() {
+        HashMap<String, Property> result = new HashMap<>();
+        for (var block : blocks.entrySet()) {
+            for (var prop : block.getValue().entrySet()) {
+                String name = block.getKey() + "_" + prop.getKey();
+                if (result.containsKey(name)) {
+                    throw new IllegalArgumentException(String.format("the key {} is used twice", name));
+                }
+                result.put(name, prop.getValue());
+            }
 
+        }
+        return result;
+
+    }
 
 
     public Optional<Property> getProperty(String blockName, String propName) {

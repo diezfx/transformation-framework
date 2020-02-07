@@ -27,8 +27,7 @@ requires:
 [x] add kubernetes transformer
 [-] add kubernetes orchestrator
 [] read vars during runtime 
-[] replace ftl with real values
-[] use configmap instead of ftl
+[-] use configmap instead of ftl(?)
 
 []implement cloudformation
 

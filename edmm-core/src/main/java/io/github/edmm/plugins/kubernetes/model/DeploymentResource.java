@@ -2,14 +2,14 @@ package io.github.edmm.plugins.kubernetes.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.docker.Container;
 import io.github.edmm.docker.PortMapping;
+import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +20,7 @@ public final class DeploymentResource implements KubernetesResource {
     private static final Logger logger = LoggerFactory.getLogger(DeploymentResource.class);
     private final Container stack;
     private Deployment deployment;
+    private final String repo = "localhost:32000/";
 
     public DeploymentResource(Container stack) {
         this.stack = stack;
@@ -28,14 +29,24 @@ public final class DeploymentResource implements KubernetesResource {
     @Override
     public void build() {
         io.fabric8.kubernetes.api.model.Container container = new ContainerBuilder()
-                .withImage(stack.getLabel() + ":latest")
+                .withImage(repo + stack.getLabel() + ":latest")
                 .withName(stack.getLabel())
-                .withImagePullPolicy("Never")
+                .withImagePullPolicy("Always")
                 .addAllToPorts(stack.getPorts().stream()
                         .map(PortMapping::toContainerPort)
                         .collect(Collectors.toList()))
                 .addAllToEnv(stack.getEnvVars().entrySet().stream()
                         .map(e -> new EnvVar(e.getKey(), e.getValue(), null))
+                        .collect(Collectors.toSet()))
+                .addAllToEnv(stack.getEnvVarsRuntime().stream()
+                        .map(varName -> {
+                            var envVarSource = new EnvVarSourceBuilder().withNewConfigMapKeyRef()
+                                    .withNewKey(varName)
+                                    .withNewName(stack.getConfigMapName())
+                                    .endConfigMapKeyRef()
+                                    .build();
+                            return new EnvVarBuilder().withName(varName).withValueFrom(envVarSource).build();
+                        })
                         .collect(Collectors.toSet()))
                 .build();
         deployment = new DeploymentBuilder()

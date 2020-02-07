@@ -3,11 +3,11 @@ version: edm_1_0
 
 orchestration_technology:
   ansible:
-    - dbms
-    - pet_clinic_tomcat
   terraform:
     - ubuntu
   kubernetes:
+    - dbms
+    - pet_clinic_tomcat
     - pet_clinic
     - db
 
@@ -32,8 +32,8 @@ components:
     interface:
       requires: # the values are calculated during runtime
         mysql-db:
-          mysql-port:
-            type: integer
+          port:
+            type: port
     provides:
       pet_port: 42
   pet_clinic_tomcat:
@@ -113,11 +113,11 @@ component_types:
 
   software_component:
     extends: base
-    interface:  
-        requires:
-          host:
-            address:
-              type: ip
+    interface:
+      requires:
+        host:
+          address:
+            type: ip
 
   compute:
     extends: base
@@ -138,7 +138,7 @@ component_types:
       public_key:
         type: string
         description: The public key of the key pair to use for authentication
-        
+
   web_server:
     extends: software_component
     properties:
@@ -151,7 +151,7 @@ component_types:
   web_application:
     extends: base
     interface:
-      provides:
+      capabilities:
         http_port: # todo call it like this and use type?
           default_value: 80
       requires:
@@ -185,6 +185,7 @@ component_types:
             type: ip
 
 
+
   ## Technology-specific Types
 
   tomcat:
@@ -200,9 +201,16 @@ component_types:
       port:
         type: port
         default_value: 3306
+    interface:
+      capabilities:
+        db:
+          port:
+            type: port
+            default_value: 3306
 
   mysql_database:
     extends: database
+
 
 ###############################################
 ## Relation Types

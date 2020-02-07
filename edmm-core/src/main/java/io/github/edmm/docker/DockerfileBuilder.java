@@ -1,6 +1,7 @@
 package io.github.edmm.docker;
 
 import io.github.edmm.docker.support.*;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -11,8 +12,8 @@ public final class DockerfileBuilder {
 
     private final List<DockerfileEntry> entries = new ArrayList<>();
     private boolean compress = false;
-    private List<AddEntry> addEntries = new ArrayList<>();
-    private List<EnvEntry> envEntries = new ArrayList<>();
+    private final List<AddEntry> addEntries = new ArrayList<>();
+    private final List<EnvEntry> envEntries = new ArrayList<>();
     private int workdirIndex = -1;
 
     public DockerfileBuilder from(String baseImage) {
@@ -42,6 +43,10 @@ public final class DockerfileBuilder {
         } else {
             addEntries.add(entry);
         }
+        if (FilenameUtils.getExtension(src).equals("sh")) {
+            entries.add(new RunEntry("chmod +x " + dest));
+        }
+
         return this;
     }
 

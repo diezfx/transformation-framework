@@ -107,7 +107,7 @@ public abstract class TopologyGraphHelper {
      */
     public static PropertyBlocks resolveHostCapabilities(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         var myCapabilities = new PropertyBlocks(new HashMap<>());
-        Optional<RootComponent> host = TopologyGraphHelper.resolveHostingComponent(graph, component);
+        Optional<RootComponent> host = TopologyGraphHelper.getTargetComponents(graph, component, HostedOn.class).stream().findFirst();
         while (host.isPresent()) {
             myCapabilities = myCapabilities.mergeBlocks(host.get().getCapabilities());
 
@@ -125,7 +125,6 @@ public abstract class TopologyGraphHelper {
     public static Optional<Map<String, Property>> findMatchingProperties(Graph<RootComponent, RootRelation> graph, Map<String, Property> reqs, RootComponent component) {
         Map<String, Property> matchedProperties = new HashMap<>();
         for (var req : reqs.entrySet()) {
-
             var prop = resolveCapabilityWithHostingByType(graph, req.getValue().getType(), component);
             if (!prop.isPresent()) {
                 return Optional.empty();
@@ -173,12 +172,12 @@ public abstract class TopologyGraphHelper {
 
         Optional<Property> prop = component.getCapabilityByType(propType);
 
+
         if (prop.isPresent()) {
             return prop;
         }
 
         PropertyBlocks hostBlocks = resolveHostCapabilities(graph, component);
-
 
         return hostBlocks.getPropertyByType(propType);
 
@@ -247,10 +246,7 @@ public abstract class TopologyGraphHelper {
      */
     public static boolean isComponentHostedOnLeaf(Graph<RootComponent, RootRelation> graph,RootComponent component){
         Set<RootComponent> sourceComponents = getSourceComponents(graph, component, HostedOn.class);
-        if(sourceComponents.isEmpty()){
-            return true;
-        }
-        return false;
+        return sourceComponents.isEmpty();
 
     }
 }
