@@ -22,7 +22,10 @@ better use configmap!
 read external ips and other stuff(?)
 
 
-[] add way to read external ip from service
+[-] add way to read external ip from service
+problem 1: properties vs. this
+nodeport is another port than internally -> Cast to Property with portvalue and nodeport value
+problem 2: ip adress; just take internal ip for now
 
 
 - special cases; what if 2 components are deployed in same cluster -> check and use service name?

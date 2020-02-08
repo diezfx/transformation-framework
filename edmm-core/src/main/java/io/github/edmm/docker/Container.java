@@ -18,6 +18,9 @@ public final class Container {
 
     private List<RootComponent> components = new ArrayList<>();
 
+    //the variables that will only be known at runtime
+    private List<String> envVarsRuntime = new ArrayList<>();
+
     private String baseImage;
     private Map<String, String> envVars = new HashMap<>();
     private List<FileMapping> artifacts = new ArrayList<>();
@@ -29,6 +32,7 @@ public final class Container {
         this.components = new ArrayList<>(stack.components);
         this.baseImage = stack.baseImage;
         this.envVars = new HashMap<>(stack.envVars);
+        this.envVarsRuntime = new ArrayList<>(stack.envVarsRuntime);
         this.artifacts = new ArrayList<>(stack.artifacts);
         this.ports = new ArrayList<>(stack.ports);
         this.operations = new ArrayList<>(stack.operations);
@@ -51,12 +55,20 @@ public final class Container {
         return getLabel() + "-deployment";
     }
 
+    public String getConfigMapName() {
+        return getLabel() + "-config";
+    }
+
     public void addComponent(RootComponent component) {
         components.add(component);
     }
 
     public void addEnvVar(String name, String value) {
         envVars.put(name, value);
+    }
+
+    public void addEnvVarRuntime(String name) {
+        envVarsRuntime.add(name);
     }
 
     public void addArtifact(FileMapping mapping) {

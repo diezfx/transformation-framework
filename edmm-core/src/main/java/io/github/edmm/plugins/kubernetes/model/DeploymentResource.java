@@ -21,6 +21,7 @@ public final class DeploymentResource implements KubernetesResource {
     private final Container stack;
     private Deployment deployment;
     private final String repo = "localhost:32000/";
+    private final String namespace = "default";
 
     public DeploymentResource(Container stack) {
         this.stack = stack;
@@ -52,6 +53,7 @@ public final class DeploymentResource implements KubernetesResource {
         deployment = new DeploymentBuilder()
                 .withNewMetadata()
                 .withName(stack.getLabel())
+                .withNamespace(namespace)
                 // The Unspecific name is used here to improve the ability to find objects belonging together
                 .addToLabels("app", stack.getLabel())
                 .endMetadata()

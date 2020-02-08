@@ -19,6 +19,7 @@ public final class ServiceResource implements KubernetesResource {
     private static final Logger logger = LoggerFactory.getLogger(ServiceResource.class);
     private final Container stack;
     private Service service;
+    private final String namespace = "default";
 
     public ServiceResource(Container stack) {
         this.stack = stack;
@@ -30,6 +31,7 @@ public final class ServiceResource implements KubernetesResource {
         service = new ServiceBuilder()
                 .withNewMetadata()
                 .withName(stack.getServiceName())
+                .withNamespace(namespace)
                 .addToLabels("app", stack.getServiceName())
                 .endMetadata()
                 .withNewSpec()

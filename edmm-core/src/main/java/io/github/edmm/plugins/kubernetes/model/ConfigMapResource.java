@@ -1,27 +1,24 @@
 package io.github.edmm.plugins.kubernetes.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.client.internal.SerializationUtils;
+
 import io.github.edmm.core.transformation.TransformationException;
-import io.github.edmm.docker.Container;
-import io.github.edmm.docker.PortMapping;
-import io.github.edmm.model.Property;
 import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.RootComponent;
+import io.kubernetes.client.models.V1ConfigMap;
+import io.kubernetes.client.models.V1ConfigMapBuilder;
+import io.kubernetes.client.util.Yaml;
 import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 public final class ConfigMapResource implements KubernetesResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceResource.class);
     private final RootComponent component;
-    private ConfigMap configMap;
+    private V1ConfigMap configMap;
     private final PropertyBlocks props;
+    private final String namespace = "default";
 
     public ConfigMapResource(RootComponent component, PropertyBlocks props) {
         this.component = component;
@@ -31,8 +28,9 @@ public final class ConfigMapResource implements KubernetesResource {
     @Override
     public void build() {
 
-        var configMapBuilder = new ConfigMapBuilder().withNewMetadata()
+        var configMapBuilder = new V1ConfigMapBuilder().withNewMetadata()
                 .withName(getName())
+                .withNamespace(namespace)
                 .endMetadata();
 
         for (var prop : props.flattenBlocks().entrySet()) {
@@ -47,12 +45,12 @@ public final class ConfigMapResource implements KubernetesResource {
         if (configMap == null) {
             throw new TransformationException("Resource not yet built, call build() first");
         }
-        try {
-            return SerializationUtils.dumpAsYaml(configMap);
-        } catch (JsonProcessingException e) {
-            logger.error("Failed to dump YAML", e);
-            throw new TransformationException(e);
-        }
+
+        return Yaml.dump(configMap);
+    }
+
+    public V1ConfigMap getConfigMap() {
+        return configMap;
     }
 
     @Override

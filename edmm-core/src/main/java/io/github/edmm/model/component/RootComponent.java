@@ -51,6 +51,10 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         return get(TYPE);
     }
 
+    public String getLabel() {
+        return getName().replace("_", "-");
+    }
+
     public List<RootRelation> getRelations() {
         if (relationCache.isEmpty()) {
             List<RootRelation> result = new ArrayList<>();
@@ -188,22 +192,28 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
     }
 
 
-     /**
+    public Map<String, Property> getCapabilitiesByType(String type) {
+        Map<String, Property> results = new HashMap<>();
+        PropertyBlocks blocks = getCapabilities();
+
+        var prop = blocks.getPropertyByTypeWithBlockName(type);
+        prop.ifPresent(property -> results.putIfAbsent(property.getLeft(), property.getRight()));
+
+        return results;
+    }
+
+
+    /**
      * finds the given capability but only on the own component; no search through dependency
+     *
      * @param name
      * @return
      */
     public Optional<Property> getCapabilityByType(String type) {
+        return getCapabilitiesByType(type).entrySet().stream()
+                .findFirst()
+                .map(Map.Entry::getValue);
 
-
-        PropertyBlocks blocks = getCapabilities();
-
-        var prop = blocks.getPropertyByType(type);
-        if (prop.isPresent()) {
-            return prop;
-        }
-
-        return Optional.empty();
     }
 
 

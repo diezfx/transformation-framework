@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.var;
+import org.apache.commons.lang3.tuple.Pair;
 
 
 import java.util.HashMap;
@@ -47,8 +48,25 @@ public class PropertyBlocks {
 
         for (var block : blocks.values()) {
             for (var prop : block.entrySet()) {
-                if (prop.getValue().getType().equals(type)) {
+                if (prop.getValue().getType().startsWith(type)) {
                     return Optional.of(prop.getValue());
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * @param name the name of the property
+     * @return looks through all blocks and their property; the first one with the specified name is returned
+     */
+    public Optional<Pair<String, Property>> getPropertyByTypeWithBlockName(String type) {
+
+        for (var block : blocks.entrySet()) {
+            for (var prop : block.getValue().entrySet()) {
+                if (prop.getValue().getType().equals(type)) {
+                    return Optional.of(Pair.of(block.getKey() + "_" + prop.getKey(), prop.getValue()));
                 }
             }
         }

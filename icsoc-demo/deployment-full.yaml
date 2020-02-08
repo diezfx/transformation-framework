@@ -152,8 +152,10 @@ component_types:
     extends: base
     interface:
       capabilities:
-        http_port: # todo call it like this and use type?
-          default_value: 80
+        app:
+          http_port: # todo call it like this and use type?
+            type: port
+            default_value: 80
       requires:
         host:
           address:

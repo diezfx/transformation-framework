@@ -10,6 +10,7 @@ import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.visitor.ComponentVisitor;
+import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,8 +84,13 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
     }
 
     private void collectPorts(RootComponent component) {
-        component.getProperty(PORT)
-                .ifPresent(port -> stack.addPort(new PortMapping(component.getNormalizedName(), port)));
+        var ports = component.getCapabilitiesByType("port");
+        logger.info(ports.toString());
+        for (var port : ports.entrySet()) {
+            var portNr = Integer.valueOf(port.getValue().getValue());
+            stack.addPort(new PortMapping(port.getKey(), portNr));
+        }
+
     }
 
     private void collectEnvVars(RootComponent component) {

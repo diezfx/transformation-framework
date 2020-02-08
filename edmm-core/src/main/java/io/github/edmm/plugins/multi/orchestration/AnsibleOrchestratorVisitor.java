@@ -43,8 +43,8 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         pb.directory(context.getSubDirAccess().getTargetDirectory());
 
 
-        PropertyBlocks requiredProps = findHostRequirements(component);
-        requiredProps.mergeBlocks(findAllRequirements(component));
+        PropertyBlocks requiredProps = OrchestrationHelper.findHostRequirements(graph, component, logger);
+        requiredProps.mergeBlocks(OrchestrationHelper.findAllRequirements(graph, component, logger));
 
 
         // look for all other requirements through relations
@@ -61,74 +61,9 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         }
     }
 
-    /**
-     * look for host requirements; special case at the moment
-     *
-     * @param component the component which requirements are looked for elsewhere
-     * @return a jsonobject with all found requirements filled in
-     * todo write the values in the model as well?
-     */
-    private PropertyBlocks findHostRequirements(RootComponent component) {
-        PropertyBlocks result = new PropertyBlocks(new HashMap<>());
-        PropertyBlocks requirements = component.getRequirements();
-        HashMap<String, Property> hostR = new HashMap<>();
-        Optional<Map<String, Property>> hostRequirements = requirements.getBlockByName("host");
 
-        if (!hostRequirements.isPresent()) {
-            return result;
-        }
 
-        hostRequirements.get().forEach((propName, propValue) -> {
-            var prop = TopologyGraphHelper.resolveCapabilityWithHostingByType(graph, propValue.getType(), component);
-            if(prop.isPresent()){
-                hostR.put(propName, prop.get());
-            }
-            else{
-                logger.warn("the property {} could not be fulfilled",propName);
-            }
-        });
-        result.addBlock("host",hostR);
-        return result;
-    }
 
-    /**
-     * for every property group look through all connects_to connections
-     * @param component
-     * @return
-     */
-    private PropertyBlocks findAllRequirements(RootComponent component) {
-        PropertyBlocks requirements = component.getRequirements();
-        PropertyBlocks result = new PropertyBlocks(new HashMap<>());
-
-        for (var block : requirements.getBlocks().entrySet()) {
-            if(block.getKey().equals("host")){
-                continue;
-            }
-            // iterate over all connects_to relations
-            Set<RootComponent> targetComponents = TopologyGraphHelper.getTargetComponents(graph, component, ConnectsTo.class);
-            Optional<Map<String, Property>> match = Optional.empty();
-            for (var targetComp : targetComponents) {
-                match = TopologyGraphHelper.findMatchingProperties(graph, block.getValue(), targetComp);
-                if (match.isPresent()) {
-                    break;
-                }
-
-            }
-            if (match.isPresent()) {
-                var blockMap = new HashMap<String, Property>();
-                for (var prop : match.get().entrySet()) {
-
-                    blockMap.put(prop.getKey(), prop.getValue());
-                }
-                result.addBlock(block.getKey(), blockMap);
-            } else {
-                logger.warn("No fitting block found for {}", block.getKey());
-            }
-
-        }
-        return result;
-
-    }
 
 
     @Override
