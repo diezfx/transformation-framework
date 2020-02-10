@@ -6,11 +6,20 @@ type capabilities e.g. database.mysql or  tosca.capabilities.Compute
 these capability blocks define a set of capabilities that have to be fulfilled
 
 ```yaml
+
+# "interface of mysqldatabase
+requirements:
+        host: capabilities.dmbs.mysql # only describe capability; not the type of component 
+capabilities:
+        db :  capabilties.endpoint.database.mysql
+
+
+#interface of pet-service
 requirements:
         db: capabilities.endpoint.database.mysql # interface somewhere else defined; is fulfilled with connects_to
         host: capabilities.tomcat # only describe capability; not the type of component 
 capabilities:
-        host: capabilities.Compute
+        pet-service: capabilities.webservice.pet-service
 ```
 
 e.g. database.mysql implies could be defined as:
@@ -21,9 +30,9 @@ capabiltiy-types:
                     type: string(?)
                     default_value: 3306
                  address:
-                    type: string(?) ## only exists transtively?
+                    type: string # only exists transtively?
                  user:
-                    type: string # separate user/password and use it with connects_to??
+                    type: string # separate user/password and transfer through connects_to??
                  password:
                     type: string
         endpoint.dbms.mysql:
@@ -31,7 +40,7 @@ capabiltiy-types:
                     type: string(?)
                     default_value: 3306
                 address:
-                    type: string(?) ## only exists transtively?
+                    type: string(?) # only exists transtively?
                 root_password:
                     type: string   
             
