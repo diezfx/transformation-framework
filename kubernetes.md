@@ -31,10 +31,10 @@ if kubernetes-visitor; only deploy when top
 
 [-] add way to read external ip from service
 - problem 1: properties vs. this vs. service
-services' nodeport is another port than internally used -> Cast to Property with portvalue and nodeport value
+services' nodeport is another port than internally used -> have to be set dynamically
 - problem 2: ip adress; just take internal ip for now
-- problem 3: 2 kubernetes stacks on same host? -> is not same host in kuberntes 
-  solution: just set adress at this component 
+ 
+ these are nodeport problems -> should not happen with loadbalancer
 
 
 ### special cases:
