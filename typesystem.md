@@ -7,8 +7,8 @@ these capability blocks define a set of capabilities that have to be fulfilled
 
 ```yaml
 requirements:
-        db: database.mysql # interface somewhere else defined
-        host: tomcat # depending on implementation needs tomcat and compuite?
+        db: capabilities.database.mysql # interface somewhere else defined
+        host: capabilities.tomcat # only describe capability; not the type of component 
 capabilities:
         host: capabilities.Compute
 ```
