@@ -60,13 +60,15 @@ tosca.nodes.Database:
 ```
 
 ### Main problem: How to resolve properties
+some properties are exported through an underlying component. 
 #### typed property
-every property is "typed see (capabilities have types); only resolve in the own component with name; look through hosted_on with type
+every property is "typed see (properties have types); look through hosted_on with type
 #### naming convention
 strict naming convention; admin_address is admin_address in every component \
 what if there are 2? e.g. comp1(database.port) and comp2(ssh_port) both are called port?
 #### reexport properties
-every component needs to reexport the capabilities
+every component needs to reexport the capabilities. No transitivity. 
+Best solution?
 
 
 ### Different technologies need different definitions
