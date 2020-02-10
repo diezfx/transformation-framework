@@ -71,7 +71,7 @@ every component needs to reexport the capabilities
 
 ### Different technologies need different definitions
 in a kubernetes cluster some of capabilities.Compute address isn't needed\
-ansible needs compute address to install sth
+ansible needs compute address to install sth; for kubernetes needs to use kubectl exec or sth.
 
 
 ## implemented at the moment :properties have types
