@@ -1,26 +1,26 @@
 # todos
 ## in general
 
-- [] testing
+- [ ] testing
 ## types
 - [x] property-types
-- [] define capability-types; look at tosca (see types.md)
+- [ ] define capability-types; look at tosca (see types.md)
 
 ## kubernetes
 - implement kubernetes (see kubernetes.md)
 - [x] add kubernetes transformer
 - [-] add kubernetes orchestrator
 - [x] use configmap for runtime vars
-- [] read vars during runtime 
+- [ ] read vars during runtime 
 ## cloudformation
-- []implement cloudformation
+- [ ]implement cloudformation
 
 
 
 ## later
-[]testing!!
-[]properties vs. cap/reqs
-[]remove todos
+- [ ] testing!!
+- [ ] properties vs. cap/reqs
+- [ ] remove todos
 
 
 ## done 
