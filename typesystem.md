@@ -69,6 +69,11 @@ what if there are 2? e.g. comp1(database.port) and comp2(ssh_port) both are call
 every component needs to reexport the capabilities
 
 
+### Different technologies need different definitions
+in a kubernetes cluster some of capabilities.Compute address isn't needed\
+ansible needs compute address to install sth
+
+
 ## implemented at the moment :properties have types
 ###  what if e.g. one component has more than. one port to offer (https/grpc)
 solve with types one port is "port.https" the other "port.grpc"
