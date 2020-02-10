@@ -29,9 +29,54 @@ capabiltiy-types:
             
 ```
 address is only a transitive capability, so naming not in control
+For comparison generic tosca endpoint
 
+```yaml
+tosca.capabilities.Endpoint:
+  derived_from: tosca.capabilities.Root
+  properties:
+    protocol:
+      type: string
+      required: true
+      default: tcp
+    port:
+      type: PortDef
+      required: false
+    secure:
+      type: boolean
+      required: false
+      default: false
+    url_path:
+      type: string
+      required: false
+    port_name:
+      type: string
+      required: false
+    network_name:
+      type: string
+      required: false
+      default: PRIVATE
+    initiator:
+      type: string
+      required: false
+      default: source
+      constraints:
+        - valid_values: [ source, target, peer ]
+    ports:
+      type: map
+      required: false
+      constraints:
+        - min_length: 1
+      entry_schema:
+        type: PortSpec
+  attributes:
+    ip_address:
+      type: string
+```
 
-tosca:
+And a db_component
+
+tosca_db_component:
 ```yaml
 tosca.nodes.Database:
   derived_from: tosca.nodes.Root # needed?
@@ -59,7 +104,6 @@ tosca.nodes.Database:
     database_endpoint:
       type: tosca.capabilities.Endpoint.Database
 ```
-
 ### Main problem: How to resolve properties
 some properties are exported through an underlying component. 
 #### typed property
