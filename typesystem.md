@@ -23,7 +23,7 @@ capabiltiy-types:
                  address:
                     type: string(?) ## only exists transtively?
                  user:
-                    type: string
+                    type: string # separate user/password and use it with connects_to??
                  password:
                     type: string
         endpoint.dbms.mysql:
