@@ -10,20 +10,20 @@ requirements:
         db: database.mysql # interface somewhere else defined
         host: tomcat # depending on implementation needs tomcat and compuite?
 capabilities:
-        host: capabilities.Compute    #let it stay as it is?
+        host: capabilities.Compute
 ```
 
-e.g. database.mysql implies:
+e.g. database.mysql implies could be defined as:
 ```yaml
 database.mysql:
         port:
             type: string(?)
             default_value: 3306
          address:
-            type: string(?) ## only exists transtively??
-          user:
+            type: string(?) ## only exists transtively?
+         user:
             type: string
-           password:
+         password:
             type: string
             
 ```
