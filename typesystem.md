@@ -66,4 +66,12 @@ tosca.nodes.Database:
       type: tosca.capabilities.Endpoint.Database
 ```
 
-What to do with 
+### Main problem: How to resolve properties
+1. every property is "typed see (capabilities have types); only resolve in the own component with name; look through hosted_on with type
+2. strict naming convention; admin_address is admin_address in every component; what if there are 2?
+3. every component needs to reexport the capabilities
+
+
+
+### related links:
+https://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.3/cos01/TOSCA-Simple-Profile-YAML-v1.3-cos01.html#DEFN_TYPE_CAPABILITIES_ENDPOINT
