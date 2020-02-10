@@ -3,7 +3,7 @@
 ## implemented at the moment :properties have types
 problem: what if one component has more than one port to offer e.g. https/grpc
 
-sol1: solve with name -> bad becase every component would need to use the same names
+sol1: solve with name -> bad becase every component would need to use the same names \
 sol2: solve with types one port is "port.https" the other "port.grpc"
 
 
