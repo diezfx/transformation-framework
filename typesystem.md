@@ -1,12 +1,5 @@
 # Type system
 
-## implemented at the moment :properties have types
-problem: what if one component has more than one port to offer e.g. https/grpc
-
-sol1: solve with name -> bad becase every component would need to use the same names \
-sol2: solve with types one port is "port.https" the other "port.grpc"
-
-
 ## future 
 ## capabilities have types
 type capabilities e.g. database.mysql or  tosca.capabilities.Compute
@@ -67,11 +60,23 @@ tosca.nodes.Database:
 ```
 
 ### Main problem: How to resolve properties
-1. every property is "typed see (capabilities have types); only resolve in the own component with name; look through hosted_on with type
-2. strict naming convention; admin_address is admin_address in every component; what if there are 2?
-3. every component needs to reexport the capabilities
+#### typed property
+every property is "typed see (capabilities have types); only resolve in the own component with name; look through hosted_on with type
+#### naming convention
+strict naming convention; admin_address is admin_address in every component \
+what if there are 2? e.g. comp1(database.port) and comp2(ssh_port) both are called port?
+#### reexport properties
+every component needs to reexport the capabilities
 
+
+## implemented at the moment :properties have types
+problem: what if one component has more than e.g. one port to offer (https/grpc)
+
+sol2: solve with types one port is "port.https" the other "port.grpc"
+
+at them moment implemented with .startswith() so getcapabilitiesofType("port") returns both.
 
 
 ### related links:
 https://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.3/cos01/TOSCA-Simple-Profile-YAML-v1.3-cos01.html#DEFN_TYPE_CAPABILITIES_ENDPOINT
+
