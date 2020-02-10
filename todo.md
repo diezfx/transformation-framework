@@ -1,8 +1,10 @@
 # todos
 ## in general
 
-[] testing
-[] define capability-types; look at tosca (see types.md)
+- [] testing
+## types
+- [x] property-types
+- [] define capability-types; look at tosca (see types.md)
 
 ## kubernetes
 - implement kubernetes (see kubernetes.md)
