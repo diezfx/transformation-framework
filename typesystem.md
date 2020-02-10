@@ -15,16 +15,17 @@ capabilities:
 
 e.g. database.mysql implies could be defined as:
 ```yaml
-database.mysql:
-        port:
-            type: string(?)
-            default_value: 3306
-         address:
-            type: string(?) ## only exists transtively?
-         user:
-            type: string
-         password:
-            type: string
+capabiltiy-types:
+        database.mysql:
+                port:
+                    type: string(?)
+                    default_value: 3306
+                 address:
+                    type: string(?) ## only exists transtively?
+                 user:
+                    type: string
+                 password:
+                    type: string
             
 ```
 address is only a transitive capability, so naming not in control
