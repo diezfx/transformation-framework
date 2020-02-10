@@ -7,7 +7,7 @@ these capability blocks define a set of capabilities that have to be fulfilled
 
 ```yaml
 requirements:
-        db: capabilities.database.mysql # interface somewhere else defined
+        db: capabilities.endpoint.database.mysql # interface somewhere else defined; is fulfilled with connects_to
         host: capabilities.tomcat # only describe capability; not the type of component 
 capabilities:
         host: capabilities.Compute
@@ -16,7 +16,7 @@ capabilities:
 e.g. database.mysql implies could be defined as:
 ```yaml
 capabiltiy-types:
-        database.mysql:
+        endpoint.database..mysql:
                 port:
                     type: string(?)
                     default_value: 3306
@@ -26,6 +26,14 @@ capabiltiy-types:
                     type: string
                  password:
                     type: string
+        endpoint.dbms.mysql:
+                port:
+                    type: string(?)
+                    default_value: 3306
+                address:
+                    type: string(?) ## only exists transtively?
+                root_password:
+                    type: string   
             
 ```
 address is only a transitive capability, so naming not in control
@@ -69,7 +77,7 @@ tosca.capabilities.Endpoint:
         - min_length: 1
       entry_schema:
         type: PortSpec
-  attributes:
+  attributes: # what is this?
     ip_address:
       type: string
 ```
