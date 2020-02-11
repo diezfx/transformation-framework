@@ -85,7 +85,7 @@ tosca.nodes.Database:
   capabilities:
     database_endpoint:
       type: tosca.capabilities.Endpoint.Database
-      
+```      
 tosca endpoint:
 ```yaml
 tosca.capabilities.Endpoint:
@@ -128,7 +128,6 @@ tosca.capabilities.Endpoint:
   attributes: # what is this?
     ip_address:
       type: string
-```
 ```
 ### Main problem: How to resolve properties
 some properties are exported through an underlying component. 
