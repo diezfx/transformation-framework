@@ -25,6 +25,7 @@ capabilities:
 #generic
 requirements:
         <name>: capabilties.<type>
+        <host>: capabilites.<type> #special keyword for hosted_on?
         ...
 capabilities:
         <name>: capabilities.<type>
