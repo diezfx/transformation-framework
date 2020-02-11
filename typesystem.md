@@ -2,14 +2,14 @@
 
 ## future 
 ## capabilities have types
-type capabilities e.g. database.mysql or  tosca.capabilities.Compute
+type capabilities e.g. `database.mysql` or  `tosca.capabilities.Compute` \
 these capability blocks define a set of capabilities that have to be fulfilled
 
 ```yaml
 
 # "interface of mysqldatabase
 requirements:
-        host: capabilities.dmbs.mysql # only describe capability; not the type of component 
+        host: capabilities.dmbs.mysql # only the host has to fulfill, doesn't set component type
 capabilities:
         db :  capabilties.endpoint.database.mysql
 
@@ -22,7 +22,7 @@ capabilities:
         pet-service: capabilities.webservice.pet-service
 ```
 
-e.g. database.mysql implies could be defined as:
+The definition for these capabilities could look as follows:
 ```yaml
 capabiltiy-types:
         endpoint.database..mysql:
@@ -46,7 +46,9 @@ capabiltiy-types:
             
 ```
 address is only a transitive capability, so naming not in control
-For comparison generic tosca endpoint
+
+
+### For comparison selected tosca models
 
 ```yaml
 tosca.capabilities.Endpoint:
@@ -133,7 +135,7 @@ every component needs to reexport the capabilities. No transitivity.
 Best solution?
 
 
-### Different technologies need different definitions
+### Different technologies need different definitions?
 in a kubernetes cluster some of capabilities.Compute address isn't needed\
 ansible needs compute address to install sth; for kubernetes needs to use kubectl exec or sth.
 
