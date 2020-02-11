@@ -20,6 +20,15 @@ requirements:
         host: capabilities.tomcat # only describe capability; not the type of component 
 capabilities:
         pet-service: capabilities.webservice.pet-service
+        
+        
+#generic
+requirements:
+        <name>: capabilties.<type>
+        ...
+capabilities:
+        <name>: capabilities.<type>
+        ...
 ```
 
 The definition for these capabilities could look as follows:
@@ -45,11 +54,39 @@ capabiltiy-types:
                     type: string   
             
 ```
-address is only a transitive capability, so naming not in control
+address is only a transitive capability, so naming not in control; needs a solution
 
 
 ### For comparison selected tosca models
-
+tosca_db_component:
+```yaml
+tosca.nodes.Database:
+  derived_from: tosca.nodes.Root # needed?
+  properties:
+    name:
+      type: string
+      description: the logical name of the database
+    port:
+      type: integer
+      description: the port the underlying database service will listen to for data
+    user:
+      type: string
+      description: the optional user account name for DB administration
+      required: false
+    password:
+      type: string
+      description: the optional password for the DB user account
+      required: false
+  requirements:
+    - host:
+        capability: tosca.capabilities.Compute
+        node: tosca.nodes.DBMS
+        relationship: tosca.relationships.HostedOn
+  capabilities:
+    database_endpoint:
+      type: tosca.capabilities.Endpoint.Database
+      
+tosca endpoint:
 ```yaml
 tosca.capabilities.Endpoint:
   derived_from: tosca.capabilities.Root
@@ -92,36 +129,6 @@ tosca.capabilities.Endpoint:
     ip_address:
       type: string
 ```
-
-And a db_component
-
-tosca_db_component:
-```yaml
-tosca.nodes.Database:
-  derived_from: tosca.nodes.Root # needed?
-  properties:
-    name:
-      type: string
-      description: the logical name of the database
-    port:
-      type: integer
-      description: the port the underlying database service will listen to for data
-    user:
-      type: string
-      description: the optional user account name for DB administration
-      required: false
-    password:
-      type: string
-      description: the optional password for the DB user account
-      required: false
-  requirements:
-    - host:
-        capability: tosca.capabilities.Compute
-        node: tosca.nodes.DBMS
-        relationship: tosca.relationships.HostedOn
-  capabilities:
-    database_endpoint:
-      type: tosca.capabilities.Endpoint.Database
 ```
 ### Main problem: How to resolve properties
 some properties are exported through an underlying component. 
