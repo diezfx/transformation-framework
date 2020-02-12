@@ -7,7 +7,7 @@ function check () {
     return 1
   fi
 }
-
+exit 0 #todo remove
 check systemctl
 if [[ $? -eq 0 ]]; then
     systemctl daemon-reload

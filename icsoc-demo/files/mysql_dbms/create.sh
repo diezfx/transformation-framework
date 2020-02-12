@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0 #todo remove
 apt -y update
 apt -y install wget
 apt -y install libaio1 libaio-dev

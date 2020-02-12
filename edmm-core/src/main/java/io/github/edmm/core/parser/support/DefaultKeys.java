@@ -29,4 +29,10 @@ public abstract class DefaultKeys {
     public static final String INTEGER = "integer";
     public static final String FLOAT = "float";
     // endregion
+
+
+    // region *** interface stuff ***
+    public static final String CAPABILITIES = "capabilities";
+    public static final String INTERFACE = "interface";
+    //endregion
 }

@@ -51,7 +51,7 @@ provider "openstack" {
 resource "openstack_compute_instance_v2" "${ec2.name}" {
   name = "${ec2.name}"
   image_name = "Ubuntu 18.04"
-  flavor_name = "m1.nano"
+  flavor_name = "m1.small"
   key_pair = "win10key"
   security_groups = [
     "default"]

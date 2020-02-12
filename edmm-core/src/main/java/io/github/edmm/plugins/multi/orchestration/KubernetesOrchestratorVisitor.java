@@ -142,6 +142,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
         ProcessBuilder pb = new ProcessBuilder();
         File compDir = new File(fileAccess.getTargetDirectory(), component.getName());
         pb.directory(compDir);
+        pb.inheritIO();
 
 
         String registry = "localhost:32000/";
@@ -151,7 +152,6 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
         try {
             pb.command("docker", "build", "-t", component.getLabel() + ":latest", ".");
             Process init = pb.start();
-            String output = IOUtils.toString(init.getInputStream());
             init.waitFor();
             pb.command("docker", "tag", component.getLabel() + ":latest", registry + component.getLabel());
             pb.start().waitFor();
@@ -171,11 +171,15 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
 
 
             deployConfigMap(component, compDir, api);
+            logger.info("deployed configMap for {}", component.getName());
             deployDeployment(component, compDir, deploymentApi);
+            logger.info("deployed deployment for {}", component.getName());
             Optional<V1Service> service = deployService(component, compDir, api);
+            logger.info("deployed service for {}", component.getName());
             for (var port : service.get().getSpec().getPorts()) {
-                logger.info(port.getNodePort().toString());
+                logger.info("the ’public’ nodeport is: {}", port.getNodePort().toString());
             }
+            logger.info("the clusterIP is: {}", service.get().getSpec().getClusterIP());
 
             //component.setPropertyValue();
 

@@ -27,7 +27,7 @@ import java.util.Set;
 
 public class KubernetesResourceBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(DockerfileBuildingVisitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesResourceBuilder.class);
 
     private final List<KubernetesResource> resources = new ArrayList<>();
 

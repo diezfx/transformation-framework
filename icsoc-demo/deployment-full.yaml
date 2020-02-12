@@ -3,14 +3,14 @@ version: edm_1_0
 
 orchestration_technology:
   ansible:
+    - dbms
+    - db
   terraform:
     - ubuntu
   kubernetes:
-    - dbms
     - pet_clinic_tomcat
     - pet_clinic
-    - db
-
+    - ubuntu2
 
 
 
@@ -34,18 +34,21 @@ components:
         mysql-db:
           port:
             type: port
+          user:
+            type: string
     provides:
       pet_port: 42
+
+  #tomcat
   pet_clinic_tomcat:
     type: tomcat
     operations:
       create: ./files/tomcat/create.sh
       start: ./files/tomcat/start.sh
     relations:
-      - hosted_on: ubuntu
+      - hosted_on: ubuntu2
 
   ## Database
-
   db:
     type: mysql_database
     properties:
@@ -58,6 +61,15 @@ components:
       configure: ./files/mysql_database/configure.sh
     relations:
       - hosted_on: dbms
+    interface:
+      capabilities:
+        db:
+          port:
+            type: port
+            value: 3307 #todo implement as scalar value
+          user:
+            type: string
+            value: user #just read properties? by name/type
 
   dbms:
     type: mysql_dbms
@@ -72,6 +84,26 @@ components:
   ## Compute
 
   ubuntu:
+    type: compute
+    properties:
+      machine_image: ubuntu
+      instance_type: large
+      key_name: edmm
+      public_key: |
+        -----BEGIN PUBLIC KEY-----
+        MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCqGKukO1De7zhZj6+H0qtjTkVxwTCpvKe4eCZ0
+        FPqri0cb2JZfXJ/DgYSF6vUpwmJG8wVQZKjeGcjDOL5UlsuusFncCzWBQ7RKNUSesmQRMSGkVb1/
+        3j+skZ6UtW+5u09lHNsj6tQ51s1SPrCBkedbNf0Tp0GbMJDyR4e9T04ZZwIDAQAB
+        -----END PUBLIC KEY-----
+    artifacts:
+      - provider: ./files/ubuntu/openstack.json
+    interface:
+      capabilities:
+        host:
+          address:
+            type: ip
+
+  ubuntu2:
     type: compute
     properties:
       machine_image: ubuntu
@@ -203,15 +235,19 @@ component_types:
       port:
         type: port
         default_value: 3306
+
+
+
+  mysql_database:
+    extends: database
     interface:
       capabilities:
         db:
           port:
             type: port
             default_value: 3306
-
-  mysql_database:
-    extends: database
+          user:
+            type: string.username
 
 
 ###############################################
