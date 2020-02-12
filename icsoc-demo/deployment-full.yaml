@@ -12,9 +12,6 @@ orchestration_technology:
     - pet_clinic
     - ubuntu2
 
-
-
-
 components:
 
   ## Spring PetClinic Application
