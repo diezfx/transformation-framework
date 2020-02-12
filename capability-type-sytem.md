@@ -5,8 +5,8 @@
 type capabilities e.g. `database.mysql` or  `tosca.capabilities.Compute` \
 these capability blocks define a set of capabilities that have to be fulfilled
 
-```yaml
 
+```yaml
 # "interface of mysqldatabase
 requirements:
         host: capabilities.dmbs.mysql # only the host has to fulfill, doesn't set component type
@@ -156,6 +156,16 @@ at them moment implemented with .startswith() so getcapabilitiesofType("port") r
 ### What if component exports 2 http ports
 first use type then name?
 
+
+### How to name them as properties?
+```yaml
+# "interface of mysqldatabase
+requirements:
+        host: 
+            port:
+            username: 
+# this becomes host-port or port as property?
+```
 
 ### related links:
 https://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.3/cos01/TOSCA-Simple-Profile-YAML-v1.3-cos01.html#DEFN_TYPE_CAPABILITIES_ENDPOINT
