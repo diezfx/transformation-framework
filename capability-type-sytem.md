@@ -4,6 +4,7 @@
 ## capabilities have types
 type capabilities e.g. `database.mysql` or  `tosca.capabilities.Compute` \
 these capability blocks define a set of capabilities that have to be fulfilled
+they are substituted, so compatible with the complete defintion
 
 
 ```yaml
