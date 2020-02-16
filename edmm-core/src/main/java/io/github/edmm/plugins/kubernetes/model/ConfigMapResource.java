@@ -43,8 +43,7 @@ public final class ConfigMapResource implements KubernetesResource {
             if (Arrays.asList(blacklist).contains(prop.getKey())) {
                 continue;
             }
-            logger.info(prop.getKey());
-            configMapBuilder = configMapBuilder.addToData(prop.getKey().toUpperCase(), prop.getValue().getValue().toUpperCase());
+            configMapBuilder = configMapBuilder.addToData(prop.getKey().toUpperCase(), prop.getValue().getValue());
 
         }
         configMap = configMapBuilder.build();

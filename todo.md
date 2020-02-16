@@ -3,8 +3,8 @@
 
 - [ ] testing
 ## properties
-- [] implement syntax propname: $(db.bla)
-- [] compare only by name
+- [x] just copy all with connects_to
+- [x] implement syntax propname: $(db.bla)
 
 
 ## kubernetes

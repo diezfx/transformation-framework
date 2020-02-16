@@ -56,7 +56,7 @@
       <#if task.args?? && task.args?size != 0>
       args:
       <#list task.args as arg_key,arg_value>
-      ${arg_key}: ${arg_value}
+        ${arg_key}: ${arg_value}
       </#list>
       <#else>
       </#if>
