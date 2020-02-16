@@ -5,11 +5,7 @@ import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.support.GraphHelper;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
-import io.github.edmm.model.ComponentInterface;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.Property;
-import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.ModelEntity;
@@ -17,8 +13,6 @@ import io.github.edmm.model.support.TypeWrapper;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.VisitableComponent;
 import lombok.ToString;
-import lombok.var;
-import org.jgrapht.Graph;
 
 import java.util.*;
 
@@ -28,11 +22,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
     public static final Attribute<String> TYPE = new Attribute<>("type", String.class);
     public static final Attribute<RootRelation> RELATIONS = new Attribute<>("relations", RootRelation.class);
 
-
-    //interface stuff
-    public static final Attribute<Property> REQUIRES = new Attribute<>("requires", Property.class);
-    public static final Attribute<Property> CAPABILITIES = new Attribute<>("capabilities", Property.class);
-    public static final Attribute<ComponentInterface> COMPONENT_INTERFACE = new Attribute<>("interface", ComponentInterface.class);
 
     private final List<RootRelation> relationCache = new ArrayList<>();
 
@@ -87,80 +76,6 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         }
     }
 
-    public PropertyBlocks getRequirements() {
-
-        Map<String, Map<String, Property>> result = new HashMap<>();
-        // Resolve the chain of types
-        Optional<Entity> propertiesEntity = entity.getChild(COMPONENT_INTERFACE).flatMap(i -> i.getChild(REQUIRES));
-
-        propertiesEntity.ifPresent(value -> value.getChildren().forEach(block -> {
-            Map<String, Property> requiredBlock = new HashMap<>();
-
-            populateProperties(requiredBlock, block);
-            result.put(block.getName(), requiredBlock);
-        }));
-        // Update current map by property definitions
-
-        for (MappingEntity typeEntity : getTypeChain()) {
-            propertiesEntity = typeEntity.getChild(COMPONENT_INTERFACE.getName())
-                    .flatMap(i -> i.getChild(REQUIRES.getName()));
-            propertiesEntity.ifPresent(value -> value.getChildren().forEach(block -> {
-                Map<String, Property> requiredBlock = new HashMap<>();
-                populateProperties(requiredBlock, block);
-                result.put(block.getName(), requiredBlock);
-            }));
-        }
-        return new PropertyBlocks(result);
-    }
-
-
-
-    /**
-     * get blocks from the own component; after that fill if not already set with properties from parent components(inheritance)
-     *
-     * @return a list of all capabilties ordered by block; blocks are not relevant for the matching atm
-     */
-    public PropertyBlocks getCapabilities() {
-        Map<String, Map<String, Property>> result = new HashMap<>();
-        // Resolve the chain of types
-
-
-        // Get initial properties by assignments
-        Optional<Entity> propertiesEntity = entity.getChild(COMPONENT_INTERFACE)
-                .flatMap(i -> i.getChild(CAPABILITIES));
-
-        if (propertiesEntity.isPresent()) {
-            for (Entity block : propertiesEntity.get().getChildren()) {
-                Map<String, Property> blockList = new HashMap<>();
-
-                populateProperties(blockList, block);
-                result.put(block.getName(), blockList);
-            }
-        }
-
-        for (MappingEntity typeEntity : getTypeChain()) {
-            propertiesEntity = typeEntity.getChild(COMPONENT_INTERFACE.getName())
-                    .flatMap(i -> i.getChild(CAPABILITIES));
-            if (!propertiesEntity.isPresent()) {
-                continue;
-            }
-
-            Map<String, Property> blockList = new HashMap<>();
-            for (Entity blockEnt : propertiesEntity.get().getChildren()) {
-
-                populateProperties(blockList, blockEnt);
-                result.putIfAbsent(blockEnt.getName(), blockList);
-
-                var newBlock = result.get(blockEnt.getName());
-                blockList.forEach(newBlock::putIfAbsent);
-
-            }
-        }
-
-        return new PropertyBlocks(result);
-
-    }
-
 
 
 
@@ -173,48 +88,11 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
 
     }
 
-    /**
-     * finds the given capability but only on the own component; no search through dependency
-     * @param name
-     * @return
-     */
-    public Optional<Property> getCapabilityByName(String name) {
 
 
-        PropertyBlocks blocks = getCapabilities();
-
-        var prop = blocks.getPropertyByName(name);
-        if (prop.isPresent()) {
-            return prop;
-        }
-
-        return Optional.empty();
-    }
 
 
-    public Map<String, Property> getCapabilitiesByType(String type) {
-        Map<String, Property> results = new HashMap<>();
-        PropertyBlocks blocks = getCapabilities();
 
-        var prop = blocks.getPropertyByTypeWithBlockName(type);
-        prop.ifPresent(property -> results.putIfAbsent(property.getLeft(), property.getRight()));
-
-        return results;
-    }
-
-
-    /**
-     * finds the given capability but only on the own component; no search through dependency
-     *
-     * @param name
-     * @return
-     */
-    public Optional<Property> getCapabilityByType(String type) {
-        return getCapabilitiesByType(type).entrySet().stream()
-                .findFirst()
-                .map(Map.Entry::getValue);
-
-    }
 
 
 

@@ -9,11 +9,13 @@ import java.util.Map;
 @Data
 @Builder
 public class AnsiblePlay {
+    private String privKeyFile;
     private String name;
     private String hosts;
     private boolean become;
     private String becomeUser;
     private Map<String, String> vars;
+    private List<String> runtimeVars;
     private List<AnsibleTask> tasks;
     private List<AnsibleFile> files;
 }

@@ -4,8 +4,11 @@ ALTER DATABASE petclinic
   DEFAULT CHARACTER SET utf8
   DEFAULT COLLATE utf8_general_ci;
 
-CREATE USER 'pc'@'localhost' IDENTIFIED BY 'petclinic';
+CREATE USER IF NOT EXISTS 'pc'@'%' IDENTIFIED BY 'petclinic';
+CREATE USER IF NOT EXISTS 'pc'@'localhost' IDENTIFIED BY 'petclinic';
+GRANT ALL PRIVILEGES ON *.* TO 'pc'@'%' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO 'pc'@'localhost' WITH GRANT OPTION;
+
 
 USE petclinic;
 

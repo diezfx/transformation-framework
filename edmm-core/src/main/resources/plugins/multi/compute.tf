@@ -2,13 +2,8 @@ variable "region" {
   default = "eu-west-1"
 }
 
-variable "key_name" {
-  default = "id_rsa"
-}
 
-variable "public_key_path" {
-  default = "id_rsa.pub"
-}
+
 
 variable "ssh_user" {
   default = "ubuntu"
@@ -37,6 +32,7 @@ variable "os_password" {
 variable "os_region_name" {}
 
 
+
 provider "openstack" {
   user_name = var.os_username
   password = var.os_password
@@ -47,12 +43,17 @@ provider "openstack" {
 }
 
 
+data "tls_public_key" "priv_key" {
+  private_key_pem = file("${ec2.privKeyFile}")
+}
+
+
 #TODO more of the vars in model
 resource "openstack_compute_instance_v2" "${ec2.name}" {
   name = "${ec2.name}"
   image_name = "Ubuntu 18.04"
   flavor_name = "m1.small"
-  key_pair = "win10key"
+  key_pair = "${ec2.keyName}"
   security_groups = [
     "default"]
 
@@ -68,11 +69,9 @@ resource "openstack_compute_instance_v2" "${ec2.name}" {
 
 resource "local_file" "compute_${ec2.name}" {
   content = jsonencode( {
-    "host" = {
-      "address" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4
-    }
+      "hostname" = openstack_compute_instance_v2.${ec2.name}.access_ip_v4
   })
-  filename = "${ec2.name}_capabilities.json"
+  filename = "${ec2.name}_computed_properties.json"
 }
 output "compute_${ec2.name}_address" {
   value = openstack_compute_instance_v2.${ec2.name}.access_ip_v4

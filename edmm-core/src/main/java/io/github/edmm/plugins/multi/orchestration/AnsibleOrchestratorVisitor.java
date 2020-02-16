@@ -1,17 +1,17 @@
 package io.github.edmm.plugins.multi.orchestration;
 
+import com.google.gson.JsonObject;
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.*;
-import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.MultiPlugin;
 import lombok.var;
+import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 
 public class AnsibleOrchestratorVisitor implements ComponentVisitor {
@@ -43,15 +41,30 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         pb.directory(context.getSubDirAccess().getTargetDirectory());
 
 
-        PropertyBlocks requiredProps = OrchestrationHelper.findHostRequirements(graph, component, logger);
-        requiredProps.mergeBlocks(OrchestrationHelper.findAllRequirements(graph, component, logger));
+        Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(graph, component);
+        Map<String, Property> computedProps = new HashMap<>();
 
 
-        // look for all other requirements through relations
+        for (var prop : allProps.entrySet()) {
+            if (prop.getValue().getValue() == null) {
+                continue;
+            }
+            if (prop.getValue().isComputed() || prop.getValue().getValue().startsWith("${")) {
+                computedProps.put(prop.getKey(), prop.getValue());
+            }
+        }
+
+        var resolvedComputedProps = TopologyGraphHelper.resolveAllPropertyReferences(graph, component, computedProps);
+
+        var json = new JsonObject();
+
+        for (var prop : resolvedComputedProps.entrySet()) {
+            json.addProperty(prop.getKey().toUpperCase(), prop.getValue().getValue());
+        }
 
 
         try {
-            context.getSubDirAccess().write(component.getNormalizedName() + ".json", requiredProps.toJson().toString());
+            context.getSubDirAccess().write(component.getNormalizedName() + ".json", json.toString());
             pb.command("ansible-playbook", component.getNormalizedName() + ".yml");
 
             Process apply = pb.start();
@@ -60,10 +73,6 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
             logger.error(e.toString());
         }
     }
-
-
-
-
 
 
     @Override

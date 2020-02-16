@@ -35,6 +35,8 @@ public class Aws {
         private String name;
         private String ami;
         private String instanceType;
+        private String privKeyFile;
+        private String keyName;
         private List<String> ingressPorts = new ArrayList<>();
         private List<FileProvisioner> fileProvisioners = new ArrayList<>();
         private List<RemoteExecProvisioner> remoteExecProvisioners = new ArrayList<>();
@@ -42,10 +44,12 @@ public class Aws {
         private Map<String, String> envVars = new HashMap<>();
 
         @Builder
-        public Instance(String name, String ami, String instanceType) {
+        public Instance(String name, String ami, String instanceType, String privKeyFile, String keyName) {
             this.name = name;
             this.ami = ami;
             this.instanceType = instanceType;
+            this.privKeyFile = privKeyFile;
+            this.keyName = keyName;
         }
 
         public void addIngressPort(String port) {

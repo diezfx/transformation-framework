@@ -2,13 +2,11 @@ package io.github.edmm.plugins.multi.orchestration;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -19,8 +17,6 @@ import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -89,23 +85,22 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         Process apply = pb.start();
         apply.waitFor();
 
-        String computeInfo = context.getSubDirAccess().readToStringTargetDir(component.getName() + "_capabilities" + ".json");
-        HashMap<String, HashMap<String, String>> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, HashMap<String, String>>>() {
+        String computeInfo = context.getSubDirAccess().readToStringTargetDir(component.getName() + "_computed_properties" + ".json");
+        HashMap<String, String> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, String>>() {
         }.getType());
 
-        PropertyBlocks capabilities = component.getCapabilities();
+        Map<String, Property> properties = component.getProperties();
 
         // set all properties
         // object is a map of maps
-        for (var block : output.entrySet()) {
-            for (var prop : block.getValue().entrySet()) {
+        for (var computed_prop : output.entrySet()) {
 
-                Optional<Property> capability = capabilities.getProperty(block.getKey(), prop.getKey());
-                if (!capability.isPresent()) {
-                    logger.warn(String.format("The capability(%s) was in the output but is not present", prop.getKey()));
-                    continue;
-                }
-                capability.get().setValue(prop.getValue());
+            if (!properties.containsKey(computed_prop.getKey())) {
+                logger.warn(String.format("The property(%s) is not there, so it was added to props", computed_prop.getKey()));
+                component.addProperty(computed_prop.getKey(), computed_prop.getValue());
+            } else {
+                var prop = properties.get(computed_prop.getKey());
+                prop.setValue(computed_prop.getValue());
             }
         }
 

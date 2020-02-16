@@ -19,7 +19,7 @@ public class Compute extends RootComponent {
     public static final Attribute<String> KEY_NAME = new Attribute<>("key_name", String.class);
     public static final Attribute<String> PUBLIC_KEY = new Attribute<>("public_key", String.class);
 
-    public static final Attribute<String> PRIVATE_KEY = new Attribute<>("private_key", String.class);
+    public static final Attribute<String> PRIVATE_KEY_PATH = new Attribute<>("priv_key_path", String.class);
 
 
     public Compute(MappingEntity mappingEntity) {
@@ -47,8 +47,9 @@ public class Compute extends RootComponent {
         return getProperty(PUBLIC_KEY);
     }
 
-
-
+    public Optional<String> getPrivateKeyPath() {
+        return getProperty(PRIVATE_KEY_PATH);
+    }
 
 
     @Override

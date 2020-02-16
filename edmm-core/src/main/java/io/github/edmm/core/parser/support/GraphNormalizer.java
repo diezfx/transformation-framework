@@ -15,7 +15,6 @@ public abstract class GraphNormalizer {
         resolveRelations(graph);
         normalizeOperations(graph);
         normalizeProperties(graph);
-        normalizeCapabilities(graph);
     }
 
     private static void resolveExtends(EntityGraph graph, EntityId types) {
@@ -133,33 +132,7 @@ public abstract class GraphNormalizer {
         }
     }
 
-    private static void normalizeCapabilities(EntityGraph graph) {
-        for (Entity node : graph.getChildren(EntityGraph.COMPONENTS)) {
-            doNormalizeCapabilities(graph, node);
-        }
-    }
 
-
-    private static void doNormalizeCapabilities(EntityGraph graph, Entity node) {
-        Optional<Entity> propertyBlocks = node.getChild(DefaultKeys.INTERFACE).flatMap(n -> n.getChild(DefaultKeys.CAPABILITIES));
-
-        if (propertyBlocks.isPresent()) {
-            for (Entity block : propertyBlocks.get().getChildren()) {
-                for (Entity prop : block.getChildren()) {
-                    if (prop instanceof ScalarEntity) {
-                        ScalarEntity scalarEntity = (ScalarEntity) prop;
-                        MappingEntity normalizedEntity = new MappingEntity(scalarEntity.getId(), graph);
-                        // todo don't infer type but look at ancestors, if not there just throw an error
-                        ScalarEntity type = new ScalarEntity(DefaultKeys.STRING, normalizedEntity.getId().extend(DefaultKeys.TYPE), graph);
-                        ScalarEntity value = new ScalarEntity(scalarEntity.getValue(), normalizedEntity.getId().extend(DefaultKeys.VALUE), graph);
-                        graph.replaceEntity(scalarEntity, normalizedEntity);
-                        graph.addEntity(type);
-                        graph.addEntity(value);
-                    }
-                }
-            }
-        }
-    }
 
     private static void doNormalizeProperties(EntityGraph graph, Entity node) {
         Optional<Entity> properties = node.getChild(DefaultKeys.PROPERTIES);

@@ -43,12 +43,16 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
     public void visit(Compute component) {
 
         Aws.Instance ec2 = Aws.Instance.builder().name(component.getNormalizedName())
+                .privKeyFile(component.getPrivateKeyPath().get())
+                .keyName(component.getKeyName().get())
                 // TODO: Try to resolve image
                 .ami("ami-0bbc25e23a7640b9b")
                 // TODO: Try to resolve instance type
                 .instanceType("t2.micro").build();
         List<String> operations = collectOperations(component);
 
+        // add properties that are needed for this component to work
+        component.addProperty("hostname", null);
 
         ec2.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
 

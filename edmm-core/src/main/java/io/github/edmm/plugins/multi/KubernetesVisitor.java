@@ -50,16 +50,18 @@ public class KubernetesVisitor implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(RootComponent component) {
 
-        if(!TopologyGraphHelper.isComponentHostedOnLeaf(graph,component)){
+        if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, component)) {
             logger.info("is not leaf");
             return;
         }
+        // announce that this will be set later
+        component.addProperty("hostname", null);
         PluginFileAccess fileAccess = context.getSubDirAccess();
         Container stack = new Container();
 
-        List<RootComponent> compStack=TopologyGraphHelper.resolveAllHostingComponents(graph,component);
-        for(var comp : compStack){
-            logger.info("add comp:{} to stack",comp.getName());
+        List<RootComponent> compStack = TopologyGraphHelper.resolveAllHostingComponents(graph, component);
+        for (var comp : compStack) {
+            logger.info("add comp:{} to stack", comp.getName());
             stack.addComponent(comp);
         }
 
@@ -68,8 +70,6 @@ public class KubernetesVisitor implements ComponentVisitor, RelationVisitor {
 
         KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, component,context.getTopologyGraph(), fileAccess);
         resourceBuilder.populateResources();
-
-
 
     }
 

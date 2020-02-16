@@ -3,11 +3,13 @@ package io.github.edmm.model.support;
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
+import io.github.edmm.core.parser.ScalarEntity;
+import io.github.edmm.core.parser.support.DefaultKeys;
 import io.github.edmm.core.parser.support.GraphHelper;
-import io.github.edmm.model.ComponentInterface;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
 import lombok.ToString;
+import lombok.var;
 
 import java.util.*;
 
@@ -17,8 +19,6 @@ public abstract class ModelEntity extends DescribableElement {
     public static final Attribute<String> EXTENDS = new Attribute<>("extends", String.class);
     public static final Attribute<Property> PROPERTIES = new Attribute<>("properties", Property.class);
     public static final Attribute<Operation> OPERATIONS = new Attribute<>("operations", Operation.class);
-    public static final Attribute<ComponentInterface> COMPONENT_INTERFACE = new Attribute<>("interface", ComponentInterface.class);
-    //public static final Attribute<Interfaces>
 
 
     private boolean transformed = false;
@@ -49,6 +49,39 @@ public abstract class ModelEntity extends DescribableElement {
         return result;
     }
 
+
+    public void addProperty(String name, String prop_value) {
+        EntityGraph graph = entity.getGraph();
+        var props = entity.getChild(PROPERTIES);
+        MappingEntity propertyEnt;
+        if (!props.isPresent()) {
+            propertyEnt = new MappingEntity(entity.getId().extend(PROPERTIES.getName()), graph);
+            graph.addEntity(propertyEnt);
+        } else {
+            propertyEnt = (MappingEntity) props.get();
+        }
+        var id = propertyEnt.getId().extend(name);
+
+
+        MappingEntity propertyEntity = new MappingEntity(id, graph);
+        ScalarEntity type = new ScalarEntity(DefaultKeys.STRING, propertyEntity.getId().extend(DefaultKeys.TYPE), graph);
+        ScalarEntity value = new ScalarEntity(prop_value, propertyEntity.getId().extend(DefaultKeys.VALUE), graph);
+        ScalarEntity computed = new ScalarEntity("true", propertyEntity.getId().extend(DefaultKeys.COMPUTED), graph);
+
+        //check if entity already exists
+        if (propertyEnt.getChild(name).isPresent()) {
+            var old_value = propertyEnt.getChild(name).get().getChild(DefaultKeys.VALUE).get();
+            var old_type = propertyEnt.getChild(name).get().getChild(DefaultKeys.TYPE).get();
+            graph.replaceEntity(old_value, value);
+            graph.replaceEntity(old_type, type);
+
+        } else {
+            graph.addEntity(propertyEntity);
+            graph.addEntity(type);
+            graph.addEntity(value);
+        }
+        graph.addEntity(computed);
+    }
 
     public Optional<Property> getProperty(String name) {
         return Optional.ofNullable(getProperties().get(name));

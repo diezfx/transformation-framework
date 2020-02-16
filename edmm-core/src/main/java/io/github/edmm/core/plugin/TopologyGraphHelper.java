@@ -1,11 +1,12 @@
 package io.github.edmm.core.plugin;
 
+import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.Dbaas;
 import io.github.edmm.model.component.Paas;
 import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import lombok.var;
@@ -99,90 +100,92 @@ public abstract class TopologyGraphHelper {
         }
     }
 
+
     /**
-     * resolve all capabilities that are provided and are "inherited" through hosted on
-     * @param graph
+     * find all properties that are only known during runtime
+     * at the moment just return everything
+     * otherwise give a warning that some are not set
+     *
      * @param component
      * @return
      */
-    public static PropertyBlocks resolveHostCapabilities(Graph<RootComponent, RootRelation> graph, RootComponent component) {
-        var myCapabilities = new PropertyBlocks(new HashMap<>());
-        Optional<RootComponent> host = TopologyGraphHelper.getTargetComponents(graph, component, HostedOn.class).stream().findFirst();
-        while (host.isPresent()) {
-            myCapabilities = myCapabilities.mergeBlocks(host.get().getCapabilities());
+    public static Map<String, Property> findCompStackProperties(Graph<RootComponent, RootRelation> graph, RootComponent component) {
+        Map<String, Property> result = new HashMap<>();
+        var hosts = TopologyGraphHelper.resolveAllHostingComponents(graph, component);
 
-
-            host = TopologyGraphHelper.resolveHostingComponent(graph, host.get());
-        }
-        return myCapabilities;
-    }
-
-
-    /**
-     * @param reqs
-     * @return all matched values; only returns if all values could be matched otherwise empty
-     */
-    public static Optional<Map<String, Property>> findMatchingProperties(Graph<RootComponent, RootRelation> graph, Map<String, Property> reqs, RootComponent component) {
-        Map<String, Property> matchedProperties = new HashMap<>();
-        for (var req : reqs.entrySet()) {
-            var prop = resolveCapabilityWithHostingByType(graph, req.getValue().getType(), component);
-            if (!prop.isPresent()) {
-                return Optional.empty();
+        for (var host : hosts) {
+            for (var prop : host.getProperties().entrySet()) {
+                result.put(prop.getKey(), prop.getValue());
             }
-            matchedProperties.put(req.getKey(), prop.get());
+        }
+        return result;
+    }
+
+    public static Map<String, Property> resolveAllPropertyReferences(Graph<RootComponent, RootRelation> graph, RootComponent component, Map<String, Property> props) {
+
+        Map<String, Property> result = new HashMap<>();
+
+        for (var prop : props.entrySet()) {
+            if (prop.getValue().getValue() != null && prop.getValue().getValue().contains("${")) {
+                result.put(prop.getKey(), resolveReferencedProperty(graph, component, prop.getValue()));
+            } else {
+                result.put(prop.getKey(), prop.getValue());
+            }
+        }
+
+        return result;
+
+
+    }
+
+
+    public static Map<String, Property> findAllProperties(Graph<RootComponent, RootRelation> graph, RootComponent component) {
+        Map<String, Property> result = findCompStackProperties(graph, component);
+
+        Set<RootComponent> targets = TopologyGraphHelper.getTargetComponents(graph, component, ConnectsTo.class);
+
+        /*
+        for(var target:targets){
+            var properties=findCompStackProperties(graph,target);
+            for(var prop: properties.entrySet()){
+                var  envName = (target.getNormalizedName() + "_" + prop.getValue().getNormalizedName());
+                result.put(envName,prop.getValue());
+            }
 
         }
-        return Optional.of(matchedProperties);
 
+         */
+
+
+        return result;
     }
 
     /**
-     * resolve capability with the name; prefer the one from the component if not fulfillable look through hosted_on relatuions
-     *
      * @param graph
-     * @param propName
-     * @param component
-     * @return
+     * @param comp
+     * @param prop
+     * @return the referenced property
      */
-    public static Optional<Property> resolveCapabilityWithHosting(Graph<RootComponent, RootRelation> graph, String propName, RootComponent component) {
+    public static Property resolveReferencedProperty(Graph<RootComponent, RootRelation> graph, RootComponent comp, Property prop) {
+        Set<RootComponent> targets = TopologyGraphHelper.getTargetComponents(graph, comp, ConnectsTo.class);
 
-        Optional<Property> prop = component.getCapabilityByName(propName);
+        String[] name_var = prop.getValue().
+                replace("${", "")
+                .replace("}", "").split("\\.");
+        String compName = name_var[0];
+        String varName = name_var[1];
 
-        if (prop.isPresent()) {
-            return prop;
+
+        for (var target : targets) {
+            if (target.getName().equals(compName)) {
+                if (!findCompStackProperties(graph, target).containsKey(varName)) {
+                    throw new IllegalStateException(String.format("the reference %s is not valid", prop.getValue()));
+                }
+                return findCompStackProperties(graph, target).get(varName);
+            }
         }
-
-        PropertyBlocks hostBlocks = resolveHostCapabilities(graph, component);
-
-
-        return hostBlocks.getPropertyByName(propName);
-
+        throw new IllegalStateException(String.format("the reference %s is not valid", prop.getValue()));
     }
-
-
-      /**
-     * resolve capability by type; prefer the one from the component if not fulfillable look through hosted_on relatuions
-     *
-     * @param graph
-     * @param propName
-     * @param component
-     * @return
-     */
-    public static Optional<Property> resolveCapabilityWithHostingByType(Graph<RootComponent, RootRelation> graph, String propType, RootComponent component) {
-
-        Optional<Property> prop = component.getCapabilityByType(propType);
-
-
-        if (prop.isPresent()) {
-            return prop;
-        }
-
-        PropertyBlocks hostBlocks = resolveHostCapabilities(graph, component);
-
-        return hostBlocks.getPropertyByType(propType);
-
-    }
-
 
 
     public static Optional<Compute> resolveHostingComputeComponent(Graph<RootComponent, RootRelation> graph, RootComponent component) {
@@ -210,16 +213,18 @@ public abstract class TopologyGraphHelper {
             resolveChildComponents(graph, children, child);
         }
     }
+
     /**
      * get the complete stack this component is hosted on including itself
      * e.g. compute -> tomcat -> application
+     *
      * @param graph
      * @param component
      * @return
      */
-    public static List<RootComponent> resolveAllHostingComponents(Graph<RootComponent, RootRelation> graph,RootComponent component){
+    public static List<RootComponent> resolveAllHostingComponents(Graph<RootComponent, RootRelation> graph, RootComponent component) {
 
-        List<RootComponent> componentStack= new ArrayList<>();
+        List<RootComponent> componentStack = new ArrayList<>();
         componentStack.add(component);
 
 
@@ -235,16 +240,18 @@ public abstract class TopologyGraphHelper {
 
     }
 
-    public static Optional<RootComponent> resolveComponentHostedOn(Graph<RootComponent, RootRelation> graph,RootComponent component){
+    public static Optional<RootComponent> resolveComponentHostedOn(Graph<RootComponent, RootRelation> graph, RootComponent component) {
 
         Set<RootComponent> targetComponents = getTargetComponents(graph, component, HostedOn.class);
         return targetComponents.stream().findFirst();
     }
+
     /**
      * leaf in the sense of no other comp is hosted on this one
+     *
      * @return true if no other component is hosted on this one
      */
-    public static boolean isComponentHostedOnLeaf(Graph<RootComponent, RootRelation> graph,RootComponent component){
+    public static boolean isComponentHostedOnLeaf(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         Set<RootComponent> sourceComponents = getSourceComponents(graph, component, HostedOn.class);
         return sourceComponents.isEmpty();
 

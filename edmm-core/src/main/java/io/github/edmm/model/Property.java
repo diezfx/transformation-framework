@@ -66,9 +66,7 @@ public class Property extends DescribableElement {
         }
         return value.replaceAll(Consts.NL, Consts.EMPTY);
     }
-
     public void setValue(String value) {
-
         set(VALUE, value);
     }
 }

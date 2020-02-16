@@ -7,12 +7,12 @@ function check () {
     return 1
   fi
 }
-exit 0 #todo remove
+sed -i 's/bind-address/\#bind-address/g' /etc/mysql/mysql.conf.d/mysqld.cnf
 check systemctl
 if [[ $? -eq 0 ]]; then
     systemctl daemon-reload
     systemctl enable mysql
-    systemctl start mysql
+    systemctl restart mysql
 else
     echo "INFO: Starting MySQL daemon in foreground"
     mysqld

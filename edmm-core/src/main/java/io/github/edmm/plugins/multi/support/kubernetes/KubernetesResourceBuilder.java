@@ -4,7 +4,6 @@ import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.docker.Container;
-import io.github.edmm.docker.DependencyGraph;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.plugins.kubernetes.model.DeploymentResource;
 import io.github.edmm.plugins.kubernetes.model.KubernetesResource;
@@ -12,18 +11,14 @@ import io.github.edmm.plugins.kubernetes.model.ServiceResource;
 import lombok.var;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class KubernetesResourceBuilder {
 
@@ -61,31 +56,32 @@ public class KubernetesResourceBuilder {
         }
     }
 
-    // build time stuff now
-    // todo how to solve when both in same cluster?
-    // todo flatten to env variables?
-    private void resolveEnvVars() {
-        Set<RootComponent> targets = TopologyGraphHelper.getTargetComponents(dependencyGraph, topComp, ConnectsTo.class);
-        /*??
-        for (RootComponent target : targets) {
-            
-            
-            for (Map.Entry<String, String> envVar : target.getEnvVars().entrySet()) {
-                stack.addEnvVar(envVar.getKey(), envVar.getValue());
+
+    private boolean matchesBlacklist(Map.Entry<String, Property> prop) {
+        String[] blacklist = {"*key_name*", "*public_key*", "hostname"};
+        logger.info(prop.getKey());
+        for (var blacklistVal : blacklist) {
+            if (FilenameUtils.wildcardMatch(prop.getKey(), blacklistVal)) {
+                return true;
             }
-            
-            stack.addEnvVar((target.getName() + "_HOSTNAME").toUpperCase(), target.getServiceName());
         }
-        */
+        return false;
+    }
 
+    // build time stuff now
+    private void resolveEnvVars() {
+        var allProps = TopologyGraphHelper.findAllProperties(dependencyGraph, topComp);
+        for (var prop : allProps.entrySet()) {
 
-        PropertyBlocks reqs = topComp.getRequirements();
-        //kubernetes ignores host for now
-        for (var prop : reqs.flattenBlocks().entrySet()) {
-            if (prop.getKey().startsWith("host")) {
+            if (matchesBlacklist(prop)) {
                 continue;
             }
-            stack.addEnvVarRuntime(prop.getKey());
+            var envName = prop.getKey().toUpperCase();
+            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
+                stack.addEnvVarRuntime(envName);
+            } else {
+                stack.addEnvVar(envName, prop.getValue().getValue());
+            }
         }
     }
 

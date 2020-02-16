@@ -2,16 +2,17 @@
 ## in general
 
 - [ ] testing
-## types
-- [x] property-types
-- [ ] define capability-types; look at tosca (see types.md)
+## properties
+- [] implement syntax propname: $(db.bla)
+- [] compare only by name
+
 
 ## kubernetes
 - implement kubernetes (see kubernetes.md)
 - [x] add kubernetes transformer
 - [-] add kubernetes orchestrator
 - [x] use configmap for runtime vars
-- [ ] read vars during runtime 
+- [x] read vars during runtime 
 ## cloudformation
 - [ ]implement cloudformation
 
@@ -19,7 +20,6 @@
 
 ## later
 - [ ] testing!!
-- [ ] properties vs. cap/reqs
 - [ ] remove todos
 
 
@@ -32,11 +32,4 @@ orchestration_technology:
         - <component_name>
         ...
 ```
-```yaml
-capabilities: #change to tosca naming
-requirements:
-    db:
-        adress:
-            type: ip # with type
-```
-[x] compare properties with types not name
+

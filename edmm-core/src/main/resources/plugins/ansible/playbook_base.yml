@@ -3,7 +3,7 @@
 # Play for component ${play.name}
 # add hosts
 - hosts: localhost
-  vars:
+  gather_facts: no
   tasks:
     - include_vars:
         file: ${play.name}.json
@@ -11,12 +11,16 @@
     - name: Add host to group 'just_created'
       add_host:
         name: ${play.hosts}
-        ansible_host: '{{requiredProperties.host.address}}'
+        ansible_host: '{{requiredProperties.HOSTNAME}}'
         ansible_user: ubuntu
-        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
-        ansible_ssh_private_key_file: /home/diezfx/.ssh/id_rsa
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+        ansible_ssh_private_key_file: ${play.privKeyFile}
         ansible_python_interpreter: /usr/bin/python3
         groups: just_created
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for:
+        host: '{{requiredProperties.HOSTNAME}}'
+        port: 22
 
 - name: ${play.name}
   <#if play.hosts??>
@@ -26,33 +30,45 @@
   become: yes
   become_user: root
   <#if play.vars?? && play.vars?size != 0>
-  vars:
+  environment:
     <#list play.vars?keys as key>
     ${key}: ${play.vars[key]}
     </#list>
   <#else>
   </#if>
   tasks:
-      <#list play.files as file>
-        - name: Make sure destination dir exists
-          file:
-            path: ${file.target} | dirname
-            state: directory
-        - name: Copy file to remote
-          copy:
-            src: ${file.src}
-            dest: ${file.target}
+    - include_vars:
+        file: ${play.name}.json
+        name: requiredProperties
+    <#list play.files as file>
+    - name: Make sure destination dir exists
+      file:
+        path:  '{{ "${file.target}" | dirname }}'
+        state: directory
+    - name: Copy file to remote
+      copy:
+        src: ${file.src}
+        dest: ${file.target}
+    </#list>
+    <#list play.tasks as task>
+    - name: ${task.name}
+      script: ${task.script}
+      <#if task.args?? && task.args?size != 0>
+      args:
+      <#list task.args as arg_key,arg_value>
+      ${arg_key}: ${arg_value}
+      </#list>
+      <#else>
+      </#if>
+      register: hello
+      <#if play.runtimeVars?? && play.runtimeVars?size != 0>
+      environment:
+        <#list play.runtimeVars as var>
+        ${var}: '{{requiredProperties.${var}}}'
         </#list>
-        <#list play.tasks as task>
-        - name: ${task.name}
-          script: ${task.script}
-          <#if task.args?? && task.args?size != 0>
-          args:
-          <#list task.args as arg>
-          ${arg.name}: ${arg.value}
-          </#list>
-          <#else>
-          </#if>
-        </#list>
+      <#else>
+      </#if>
+    - debug: msg="{{ hello.stdout }}"
+    </#list>
 
   </#list>

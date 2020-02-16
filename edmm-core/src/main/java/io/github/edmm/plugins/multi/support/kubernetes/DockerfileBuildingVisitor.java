@@ -84,21 +84,18 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
     }
 
     private void collectPorts(RootComponent component) {
-        var ports = component.getCapabilitiesByType("port");
-        logger.info(ports.toString());
-        for (var port : ports.entrySet()) {
-            var portNr = Integer.valueOf(port.getValue().getValue());
-            stack.addPort(new PortMapping(port.getKey(), portNr));
-        }
-
+        component.getProperty(PORT)
+                .ifPresent(port -> stack.addPort(new PortMapping(component.getNormalizedName(), port)));
     }
 
     private void collectEnvVars(RootComponent component) {
         String[] blacklist = {"key_name", "public_key"};
         component.getProperties().values().stream()
                 .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                .filter(p -> p.getValue() != null)
+                .filter(p -> !p.getValue().contains("$"))
                 .forEach(p -> {
-                    String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
+                    String name = p.getNormalizedName().toUpperCase();
                     builder.env(name, p.getValue());
                     stack.addEnvVar(name, p.getValue());
                 });

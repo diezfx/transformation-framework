@@ -7,6 +7,7 @@ import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
+import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -14,7 +15,9 @@ import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.ansible.model.AnsibleFile;
 import io.github.edmm.plugins.ansible.model.AnsiblePlay;
 import io.github.edmm.plugins.ansible.model.AnsibleTask;
+import lombok.var;
 import org.apache.commons.io.FilenameUtils;
+import org.checkerframework.checker.nullness.Opt;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,22 +47,26 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         copyFiles(component);
 
         Map<String, String> envVars = collectEnvVars(component);
+        List<String> envVarsRuntime = collectRuntimeEnvVars(component);
         // scripts that are executed
-        List<AnsibleTask> tasks = prepareTasks(collectOperations(component));
+        List<AnsibleTask> tasks = prepareTasks(collectOperations(component), component);
         List<AnsibleFile> files = collectFiles(component);
 
-        logger.info("files: {}", files);
-
         // host is the compute if exists
-        String hosts = component.getNormalizedName();
+
         Optional<Compute> optionalCompute = TopologyGraphHelper
                 .resolveHostingComputeComponent(context.getTopologyGraph(), component);
-        if (optionalCompute.isPresent()) {
-            hosts = optionalCompute.get().getNormalizedName();
-        }
 
-        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(hosts).vars(envVars).tasks(tasks)
-                .files(files).build();
+        if (!optionalCompute.isPresent()) {
+            throw new IllegalStateException(String.format("The component %s could doesn't have a hosting compute", component.getName()));
+
+
+        }
+        String hosts = optionalCompute.get().getNormalizedName();
+        Optional<String> privKeyPath = optionalCompute.get().getPrivateKeyPath();
+
+        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(hosts).vars(envVars).runtimeVars(envVarsRuntime).tasks(tasks)
+                .files(files).privKeyFile(privKeyPath.get()).build();
 
         plays.add(play);
         Map<String, Object> templateData = new HashMap<>();
@@ -104,16 +111,51 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         visit((RootComponent) component);
     }
 
+
+    private boolean matchesBlacklist(Map.Entry<String, Property> prop) {
+        String[] blacklist = {"*key_name*", "*public_key*", "hostname"};
+        logger.info(prop.getKey());
+        for (var blacklistVal : blacklist) {
+            if (FilenameUtils.wildcardMatch(prop.getKey(), blacklistVal)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Map<String, String> collectEnvVars(RootComponent component) {
-
         Map<String, String> envVars = new HashMap<>();
-        String[] blacklist = { "key_name", "public_key" };
-        component.getProperties().values().stream().filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                .filter(p -> p.getValue() != null || !p.isComputed()).forEach(p -> {
-                    String name = (component.getNormalizedName() + "_" + p.getNormalizedName());
-                    envVars.put(name, p.getValue());
-                });
+        var allProps = TopologyGraphHelper.findAllProperties(graph, component);
 
+        for (var prop : allProps.entrySet()) {
+            if (matchesBlacklist(prop)) {
+                continue;
+            }
+
+
+            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
+                continue;
+            }
+            envVars.put(prop.getKey().toUpperCase(), prop.getValue().getValue());
+        }
+
+        return envVars;
+    }
+
+    private List<String> collectRuntimeEnvVars(RootComponent component) {
+        //runtime vars
+        List<String> envVars = new ArrayList<>();
+        var allProps = TopologyGraphHelper.findAllProperties(graph, component);
+
+        for (var prop : allProps.entrySet()) {
+
+            if (matchesBlacklist(prop)) {
+                continue;
+            }
+            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
+                envVars.add(prop.getKey().toUpperCase());
+            }
+        }
         return envVars;
     }
 
@@ -123,7 +165,7 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         for (Artifact artifact : component.getArtifacts()) {
             String basename = FilenameUtils.getName(artifact.getValue());
             String newPath = "./files/" + basename;
-            String destination = "/opt/" + component.getNormalizedName() + "/";
+            String destination = "/opt/";
             fileList.add(new AnsibleFile(newPath, destination + basename));
         }
         return fileList;
@@ -131,12 +173,14 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
     }
 
     // convert operations to tasks
-    private List<AnsibleTask> prepareTasks(List<Artifact> operations) {
+    private List<AnsibleTask> prepareTasks(List<Artifact> operations, RootComponent component) {
         List<AnsibleTask> taskQueue = new ArrayList<>();
         operations.forEach(operation -> {
             String basename = FilenameUtils.getName(operation.getValue());
             String newPath = "./files/" + basename;
-            AnsibleTask task = AnsibleTask.builder().name(operation.getNormalizedName()).script(newPath).build();
+            Map<String, String> args = new HashMap<>();
+            args.put("chdir", "/opt/");
+            AnsibleTask task = AnsibleTask.builder().name(operation.getNormalizedName()).script(newPath).args(args).build();
             taskQueue.add(task);
 
         });

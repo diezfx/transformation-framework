@@ -1,47 +1,34 @@
 package io.github.edmm.plugins.multi.orchestration;
 
-import com.amazonaws.util.IOUtils;
+import io.github.edmm.model.Property;
 import io.github.edmm.utils.Consts;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.apis.AppsV1Api;
 import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.Configuration;
 import io.kubernetes.client.models.V1ConfigMap;
 import io.kubernetes.client.models.V1Service;
 import io.kubernetes.client.util.Config;
 import io.github.edmm.core.plugin.PluginFileAccess;
-import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
-import io.github.edmm.model.Artifact;
-import io.github.edmm.model.Metadata;
-import io.github.edmm.model.Property;
-import io.github.edmm.model.PropertyBlocks;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.kubernetes.model.ConfigMapResource;
-import io.github.edmm.plugins.kubernetes.model.KubernetesResource;
-import io.github.edmm.plugins.multi.MultiPlugin;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.models.V1Deployment;
 import io.kubernetes.client.util.Yaml;
-import lombok.SneakyThrows;
 import lombok.var;
 import org.apache.commons.io.FileUtils;
-import org.checkerframework.checker.nullness.Opt;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -58,9 +45,18 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
 
 
     private V1ConfigMap createConfigMap(RootComponent component, File dir) {
-        PropertyBlocks reqs = OrchestrationHelper.findAllRequirements(graph, component, logger);
+        Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(graph, component);
+        Map<String, Property> computedProps = new HashMap<>();
+        for (var prop : allProps.entrySet()) {
+            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
+                computedProps.put(prop.getKey(), prop.getValue());
+            }
+        }
 
-        var config = new ConfigMapResource(component, reqs);
+        var resolvedComputedProps = TopologyGraphHelper.resolveAllPropertyReferences(graph, component, computedProps);
+
+
+        var config = new ConfigMapResource(component, resolvedComputedProps);
         config.build();
         try {
             File serviceYaml = new File(dir, component.getLabel() + "-config.yaml");
@@ -103,7 +99,8 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             try {
                 api.createNamespacedDeployment("default", depl, true, null, null);
             } catch (ApiException e) {
-                api.replaceNamespacedDeployment(depl.getMetadata().getName(), depl.getMetadata().getNamespace(), depl, null, null);
+                api.deleteNamespacedDeployment(depl.getMetadata().getName(), depl.getMetadata().getNamespace(), null, null, null, null, null, null);
+                api.createNamespacedDeployment(depl.getMetadata().getNamespace(), depl, true, null, null);
             }
         } catch (IOException | ApiException e) {
             e.printStackTrace();
@@ -118,7 +115,8 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             try {
                 api.createNamespacedConfigMap("default", config, true, null, null);
             } catch (ApiException e) {
-                api.replaceNamespacedConfigMap(config.getMetadata().getName(), config.getMetadata().getNamespace(), config, null, null);
+                api.deleteNamespacedConfigMap(config.getMetadata().getName(), config.getMetadata().getNamespace(), null, null, null, null, null, null);
+                api.createNamespacedConfigMap(config.getMetadata().getNamespace(), config, null, null, null);
             }
 
 
@@ -136,8 +134,6 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             return;
         }
         PluginFileAccess fileAccess = this.context.getSubDirAccess();
-
-
 
         ProcessBuilder pb = new ProcessBuilder();
         File compDir = new File(fileAccess.getTargetDirectory(), component.getName());
@@ -176,18 +172,26 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             logger.info("deployed deployment for {}", component.getName());
             Optional<V1Service> service = deployService(component, compDir, api);
             logger.info("deployed service for {}", component.getName());
+            Map<String, Property> properties = component.getProperties();
             for (var port : service.get().getSpec().getPorts()) {
                 logger.info("the ’public’ nodeport is: {}", port.getNodePort().toString());
+
             }
             logger.info("the clusterIP is: {}", service.get().getSpec().getClusterIP());
-
-            //component.setPropertyValue();
+            component.addProperty("hostname", service.get().getSpec().getClusterIP());
 
 
         } catch (IOException e) {
             logger.error("could not find default config for comp: {}", component.getName());
             e.printStackTrace();
 
+        }
+
+        try {
+            logger.info("wait for component to start");
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
