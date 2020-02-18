@@ -26,6 +26,7 @@ The multi plugin is executed in different lifecycle phases.
 Each plugin implements its own transformation logic by providing a respective `Plugin` implementation.
 The two special phases are `transform` and `orchestration`.
 The phases are called from `edmm-core/src/main/java/io/github/edmm/plugins/multi/MultiLifecycle.java`.
+Most of the implementation is in `edmm-core/src/main/java/io/github/edmm/plugins/multi/.
 
 
 ### Transform
