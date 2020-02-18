@@ -1,6 +1,10 @@
 # ansible
 Ansible is only used for software components
 
+It requires always from the host:
+- hostname
+- priv_key_path
+
 ##transformation
 when the component is visited a play is created. This should be more or less the same as the plugin.
 One difference is that runtime vars are recognized as well and added in a new runtimeEnv category.
