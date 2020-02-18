@@ -27,6 +27,7 @@ Each plugin implements its own transformation logic by providing a respective `P
 The two special phases are `transform` and `orchestration`.
 The phases are called from `edmm-core/src/main/java/io/github/edmm/plugins/multi/MultiLifecycle.java`.
 
+
 ### Transform
 The general idea of the transformation is to visit every component once. 
 At the moment all components are visited in the order they will be deployed. 
@@ -56,9 +57,9 @@ The major difference is the implementation of the visitors.
 In this step every property that becomes known during execution is added to the model
 After every step the `state.yaml` is updated to reflect the new infos.
 
-Link kubernetes
-link ansible
-link terraform
+[Kubernetes](kubernetes.md)
+[Kubernetes](ansible.md)
+[Kubernetes](terraform.md)
 
 ## Built-in Types
 

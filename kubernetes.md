@@ -41,11 +41,14 @@ All runtime references to the configmap are fulfilled now.
 
 At last the service is deployed to expose ports.
 
+> wait for it to come online
+
+At the moment this is only implemented with waiting 20 seconds. Could be improved with polling the status.
+
 > read runtime vars
 
 After everything is deployed interesting variables can be read out. At the moment this is the clusterIP that is 
 simulating some future external loadbalancer-hostname or something similar. This is injected in the model as `hostname
-
 
 ### special cases:
   what if 2 components are deployed in same cluster -> check and use service name?

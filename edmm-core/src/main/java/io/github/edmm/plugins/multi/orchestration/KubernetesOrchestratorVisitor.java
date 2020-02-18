@@ -182,7 +182,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
 
 
         } catch (IOException e) {
-            logger.error("could not find default config for comp: {}", component.getName());
+            logger.error("could not deploy comp: {}", component.getName());
             e.printStackTrace();
 
         }
