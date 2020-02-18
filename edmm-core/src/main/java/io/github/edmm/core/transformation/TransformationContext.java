@@ -54,6 +54,10 @@ public final class TransformationContext {
     }
 
 
+    /**
+     *
+     * @return access to the directory for this component
+     */
     public PluginFileAccess getSubDirAccess() {
         File subdir = new File(this.targetDirectory, this.subTargetDirectory);
         return new PluginFileAccess(sourceDirectory, subdir);

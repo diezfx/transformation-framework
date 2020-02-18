@@ -41,14 +41,9 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
 
     @Override
     public void visit(Compute component) {
-
+        //todo dont use aws instance for openstack
         Aws.Instance ec2 = Aws.Instance.builder().name(component.getNormalizedName())
-                .privKeyFile(component.getPrivateKeyPath().get())
-                .keyName(component.getKeyName().get())
-                // TODO: Try to resolve image
-                .ami("ami-0bbc25e23a7640b9b")
-                // TODO: Try to resolve instance type
-                .instanceType("t2.micro").build();
+                .privKeyFile(component.getPrivateKeyPath().get()).build();
         List<String> operations = collectOperations(component);
 
         // add properties that are needed for this component to work

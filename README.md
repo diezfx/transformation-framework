@@ -39,14 +39,15 @@ Most of the implementation is in `edmm-core/src/main/java/io/github/edmm/plugins
 The general idea of the transformation is to visit every component once. 
 At the moment all components are visited in the order they will be deployed. 
 To visit a component, first the chosen deployment technology is looked up in the model. Then a new technology dependent "Visitor" is created and
-called. This is done to reset the context, because something else that has to be deployed in between could be skipped. E.g. ansible -> terraform -> ansible
+the function `visit(component)` is called. This is done to reset the context, because something else that has to be deployed in between could be skipped. E.g. ansible -> terraform -> ansible
 A Future optimization could be to keep the context for components that are guaranteed deployed without other technologies in between.
 
 The Visitor implementation depends on the tech.
 
 Valid for all techs:
 - Environment variables from hosted_on are used transitively and keep their name
-- Env vars from other connections are not used automatically and need to be called explicitly
+- Env vars from other connections are not used automatically and need to be called explicitly syntax see model
+    - this can be changed with a few lines in 
 This can be changed in `TopologyGraphHelper.findAllProperties`. When uncommenting the lines all vars that come through connects_to are imported
 as <targetCompname>.<variablename>.
 
@@ -57,20 +58,24 @@ as <targetCompname>.<variablename>.
 
 
 
-
 ### Orchestration(name is open for alternatives)
-The principal idea is the same as for transformation
+Every component is visited in order.
 The major difference is the implementation of the visitors.
-In this step every property that becomes known during execution is added to the model
+In this step the runtime properties are provided. Then the deployment is executed.
+After that the properties that become known during execution are added back to the model.
 After every step the `state.yaml` is updated to reflect the new infos.
 
 [Kubernetes](kubernetes.md)
 [Ansible](ansible.md)
 [Terraform](terraform.md)
 
-## Built-in Types
+### possible future work
+- decpouple orchestration from transformation
+- new instance model after transformation
+- add verification
 
-The types used are all in the model. 
+    
+
 
 ## Build the project
 

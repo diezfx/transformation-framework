@@ -97,7 +97,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             V1Deployment depl = (V1Deployment) Yaml.load(deployYaml);
             // this throws an exception if already exists
             try {
-                api.createNamespacedDeployment("default", depl, true, null, null);
+                api.createNamespacedDeployment(depl.getMetadata().getNamespace(), depl, true, null, null);
             } catch (ApiException e) {
                 api.deleteNamespacedDeployment(depl.getMetadata().getName(), depl.getMetadata().getNamespace(), null, null, null, null, null, null);
                 api.createNamespacedDeployment(depl.getMetadata().getNamespace(), depl, true, null, null);
@@ -113,7 +113,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             V1ConfigMap config = createConfigMap(component, dir);
             // this throws an exception if already exists
             try {
-                api.createNamespacedConfigMap("default", config, true, null, null);
+                api.createNamespacedConfigMap(config.getMetadata().getNamespace(), config, true, null, null);
             } catch (ApiException e) {
                 api.deleteNamespacedConfigMap(config.getMetadata().getName(), config.getMetadata().getNamespace(), null, null, null, null, null, null);
                 api.createNamespacedConfigMap(config.getMetadata().getNamespace(), config, null, null, null);
@@ -140,7 +140,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
         pb.directory(compDir);
         pb.inheritIO();
 
-
+        // hardcoded registry for now
         String registry = "localhost:32000/";
 
 
@@ -163,16 +163,18 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
             deploymentApi.setApiClient(client);
             CoreV1Api api = new CoreV1Api();
             api.setApiClient(client);
-            // apply config
 
-
+            // contains the runtime properties
             deployConfigMap(component, compDir, api);
+
+            // deploy everything
             logger.info("deployed configMap for {}", component.getName());
             deployDeployment(component, compDir, deploymentApi);
             logger.info("deployed deployment for {}", component.getName());
             Optional<V1Service> service = deployService(component, compDir, api);
             logger.info("deployed service for {}", component.getName());
-            Map<String, Property> properties = component.getProperties();
+
+            // read output
             for (var port : service.get().getSpec().getPorts()) {
                 logger.info("the ’public’ nodeport is: {}", port.getNodePort().toString());
 
@@ -198,7 +200,7 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
 
     @Override
     public void visit(Compute component) {
-
+        visit((RootComponent) component);
     }
 
     @Override

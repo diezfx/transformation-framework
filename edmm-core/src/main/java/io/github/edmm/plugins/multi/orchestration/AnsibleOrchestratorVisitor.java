@@ -40,11 +40,10 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
         pb.inheritIO();
         pb.directory(context.getSubDirAccess().getTargetDirectory());
 
-
         Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(graph, component);
         Map<String, Property> computedProps = new HashMap<>();
 
-
+        // filter runtime properties and add them to the json
         for (var prop : allProps.entrySet()) {
             if (prop.getValue().getValue() == null) {
                 continue;

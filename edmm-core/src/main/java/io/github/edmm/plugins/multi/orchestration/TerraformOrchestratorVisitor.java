@@ -28,7 +28,6 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(TerraformOrchestratorVisitor.class);
     protected final TransformationContext context;
-    protected final Configuration cfg = TemplateHelper.forClasspath(MultiPlugin.class, "/plugins/multi");
     protected final Graph<RootComponent, RootRelation> graph;
 
     public TerraformOrchestratorVisitor(TransformationContext context) {
@@ -38,12 +37,6 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
 
     @Override
     public void visit(RootComponent component) {
-
-        /*
-         * ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "dir");
-         * pb.inheritIO(); pb.directory(context.getSubDirAccess().getTargetDirectory());
-         * try { pb.start(); } catch (IOException e) { e.printStackTrace(); }
-         */
     }
 
     @SneakyThrows
@@ -61,7 +54,7 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         if (providerInfo.isEmpty()) {
             throw new IllegalArgumentException("The providerinfo for openstack was not provided");
         }
-
+        // read input variables
         String openstackProviderInfo = context.getSubDirAccess().readToString(providerInfo.iterator().next().getValue());
 
         HashMap<String, String> obj = gson.fromJson(openstackProviderInfo, HashMap.class);
@@ -72,19 +65,19 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
             env.put("TF_VAR_" + key, obj.get(key));
         }
 
-        try {
-            pb.command("terraform", "init");
-            Process init = pb.start();
-            init.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        // deploy
+        pb.command("terraform", "init");
+        Process init = pb.start();
+        init.waitFor();
+
 
         pb.command("terraform", "apply", "-auto-approve", "-input=false");
 
         Process apply = pb.start();
         apply.waitFor();
 
+
+        // read output variables and write back in model
         String computeInfo = context.getSubDirAccess().readToStringTargetDir(component.getName() + "_computed_properties" + ".json");
         HashMap<String, String> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, String>>() {
         }.getType());
@@ -92,7 +85,7 @@ public class TerraformOrchestratorVisitor implements ComponentVisitor {
         Map<String, Property> properties = component.getProperties();
 
         // set all properties
-        // object is a map of maps
+        // object is a map
         for (var computed_prop : output.entrySet()) {
 
             if (!properties.containsKey(computed_prop.getKey())) {

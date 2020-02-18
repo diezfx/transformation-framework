@@ -132,6 +132,7 @@ public class MultiLifecycle extends AbstractLifecycle {
         while (iterator.hasNext()) {
 
             RootComponent comp = iterator.next();
+            // give this component its own folder
             context.setSubFileAcess(comp.getNormalizedName());
 
             Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
@@ -142,9 +143,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             // TODO clean version
             logger.info("deployment_tool: {} ", deploy);
             if (deploy == Technology.ANSIBLE) {
-
                 AnsibleOrchestratorVisitor ansibleVisitor = new AnsibleOrchestratorVisitor(context);
-
                 comp.accept(ansibleVisitor);
             } else if (deploy == Technology.TERRAFORM) {
                 TerraformOrchestratorVisitor terraformVisitor = new TerraformOrchestratorVisitor(context);
@@ -170,8 +169,5 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     }
 
-    
-
-  
 
 }

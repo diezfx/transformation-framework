@@ -138,13 +138,18 @@ public abstract class TopologyGraphHelper {
 
     }
 
-
+    /**
+     *
+     * @param graph
+     * @param component
+     * @return all Properties this component has and its hosts
+     */
     public static Map<String, Property> findAllProperties(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         Map<String, Property> result = findCompStackProperties(graph, component);
 
+        /* // find all properties that are known through connectsto connections.
         Set<RootComponent> targets = TopologyGraphHelper.getTargetComponents(graph, component, ConnectsTo.class);
 
-        /*
         for(var target:targets){
             var properties=findCompStackProperties(graph,target);
             for(var prop: properties.entrySet()){
@@ -153,10 +158,7 @@ public abstract class TopologyGraphHelper {
             }
 
         }
-
          */
-
-
         return result;
     }
 

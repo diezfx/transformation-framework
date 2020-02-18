@@ -129,6 +129,9 @@ public class PluginFileAccess {
         }
     }
 
+    /*
+    this method looks in the target directory not in source one
+     */
     public String readToStringTargetDir(String relativePath)throws IOException {
         File file = new File(targetDirectory, relativePath);
         try {
