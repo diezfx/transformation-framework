@@ -112,7 +112,6 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
 
     private boolean matchesBlacklist(Map.Entry<String, Property> prop) {
         String[] blacklist = {"*key_name*", "*public_key*", "hostname"};
-        logger.info(prop.getKey());
         for (var blacklistVal : blacklist) {
             if (FilenameUtils.wildcardMatch(prop.getKey(), blacklistVal)) {
                 return true;
