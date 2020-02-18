@@ -53,10 +53,8 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         List<AnsibleFile> files = collectFiles(component);
 
         // host is the compute if exists
-
         Optional<Compute> optionalCompute = TopologyGraphHelper
                 .resolveHostingComputeComponent(context.getTopologyGraph(), component);
-
         if (!optionalCompute.isPresent()) {
             throw new IllegalStateException(String.format("The component %s could doesn't have a hosting compute", component.getName()));
 

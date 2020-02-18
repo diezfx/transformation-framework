@@ -40,13 +40,6 @@ public class MultiLifecycle extends AbstractLifecycle {
     @Override
     public void transform() {
         logger.info("Begin transformation to Multi...");
-        TerraformVisitor visitor = new TerraformVisitor(context);
-        AnsibleVisitor ansibleVisitor = new AnsibleVisitor(context);
-        KubernetesVisitor kubernetesVisitor = new KubernetesVisitor(context);
-
-        // context.getModel().getGraph().generateYamlOutput(new
-        // OutputStreamWriter(System.out));
-
         PluginFileAccess fileAccess = context.getFileAccess();
 
         try {
@@ -75,16 +68,20 @@ public class MultiLifecycle extends AbstractLifecycle {
 
             Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
                     .map(OrchestrationTechnologyMapping::getTechForComponents);
-            // use technology or ansible as default for now
             Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.UNDEFINED);
 
             // TODO better version
             logger.info("deployment_tool: {} ", deploy);
             if (deploy == Technology.ANSIBLE) {
+
+                AnsibleVisitor ansibleVisitor = new AnsibleVisitor(context);
                 comp.accept(ansibleVisitor);
             } else if (deploy == Technology.TERRAFORM) {
+                TerraformVisitor visitor = new TerraformVisitor(context);
+
                 comp.accept(visitor);
             } else if (deploy == Technology.KUBERNETES) {
+                KubernetesVisitor kubernetesVisitor = new KubernetesVisitor(context);
                 comp.accept(kubernetesVisitor);
             } else {
                 logger.error("could not find technology: {} for component {}", deploy, comp.getNormalizedName());
@@ -93,11 +90,6 @@ public class MultiLifecycle extends AbstractLifecycle {
 
             i++;
 
-            // reset for next round
-            // later: only reset when necessary
-            visitor = new TerraformVisitor(context);
-            ansibleVisitor = new AnsibleVisitor(context);
-            kubernetesVisitor = new KubernetesVisitor(context);
         }
 
         Writer writer = new StringWriter();
@@ -129,9 +121,6 @@ public class MultiLifecycle extends AbstractLifecycle {
         }
 
         logger.info("Begin orchestration ...");
-        TerraformOrchestratorVisitor terraformVisitor = new TerraformOrchestratorVisitor(context);
-        AnsibleOrchestratorVisitor ansibleVisitor = new AnsibleOrchestratorVisitor(context);
-        KubernetesOrchestratorVisitor kubernetesVisitor = new KubernetesOrchestratorVisitor(context);
         // Reverse the graph to find sources
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
                 context.getModel().getTopology());
@@ -153,19 +142,21 @@ public class MultiLifecycle extends AbstractLifecycle {
             // TODO clean version
             logger.info("deployment_tool: {} ", deploy);
             if (deploy == Technology.ANSIBLE) {
+
+                AnsibleOrchestratorVisitor ansibleVisitor = new AnsibleOrchestratorVisitor(context);
+
                 comp.accept(ansibleVisitor);
             } else if (deploy == Technology.TERRAFORM) {
+                TerraformOrchestratorVisitor terraformVisitor = new TerraformOrchestratorVisitor(context);
                 comp.accept(terraformVisitor);
             } else if (deploy == Technology.KUBERNETES) {
+                KubernetesOrchestratorVisitor kubernetesVisitor = new KubernetesOrchestratorVisitor(context);
                 comp.accept(kubernetesVisitor);
             }
             logger.info("{}", comp.getName());
 
             i++;
 
-            // reset for next round
-            terraformVisitor = new TerraformOrchestratorVisitor(context);
-            ansibleVisitor = new AnsibleOrchestratorVisitor(context);
         }
 
         try {

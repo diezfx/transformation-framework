@@ -3,16 +3,17 @@ version: edm_1_0
 
 orchestration_technology:
   ansible:
-    - pet_clinic_tomcat
-    - pet_clinic
+
 
     - dbms
     - db
   terraform:
     - ubuntu2
-    - ubuntu
-  kubernetes:
 
+  kubernetes:
+    - ubuntu
+    - pet_clinic_tomcat
+    - pet_clinic
 
 components:
 
