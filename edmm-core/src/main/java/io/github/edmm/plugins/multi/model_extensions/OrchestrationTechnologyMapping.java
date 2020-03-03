@@ -47,11 +47,9 @@ public class OrchestrationTechnologyMapping extends BaseElement {
         for (ScalarEntity compEntity : compTechList) {
             Optional<RootComponent> referencedComp = components.stream()
                     .filter(c -> c.getName().equals(compEntity.getValue())).findFirst();
-
-            referencedComp.ifPresentOrElse(referencedComps::add, () -> {
-                throw new IllegalArgumentException(
-                        String.format("the given component(%s) is not in the model", (compEntity.getValue())));
-            });
+            String msg = String.format("the given component(%s) is not in the model", (compEntity.getValue()));
+            RootComponent component = referencedComp.orElseThrow(() -> new IllegalArgumentException(msg));
+            referencedComps.add(component);
         }
         return Optional.of(referencedComps);
     }

@@ -3,17 +3,14 @@ version: edm_1_0
 
 orchestration_technology:
   ansible:
-
-
-    - dbms
     - db
+    - dbms
   terraform:
-    - ubuntu2
-
+    - ubuntu_db
   kubernetes:
-    - ubuntu
-    - pet_clinic_tomcat
     - pet_clinic
+    - pet_clinic_tomcat
+    - ubuntu_app
 
 components:
 
@@ -22,7 +19,7 @@ components:
   pet_clinic:
     type: web_application
     artifacts:
-      - war: ../../spring-petclinic/target/petclinic.war
+      - war: ./files/petclinic/petclinic.war
     operations:
       configure: ./files/petclinic/configure.sh
     relations:
@@ -34,14 +31,13 @@ components:
       db_password: ${db.password}
       db_port: ${db.port}
 
-
   pet_clinic_tomcat:
     type: tomcat
     operations:
       create: ./files/tomcat/create.sh
       start: ./files/tomcat/start.sh
     relations:
-      - hosted_on: ubuntu2
+      - hosted_on: ubuntu_app
 
   ## Database
 
@@ -66,29 +62,29 @@ components:
       create: ./files/mysql_dbms/create.sh
       start: ./files/mysql_dbms/start.sh
     relations:
-      - hosted_on: ubuntu
+      - hosted_on: ubuntu_db
 
   ## Compute
 
-  ubuntu:
+  ubuntu_app:
     type: compute
     properties:
       machine_image: ubuntu
       instance_type: large
-      key_name: win10key
-      priv_key_path: /home/diezfx/.ssh/id_rsa
-    artifacts:
-      - provider: ./files/ubuntu/openstack.json
-  ubuntu2:
-    type: compute
-    properties:
-      machine_image: ubuntu
-      instance_type: large
-      key_name: win10key
-      priv_key_path: /home/diezfx/.ssh/id_rsa
+      key_name: wursteml
+      priv_key_path: ./files/ubuntu/key.pem
     artifacts:
       - provider: ./files/ubuntu/openstack.json
 
+  ubuntu_db:
+    type: compute
+    properties:
+      machine_image: ubuntu
+      instance_type: large
+      key_name: wursteml
+      priv_key_path: ./files/ubuntu/key.pem
+    artifacts:
+      - provider: ./files/ubuntu/openstack.json
 
 
 
