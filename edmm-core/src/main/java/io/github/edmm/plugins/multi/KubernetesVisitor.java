@@ -3,7 +3,6 @@ package io.github.edmm.plugins.multi;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.docker.Container;
-import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.kubernetes.support.ImageMappingVisitor;
 import io.github.edmm.plugins.multi.support.kubernetes.DockerfileBuildingVisitor;
@@ -20,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class KubernetesVisitor implements ComponentVisitor, RelationVisitor {
+public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
 
     protected final TransformationContext context;
     protected final Graph<RootComponent, RootRelation> graph;

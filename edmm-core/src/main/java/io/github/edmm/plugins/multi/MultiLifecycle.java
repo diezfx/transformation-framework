@@ -2,16 +2,17 @@ package io.github.edmm.plugins.multi;
 
 import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.PluginFileAccess;
+import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
-import io.github.edmm.model.Artifact;
-import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
+import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import io.github.edmm.plugins.multi.orchestration.AnsibleOrchestratorVisitor;
 import io.github.edmm.plugins.multi.orchestration.KubernetesOrchestratorVisitor;
 import io.github.edmm.plugins.multi.orchestration.TerraformOrchestratorVisitor;
-import org.apache.commons.io.FilenameUtils;
+import lombok.var;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class MultiLifecycle extends AbstractLifecycle {
 
@@ -55,39 +55,60 @@ public class MultiLifecycle extends AbstractLifecycle {
         TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
                 dependencyGraph);
 
+
         int i = 0;
         while (iterator.hasNext()) {
 
             RootComponent comp = iterator.next();
+            Technology tech = getTechnology(comp);
+            var optTarget = TopologyGraphHelper.getTargetComponents(dependencyGraph, comp, HostedOn.class);
+            // only do sth if this is a top component of this technology
+            if (!optTarget.isEmpty() && getTechnology(optTarget.iterator().next()) == tech) {
+                continue;
+            }
+
             context.setSubFileAcess(comp.getNormalizedName());
             try {
                 fileAccess.append("plan.plan", i + ": " + comp.getName());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
-                    .map(OrchestrationTechnologyMapping::getTechForComponents);
-            Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.UNDEFINED);
+            MultiVisitor visitorContext;
 
             // TODO better version
-            logger.info("deployment_tool: {} ", deploy);
-            if (deploy == Technology.ANSIBLE) {
+            logger.info("deployment_tool: {} ", tech);
+            if (tech == Technology.ANSIBLE) {
 
-                AnsibleVisitor ansibleVisitor = new AnsibleVisitor(context);
-                comp.accept(ansibleVisitor);
-            } else if (deploy == Technology.TERRAFORM) {
-                TerraformVisitor visitor = new TerraformVisitor(context);
+                visitorContext = new AnsibleVisitor(context);
+            } else if (tech == Technology.TERRAFORM) {
+                visitorContext = new TerraformVisitor(context);
 
-                comp.accept(visitor);
-            } else if (deploy == Technology.KUBERNETES) {
-                KubernetesVisitor kubernetesVisitor = new KubernetesVisitor(context);
-                comp.accept(kubernetesVisitor);
+            } else if (tech == Technology.KUBERNETES) {
+                visitorContext = new KubernetesVisitor(context);
             } else {
-                logger.error("could not find technology: {} for component {}", deploy, comp.getNormalizedName());
+                String error = String.format("could not find technology: %s for component %s", tech, comp.getNormalizedName());
+                throw new IllegalArgumentException(error);
             }
-            logger.info("{}", comp.getName());
 
+
+
+            List<RootComponent> sources = new ArrayList<>();
+            sources.add(comp);
+
+            // check if source uses same technology, then don't populate in this step
+            var source = TopologyGraphHelper.getSourceComponents(dependencyGraph, comp, HostedOn.class).stream().findFirst();
+            while (source.isPresent() && getTechnology(source.get()) == tech) {
+                sources.add(source.get());
+                source = TopologyGraphHelper.getSourceComponents(dependencyGraph, source.get(), HostedOn.class).stream().findFirst();
+            }
+            context.setSubFileAcess(comp.getNormalizedName());
+            // visit all comps
+            Collections.reverse(sources);
+            for (var t : sources) {
+                t.accept(visitorContext);
+            }
+            visitorContext.populate();
+            logger.info("{}", comp.getName());
             i++;
 
         }
@@ -128,38 +149,36 @@ public class MultiLifecycle extends AbstractLifecycle {
         TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
                 dependencyGraph);
 
-        int i = 0;
         while (iterator.hasNext()) {
-
             RootComponent comp = iterator.next();
+            // see if this component is top component of this technology
+            var optTarget = TopologyGraphHelper.getTargetComponents(dependencyGraph, comp, HostedOn.class);
+            Technology tech = getTechnology(comp);
+            if (!optTarget.isEmpty()&& tech==getTechnology(optTarget.iterator().next())) {
+                continue;
+            }
             // give this component its own folder
             context.setSubFileAcess(comp.getNormalizedName());
 
-            Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
-                    .map(OrchestrationTechnologyMapping::getTechForComponents);
-            // use technology or ansible as default for now
-            Technology deploy = deploymentTechList.map(c -> c.get(comp)).orElse(Technology.ANSIBLE);
 
-            // TODO clean version
-            logger.info("deployment_tool: {} ", deploy);
-            if (deploy == Technology.ANSIBLE) {
-                AnsibleOrchestratorVisitor ansibleVisitor = new AnsibleOrchestratorVisitor(context);
-                comp.accept(ansibleVisitor);
-            } else if (deploy == Technology.TERRAFORM) {
-                TerraformOrchestratorVisitor terraformVisitor = new TerraformOrchestratorVisitor(context);
-                comp.accept(terraformVisitor);
-            } else if (deploy == Technology.KUBERNETES) {
-                KubernetesOrchestratorVisitor kubernetesVisitor = new KubernetesOrchestratorVisitor(context);
-                comp.accept(kubernetesVisitor);
+            ComponentVisitor visitorContext;
+            logger.info("deployment_tool: {} ", tech);
+            if (tech == Technology.ANSIBLE) {
+                visitorContext = new AnsibleOrchestratorVisitor(context);
+            } else if (tech == Technology.TERRAFORM) {
+                visitorContext = new TerraformOrchestratorVisitor(context);
+            } else if (tech == Technology.KUBERNETES) {
+                visitorContext = new KubernetesOrchestratorVisitor(context);
+            } else {
+                String error = String.format("could not find technology: %s for component %s", tech, comp.getNormalizedName());
+                throw new IllegalArgumentException(error);
             }
+            comp.accept(visitorContext);
             logger.info("{}", comp.getName());
-
-            i++;
 
         }
 
         try {
-
             Writer writer = new StringWriter();
             context.getModel().getGraph().generateYamlOutput(writer);
             fileAccess.write("state.yaml", writer.toString());
@@ -167,6 +186,13 @@ public class MultiLifecycle extends AbstractLifecycle {
             e.printStackTrace();
         }
 
+    }
+
+
+    private Technology getTechnology(RootComponent component) {
+        Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
+                .map(OrchestrationTechnologyMapping::getTechForComponents);
+        return deploymentTechList.map(c -> c.get(component)).orElse(Technology.UNDEFINED);
     }
 
 

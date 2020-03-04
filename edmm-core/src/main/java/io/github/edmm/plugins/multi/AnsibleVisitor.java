@@ -10,29 +10,32 @@ import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.ansible.model.AnsibleFile;
+import io.github.edmm.plugins.ansible.model.AnsibleHost;
 import io.github.edmm.plugins.ansible.model.AnsiblePlay;
 import io.github.edmm.plugins.ansible.model.AnsibleTask;
 import lombok.var;
 import org.apache.commons.io.FilenameUtils;
-import org.checkerframework.checker.nullness.Opt;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
+public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(AnsibleVisitor.class);
     protected final TransformationContext context;
     protected final Configuration cfg = TemplateHelper.forClasspath(AnsibleVisitor.class, "/plugins/ansible");
     protected final Graph<RootComponent, RootRelation> graph;
     private final List<AnsiblePlay> plays = new ArrayList<>();
+    private final Map<String, AnsibleHost> hosts = new HashMap<>();
 
     public AnsibleVisitor(TransformationContext context) {
         this.context = context;
@@ -43,7 +46,6 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
     public void visit(RootComponent component) {
 
         logger.info("Generate a play for component " + component.getName());
-        PluginFileAccess fileAccess = context.getSubDirAccess();
         copyFiles(component);
 
         Map<String, String> envVars = collectEnvVars(component);
@@ -53,29 +55,26 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         List<AnsibleFile> files = collectFiles(component);
 
         // host is the compute if exists
-        Optional<Compute> optionalCompute = TopologyGraphHelper
-                .resolveHostingComputeComponent(context.getTopologyGraph(), component);
-        if (!optionalCompute.isPresent()) {
-            throw new IllegalStateException(String.format("The component %s could doesn't have a hosting compute", component.getName()));
+        Compute compute = TopologyGraphHelper
+                .resolveHostingComputeComponent(context.getTopologyGraph(), component)
+                .orElseThrow(() -> new IllegalStateException(String.format("The component %s could doesn't have a hosting compute", component.getName())));
+
+        String host = compute.getNormalizedName();
 
 
+        String absoluteKeyPath;
+        Path privKeyValue = Paths.get(compute.getPrivateKeyPath().get());
+        if (privKeyValue.isAbsolute()) {
+            absoluteKeyPath = compute.getPrivateKeyPath().get();
+        } else {
+            System.out.println(compute.getPrivateKeyPath().get());
+            absoluteKeyPath = new File(context.getFileAccess().getSourceDirectory(), compute.getPrivateKeyPath().get()).getAbsolutePath();
         }
-        String hosts = optionalCompute.get().getNormalizedName();
-        Optional<String> privKeyPath = optionalCompute.get().getPrivateKeyPath();
-
-        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(hosts).vars(envVars).runtimeVars(envVarsRuntime).tasks(tasks)
-                .files(files).privKeyFile(privKeyPath.get()).build();
+        hosts.put(host, new AnsibleHost(host, absoluteKeyPath));
+        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(host).vars(envVars).runtimeVars(envVarsRuntime).tasks(tasks)
+                .files(files).build();
 
         plays.add(play);
-        Map<String, Object> templateData = new HashMap<>();
-        templateData.put("plays", plays);
-        String filename = String.format("%s.yml", component.getNormalizedName());
-
-        try {
-            fileAccess.write(filename, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
-        } catch (IOException e) {
-            logger.error("Failed to write Ansible file", e);
-        }
         component.setTransformed(true);
     }
 
@@ -161,8 +160,8 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         List<AnsibleFile> fileList = new ArrayList<>();
         for (Artifact artifact : component.getArtifacts()) {
             String basename = FilenameUtils.getName(artifact.getValue());
-            String newPath = "./files/" + basename;
-            String destination = "/opt/";
+            String newPath = "./files/"+component.getNormalizedName() +"/"+ basename;
+            String destination = "/opt/" + component.getNormalizedName() + "/";
             fileList.add(new AnsibleFile(newPath, destination + basename));
         }
         return fileList;
@@ -174,9 +173,9 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         List<AnsibleTask> taskQueue = new ArrayList<>();
         operations.forEach(operation -> {
             String basename = FilenameUtils.getName(operation.getValue());
-            String newPath = "./files/" + basename;
+            String newPath = "./files/" + component.getNormalizedName() + "/" + basename;
             Map<String, String> args = new HashMap<>();
-            args.put("chdir", "/opt/");
+            //args.put("chdir", "/opt/" + component.getNormalizedName());
             AnsibleTask task = AnsibleTask.builder().name(operation.getNormalizedName()).script(newPath).args(args).build();
             taskQueue.add(task);
 
@@ -185,13 +184,13 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
     }
 
     private void copyFiles(RootComponent comp) {
-        PluginFileAccess fileAccess = context.getFileAccess();
+        PluginFileAccess fileAccess = context.getSubDirAccess();
         for (Artifact artifact : comp.getArtifacts()) {
             try {
                 // get basename
                 String basename = FilenameUtils.getName(artifact.getValue());
-                String newPath = "./files/" + basename;
-                fileAccess.copy(artifact.getValue(), comp.getNormalizedName() + "/" + newPath);
+                String newPath = "./files/" + comp.getNormalizedName() + "/" + basename;
+                fileAccess.copy(artifact.getValue(), newPath);
             } catch (IOException e) {
                 logger.warn("Failed to copy file '{}'", artifact.getValue());
             }
@@ -202,8 +201,8 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         for (Artifact artifact : operations) {
             try {
                 String basename = FilenameUtils.getName(artifact.getValue());
-                String newPath = "./files/" + basename;
-                fileAccess.copy(artifact.getValue(), comp.getNormalizedName() + "/" + newPath);
+                String newPath = "./files/" + comp.getNormalizedName() + "/" + basename;
+                fileAccess.copy(artifact.getValue(), newPath);
             } catch (IOException e) {
                 logger.warn("Failed to copy file '{}'", artifact.getValue());
             }
@@ -219,6 +218,20 @@ public class AnsibleVisitor implements ComponentVisitor, RelationVisitor {
         component.getStandardLifecycle().getConfigure().ifPresent(artifactsConsumer);
         component.getStandardLifecycle().getStart().ifPresent(artifactsConsumer);
         return operations;
+    }
+
+    public void populate() {
+        PluginFileAccess fileAccess = context.getSubDirAccess();
+        String filename = String.format("deployment.yml");
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("plays", plays);
+        templateData.put("hosts", hosts);
+
+        try {
+            fileAccess.write(filename, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
+        } catch (IOException e) {
+            logger.error("Failed to write Ansible file", e);
+        }
     }
 
 }

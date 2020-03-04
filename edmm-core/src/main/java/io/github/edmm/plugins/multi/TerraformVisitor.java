@@ -9,24 +9,26 @@ import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.terraform.model.Aws;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
+public class TerraformVisitor implements MultiVisitor, RelationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(TerraformVisitor.class);
     protected final TransformationContext context;
@@ -39,14 +41,27 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
     }
 
 
+    @SneakyThrows
     @Override
     public void visit(Compute component) {
         //todo dont use aws instance for openstack
+        String abolutePrivkeyPath;
+        Path privKeyValue = Paths.get(component.getPrivateKeyPath().get());
+        if(privKeyValue.isAbsolute()){
+            abolutePrivkeyPath=component.getPrivateKeyPath().get();
+        }
+        else{
+            System.out.println(component.getPrivateKeyPath().get());
+           abolutePrivkeyPath= new File(context.getFileAccess().getSourceDirectory(),component.getPrivateKeyPath().get()).getAbsolutePath();
+        }
         Aws.Instance ec2 = Aws.Instance.builder().name(component.getNormalizedName())
                 .keyName(component.getKeyName().get())
-                .privKeyFile(component.getPrivateKeyPath().get())
+                .privKeyFile(abolutePrivkeyPath)
                 .build();
         List<String> operations = collectOperations(component);
+
+        //convert relative to absolute paths
+
 
         // add properties that are needed for this component to work
         component.addProperty("hostname", null);

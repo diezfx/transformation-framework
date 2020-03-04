@@ -37,10 +37,10 @@ Most of the implementation is in `edmm-core/src/main/java/io/github/edmm/plugins
 
 ### Transform
 The general idea of the transformation is to visit every component once. 
-At the moment all components are visited in the order they will be deployed. 
-To visit a component, first the chosen deployment technology is looked up in the model. Then a new technology dependent "Visitor" is created and
-the function `visit(component)` is called. This is done to reset the context, because something else that has to be deployed in between could be skipped. E.g. ansible -> terraform -> ansible
-A Future optimization could be to keep the context for components that are guaranteed deployed without other technologies in between.
+At the moment all components are visited in the order they will be deployed. This means it's converted to a reversed directed acyclic graph and then iterated.
+To visit a component, first the chosen deployment technology is looked up. If this component is the topmost component of this particular technology,
+then visit all source component of this tech and this component at last.
+
 
 The Visitor implementation depends on the tech.
 
@@ -59,7 +59,7 @@ as <targetCompname>.<variablename>.
 
 
 ### Orchestration(name is open for alternatives)
-Every component is visited in order.
+Every top_component of a technology is visited in order.
 The major difference is the implementation of the visitors.
 In this step the runtime properties are provided. Then the deployment is executed.
 After that the properties that become known during execution are added back to the model.

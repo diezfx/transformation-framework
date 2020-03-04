@@ -9,7 +9,6 @@ import java.util.Map;
 @Data
 @Builder
 public class AnsiblePlay {
-    private String privKeyFile;
     private String name;
     private String hosts;
     private boolean become;

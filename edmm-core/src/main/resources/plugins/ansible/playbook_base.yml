@@ -1,27 +1,27 @@
 ---
-  <#list plays as play>
-# Play for component ${play.name}
 # add hosts
+<#list hosts as key,value>
 - hosts: localhost
   gather_facts: no
   tasks:
     - include_vars:
-        file: ${play.name}.json
+        file: requiredProperties.json
         name: requiredProperties
-    - name: Add host to group 'just_created'
+    - name: Add host
       add_host:
-        name: ${play.hosts}
+        name: ${value.name}
         ansible_host: '{{requiredProperties.HOSTNAME}}'
         ansible_user: ubuntu
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-        ansible_ssh_private_key_file: ${play.privKeyFile}
+        ansible_ssh_private_key_file: ${value.privKeyFile}
         ansible_python_interpreter: /usr/bin/python3
-        groups: just_created
     - name: Wait 600 seconds for target connection to become reachable/usable
       wait_for:
         host: '{{requiredProperties.HOSTNAME}}'
         port: 22
-
+</#list>
+  <#list plays as play>
+# Play for component ${play.name}
 - name: ${play.name}
   <#if play.hosts??>
   hosts: ${play.hosts}
@@ -38,7 +38,7 @@
   </#if>
   tasks:
     - include_vars:
-        file: ${play.name}.json
+        file: requiredProperties.json
         name: requiredProperties
     <#list play.files as file>
     - name: Make sure destination dir exists

@@ -11,7 +11,6 @@ import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.MultiPlugin;
 import lombok.var;
-import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +62,8 @@ public class AnsibleOrchestratorVisitor implements ComponentVisitor {
 
 
         try {
-            context.getSubDirAccess().write(component.getNormalizedName() + ".json", json.toString());
-            pb.command("ansible-playbook", component.getNormalizedName() + ".yml");
+            context.getSubDirAccess().write("requiredProperties.json", json.toString());
+            pb.command("ansible-playbook", "deployment.yml");
 
             Process apply = pb.start();
             apply.waitFor();
