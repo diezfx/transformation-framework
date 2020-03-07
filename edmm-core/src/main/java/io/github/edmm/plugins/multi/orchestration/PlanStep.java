@@ -1,0 +1,31 @@
+package io.github.edmm.plugins.multi.orchestration;
+
+import io.github.edmm.plugins.multi.Technology;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class PlanStep {
+    public Technology tech;
+    // all components that will be deployed in this step
+    public List<String> components;
+
+
+    public PlanStep(Technology tech) {
+        components = new ArrayList<>();
+        this.tech = tech;
+    }
+
+    public String toYaml() {
+        Yaml yaml = new Yaml();
+        StringWriter writer = new StringWriter();
+        yaml.dump(this, writer);
+        return writer.toString();
+    }
+}
+
+
+

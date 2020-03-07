@@ -9,9 +9,7 @@ import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
-import io.github.edmm.plugins.multi.orchestration.AnsibleOrchestratorVisitor;
-import io.github.edmm.plugins.multi.orchestration.KubernetesOrchestratorVisitor;
-import io.github.edmm.plugins.multi.orchestration.TerraformOrchestratorVisitor;
+import io.github.edmm.plugins.multi.orchestration.*;
 import lombok.var;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -41,12 +39,7 @@ public class MultiLifecycle extends AbstractLifecycle {
     public void transform() {
         logger.info("Begin transformation to Multi...");
         PluginFileAccess fileAccess = context.getFileAccess();
-
-        try {
-            fileAccess.write("plan.plan", "here is the plan");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Plan plan = new Plan();
 
         // Reverse the graph to find sources
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
@@ -55,12 +48,11 @@ public class MultiLifecycle extends AbstractLifecycle {
         TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
                 dependencyGraph);
 
-
-        int i = 0;
         while (iterator.hasNext()) {
 
             RootComponent comp = iterator.next();
             Technology tech = getTechnology(comp);
+            PlanStep step = new PlanStep(tech);
             var optTarget = TopologyGraphHelper.getTargetComponents(dependencyGraph, comp, HostedOn.class);
             // only do sth if this is a top component of this technology
             if (!optTarget.isEmpty() && getTechnology(optTarget.iterator().next()) == tech) {
@@ -68,11 +60,6 @@ public class MultiLifecycle extends AbstractLifecycle {
             }
 
             context.setSubFileAcess(comp.getNormalizedName());
-            try {
-                fileAccess.append("plan.plan", i + ": " + comp.getName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             MultiVisitor visitorContext;
 
             // TODO better version
@@ -80,6 +67,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             if (tech == Technology.ANSIBLE) {
 
                 visitorContext = new AnsibleVisitor(context);
+
             } else if (tech == Technology.TERRAFORM) {
                 visitorContext = new TerraformVisitor(context);
 
@@ -90,8 +78,6 @@ public class MultiLifecycle extends AbstractLifecycle {
                 throw new IllegalArgumentException(error);
             }
 
-
-
             List<RootComponent> sources = new ArrayList<>();
             sources.add(comp);
 
@@ -101,15 +87,17 @@ public class MultiLifecycle extends AbstractLifecycle {
                 sources.add(source.get());
                 source = TopologyGraphHelper.getSourceComponents(dependencyGraph, source.get(), HostedOn.class).stream().findFirst();
             }
+
             context.setSubFileAcess(comp.getNormalizedName());
             // visit all comps
             Collections.reverse(sources);
             for (var t : sources) {
                 t.accept(visitorContext);
+                step.components.add(t.getNormalizedName());
             }
             visitorContext.populate();
+            plan.steps.add(step);
             logger.info("{}", comp.getName());
-            i++;
 
         }
 
@@ -118,6 +106,7 @@ public class MultiLifecycle extends AbstractLifecycle {
 
         try {
             fileAccess.write("state.yaml", writer.toString());
+            fileAccess.write("execution.plan", plan.toJson());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -154,7 +143,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             // see if this component is top component of this technology
             var optTarget = TopologyGraphHelper.getTargetComponents(dependencyGraph, comp, HostedOn.class);
             Technology tech = getTechnology(comp);
-            if (!optTarget.isEmpty()&& tech==getTechnology(optTarget.iterator().next())) {
+            if (!optTarget.isEmpty() && tech == getTechnology(optTarget.iterator().next())) {
                 continue;
             }
             // give this component its own folder
