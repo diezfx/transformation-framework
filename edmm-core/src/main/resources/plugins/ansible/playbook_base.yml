@@ -38,7 +38,8 @@
   </#if>
   tasks:
     - include_vars:
-        file: requiredProperties.json
+        file: ${play.name}_requiredProps.json
+
         name: requiredProperties
     <#list play.files as file>
     - name: Make sure destination dir exists

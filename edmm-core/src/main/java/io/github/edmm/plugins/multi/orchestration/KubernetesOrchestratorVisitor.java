@@ -1,23 +1,22 @@
 package io.github.edmm.plugins.multi.orchestration;
 
-import io.github.edmm.model.Property;
-import io.github.edmm.utils.Consts;
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.apis.AppsV1Api;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.models.V1ConfigMap;
-import io.kubernetes.client.models.V1Service;
-import io.kubernetes.client.util.Config;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
-import io.github.edmm.model.component.*;
+import io.github.edmm.model.Property;
+import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.kubernetes.model.ConfigMapResource;
+import io.github.edmm.utils.Consts;
 import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
+import io.kubernetes.client.apis.AppsV1Api;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.models.V1ConfigMap;
 import io.kubernetes.client.models.V1Deployment;
+import io.kubernetes.client.models.V1Service;
+import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Yaml;
 import lombok.var;
 import org.apache.commons.io.FileUtils;
@@ -29,10 +28,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class KubernetesOrchestratorVisitor implements ComponentVisitor {
+public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesOrchestratorVisitor.class);
     protected final TransformationContext context;
@@ -127,110 +127,76 @@ public class KubernetesOrchestratorVisitor implements ComponentVisitor {
 
     }
 
-    @Override
-    public void visit(RootComponent component) {
 
-        if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, component)) {
-            return;
-        }
-        PluginFileAccess fileAccess = this.context.getSubDirAccess();
+    public void visit(List<RootComponent> components) {
 
-        ProcessBuilder pb = new ProcessBuilder();
-        File compDir = new File(fileAccess.getTargetDirectory(), component.getName());
-        pb.directory(compDir);
-        pb.inheritIO();
+        for (var component : components) {
+            if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, component)) {
+                return;
+            }
+            PluginFileAccess fileAccess = this.context.getSubDirAccess();
 
-        // hardcoded registry for now
-        String registry = "localhost:32000/";
+            ProcessBuilder pb = new ProcessBuilder();
+            File compDir = new File(fileAccess.getTargetDirectory(), component.getName());
+            pb.directory(compDir);
+            pb.inheritIO();
+
+            // hardcoded registry for now
+            String registry = "localhost:32000/";
 
 
-        // docker build &push
-        try {
-            pb.command("docker", "build", "-t", component.getLabel() + ":latest", ".");
-            Process init = pb.start();
-            init.waitFor();
-            pb.command("docker", "tag", component.getLabel() + ":latest", registry + component.getLabel());
-            pb.start().waitFor();
-            pb.command("docker", "push", registry + component.getLabel());
-            pb.start().waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+            // docker build &push
+            try {
+                pb.command("docker", "build", "-t", component.getLabel() + ":latest", ".");
+                Process init = pb.start();
+                init.waitFor();
+                pb.command("docker", "tag", component.getLabel() + ":latest", registry + component.getLabel());
+                pb.start().waitFor();
+                pb.command("docker", "push", registry + component.getLabel());
+                pb.start().waitFor();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        try {
-            ApiClient client = Config.defaultClient();
-            AppsV1Api deploymentApi = new AppsV1Api();
-            deploymentApi.setApiClient(client);
-            CoreV1Api api = new CoreV1Api();
-            api.setApiClient(client);
+            try {
+                ApiClient client = Config.defaultClient();
+                AppsV1Api deploymentApi = new AppsV1Api();
+                deploymentApi.setApiClient(client);
+                CoreV1Api api = new CoreV1Api();
+                api.setApiClient(client);
 
-            // contains the runtime properties
-            deployConfigMap(component, compDir, api);
+                // contains the runtime properties
+                deployConfigMap(component, compDir, api);
 
-            // deploy everything
-            logger.info("deployed configMap for {}", component.getName());
-            deployDeployment(component, compDir, deploymentApi);
-            logger.info("deployed deployment for {}", component.getName());
-            Optional<V1Service> service = deployService(component, compDir, api);
-            logger.info("deployed service for {}", component.getName());
+                // deploy everything
+                logger.info("deployed configMap for {}", component.getName());
+                deployDeployment(component, compDir, deploymentApi);
+                logger.info("deployed deployment for {}", component.getName());
+                Optional<V1Service> service = deployService(component, compDir, api);
+                logger.info("deployed service for {}", component.getName());
 
-            // read output
-            for (var port : service.get().getSpec().getPorts()) {
-                logger.info("the ’public’ nodeport is: {}", port.getNodePort().toString());
+                // read output
+                for (var port : service.get().getSpec().getPorts()) {
+                    logger.info("the ’public’ nodeport is: {}", port.getNodePort().toString());
+
+                }
+                logger.info("the clusterIP is: {}", service.get().getSpec().getClusterIP());
+                component.addProperty("hostname", service.get().getSpec().getClusterIP());
+
+
+            } catch (IOException e) {
+                logger.error("could not deploy comp: {}", component.getName());
+                e.printStackTrace();
 
             }
-            logger.info("the clusterIP is: {}", service.get().getSpec().getClusterIP());
-            component.addProperty("hostname", service.get().getSpec().getClusterIP());
 
-
-        } catch (IOException e) {
-            logger.error("could not deploy comp: {}", component.getName());
-            e.printStackTrace();
-
+            try {
+                logger.info("wait for component to start");
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-
-        try {
-            logger.info("wait for component to start");
-            Thread.sleep(20000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @Override
-    public void visit(Compute component) {
-        visit((RootComponent) component);
-    }
-
-    @Override
-    public void visit(Tomcat component) {
-        visit((RootComponent) component);
-    }
-
-    @Override
-    public void visit(MysqlDbms component) {
-        visit((RootComponent) component);
-    }
-
-    @Override
-    public void visit(Database component) {
-        visit((RootComponent) component);
-    }
-
-    @Override
-    public void visit(Dbms component) {
-        visit((RootComponent) component);
-    }
-
-    @Override
-    public void visit(MysqlDatabase component) {
-        visit((RootComponent) component);
-    }
-
-    @Override
-    public void visit(WebApplication component) {
-        visit((RootComponent) component);
     }
 
 
