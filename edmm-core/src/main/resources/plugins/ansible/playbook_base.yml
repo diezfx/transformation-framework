@@ -5,7 +5,7 @@
   gather_facts: no
   tasks:
     - include_vars:
-        file: requiredProperties.json
+        file: ${value.name}_host.json
         name: requiredProperties
     - name: Add host
       add_host:

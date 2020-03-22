@@ -259,8 +259,9 @@ public class MultiLifecycle extends AbstractLifecycle {
         Plan plan = new Plan();
         plan.steps = stepList;
 
-        for (var cont : contextList) {
-            cont.populate();
+        for (int i = 0; i < contextList.size(); i++) {
+            context.setSubFileAcess("step" + i + "_" + stepList.get(i).tech.toString());
+            contextList.get(i).populate();
         }
         Writer writer = new StringWriter();
         context.getModel().getGraph().generateYamlOutput(writer);
