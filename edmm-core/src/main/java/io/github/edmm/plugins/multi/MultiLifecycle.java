@@ -3,18 +3,14 @@ package io.github.edmm.plugins.multi;
 import com.google.gson.Gson;
 import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.PluginFileAccess;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import io.github.edmm.plugins.multi.orchestration.*;
 import lombok.var;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.alg.TransitiveClosure;
 import org.jgrapht.alg.TransitiveReduction;
 import org.jgrapht.graph.DefaultEdge;
@@ -84,8 +80,6 @@ public class MultiLifecycle extends AbstractLifecycle {
         DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge> newGraph = new DirectedAcyclicGraph<>(DefaultEdge.class);
         Graphs.addGraph(newGraph, graph);
 
-
-        System.out.println("merge " + g1 + "with " + g2);
         var edgesIncoming = Stream.concat(newGraph.incomingEdgesOf(g1).stream(), newGraph.incomingEdgesOf(g2).stream())
                 .filter(edge -> !newGraph.getEdgeSource(edge).containsAll(g1) && !newGraph.getEdgeSource(edge).containsAll(g2))
                 .collect(Collectors.toSet());
@@ -98,36 +92,37 @@ public class MultiLifecycle extends AbstractLifecycle {
         newGroup.addAll(g2);
 
         newGraph.addVertex(newGroup);
-
+        boolean containsCycle = false;
 
         for (var edge : edgesOutgoing) {
             var target = newGraph.getEdgeTarget(edge);
             newGraph.removeEdge(edge);
-            newGraph.addEdge(newGroup, target, edge);
+            try {
+                newGraph.addEdge(target, newGroup);
+            } catch (IllegalArgumentException e) {
+                containsCycle = true;
+                break;
+            }
         }
 
         for (var edge : edgesIncoming) {
             var source = newGraph.getEdgeSource(edge);
             newGraph.removeEdge(edge);
-            newGraph.addEdge(source, newGroup, edge);
+            try {
+                newGraph.addEdge(source, newGroup);
+            } catch (IllegalArgumentException e) {
+                containsCycle = true;
+                break;
+            }
         }
 
+        //rollback cycles detected
+        if (containsCycle) {
+            return graph;
+        }
 
         for (var node : newGroup) {
             compSets.put(node.getName(), newGroup);
-        }
-
-        CycleDetector<Set<RootComponent>, DefaultEdge> cycleDetector = new CycleDetector<>(newGraph);
-        //rollback cycles detected
-        if (cycleDetector.detectCycles()) {
-
-            for (var node : g1) {
-                compSets.put(node.getName(), g1);
-            }
-            for (var node : g2) {
-                compSets.put(node.getName(), g2);
-            }
-            return graph;
         }
         newGraph.removeVertex(g1);
         newGraph.removeVertex(g2);
@@ -135,7 +130,7 @@ public class MultiLifecycle extends AbstractLifecycle {
     }
 
 
-    public Graph<Set<RootComponent>, DefaultEdge> DetermineGroupProvisioningOrder(Graph<RootComponent, RootRelation> graph) {
+    public Graph<Set<RootComponent>, DefaultEdge> determineGroupProvisioningOrder(Graph<RootComponent, RootRelation> graph) {
         DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge> targetGraph = new DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge>(DefaultEdge.class);
         Map<String, Set<RootComponent>> componentSets = initGPONodes(targetGraph, graph.vertexSet());
         initGPOEdges(targetGraph, componentSets);
@@ -147,7 +142,6 @@ public class MultiLifecycle extends AbstractLifecycle {
 
         for (var e : order) {
             try {
-                System.out.println(targetGraph);
                 var source = targetGraph.getEdgeSource(e).stream().findFirst().get();
                 var target = targetGraph.getEdgeTarget(e).stream().findFirst().get();
                 if (getTechnology(source) != getTechnology(target)) {
@@ -164,9 +158,10 @@ public class MultiLifecycle extends AbstractLifecycle {
         for (var tech : Technology.values()) {
             var nodes = new HashSet<>(targetGraph.vertexSet());
             for (var gk : nodes) {
-                if (getTechnology(gk) != tech) {
+                if (getTechnology(gk) != tech || !targetGraph.containsVertex(gk)) {
                     continue;
                 }
+
                 TransitiveClosure.INSTANCE.closeDirectedAcyclicGraph(targetGraph);
                 boolean b1 = true;
                 boolean b2 = true;
@@ -174,10 +169,7 @@ public class MultiLifecycle extends AbstractLifecycle {
 
                 var nodeSet = new HashSet<>(targetGraph.vertexSet());
                 for (var gz : nodeSet) {
-                    if (gk.containsAll(gz)) {
-                        continue;
-                    }
-                    if (!targetGraph.containsVertex(gk)) {
+                    if (gk.containsAll(gz) || !targetGraph.containsVertex(gk)) {
                         continue;
                     }
                     for (var e : targetGraph.outgoingEdgesOf(gk)) {
@@ -196,7 +188,6 @@ public class MultiLifecycle extends AbstractLifecycle {
                 }
 
             }
-            System.out.println(targetGraph);
         }
 
 
@@ -288,7 +279,7 @@ public class MultiLifecycle extends AbstractLifecycle {
 
 
         //new Groupprovisioning
-        Graph<Set<RootComponent>, DefaultEdge> groupGraph = (DetermineGroupProvisioningOrder(dependencyGraph));
+        Graph<Set<RootComponent>, DefaultEdge> groupGraph = (determineGroupProvisioningOrder(dependencyGraph));
         createPlan(groupGraph);
 
 
