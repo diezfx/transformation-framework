@@ -2,10 +2,12 @@ package io.github.edmm.plugins.multi.orchestration;
 
 import com.google.gson.JsonObject;
 import freemarker.template.Configuration;
+import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Property;
+import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.multi.MultiPlugin;
@@ -15,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class AnsibleOrchestratorVisitor implements GroupVisitor {
@@ -39,33 +38,25 @@ public class AnsibleOrchestratorVisitor implements GroupVisitor {
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();
         pb.directory(context.getSubDirAccess().getTargetDirectory());
+
+        //important for ip-address/hostname/ssh-port...
+        Set<Compute> hosts = new HashSet<>();
         try {
             for (var component : components) {
-
-
-                Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(graph, component);
-                Map<String, Property> computedProps = new HashMap<>();
-
-                // filter runtime properties and add them to the json
-                for (var prop : allProps.entrySet()) {
-                    if (prop.getValue().getValue() == null) {
-                        continue;
-                    }
-                    if (prop.getValue().isComputed() || prop.getValue().getValue().startsWith("${")) {
-                        computedProps.put(prop.getKey(), prop.getValue());
-                    }
-                }
-
-                var resolvedComputedProps = TopologyGraphHelper.resolveAllPropertyReferences(graph, component, computedProps);
-
-                var json = new JsonObject();
-
-                for (var prop : resolvedComputedProps.entrySet()) {
-                    json.addProperty(prop.getKey().toUpperCase(), prop.getValue().getValue());
-                }
-
+                Compute host = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
+                        .orElseThrow(() -> new IllegalArgumentException("can't find the hosting component"));
+                hosts.add(host);
+                var json = getProperties(graph, component);
                 context.getSubDirAccess().write(component.getName() + "_requiredProps.json", json.toString());
             }
+
+
+            for (var compute : hosts) {
+                var json = getProperties(graph, compute);
+                context.getSubDirAccess().write(compute.getName() + "_host.json", json.toString());
+
+            }
+
             pb.command("ansible-playbook", "deployment.yml");
 
             Process apply = pb.start();
@@ -73,6 +64,31 @@ public class AnsibleOrchestratorVisitor implements GroupVisitor {
         } catch (IOException | InterruptedException e) {
             logger.error(e.toString());
         }
+    }
+
+    public JsonObject getProperties(Graph<RootComponent, RootRelation> graph, RootComponent component) {
+
+        Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(graph, component);
+        Map<String, Property> computedProps = new HashMap<>();
+
+        // filter runtime properties and add them to the json
+        for (var prop : allProps.entrySet()) {
+            if (prop.getValue().getValue() == null) {
+                continue;
+            }
+            if (prop.getValue().isComputed() || prop.getValue().getValue().startsWith("${")) {
+                computedProps.put(prop.getKey(), prop.getValue());
+            }
+        }
+
+        var resolvedComputedProps = TopologyGraphHelper.resolveAllPropertyReferences(graph, component, computedProps);
+
+        var json = new JsonObject();
+
+        for (var prop : resolvedComputedProps.entrySet()) {
+            json.addProperty(prop.getKey().toUpperCase(), prop.getValue().getValue());
+        }
+        return json;
     }
 
 
