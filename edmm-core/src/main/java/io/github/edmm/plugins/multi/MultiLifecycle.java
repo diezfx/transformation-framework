@@ -3,7 +3,9 @@ package io.github.edmm.plugins.multi;
 import com.google.gson.Gson;
 import io.github.edmm.core.plugin.AbstractLifecycle;
 import io.github.edmm.core.plugin.PluginFileAccess;
+import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
+import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
@@ -274,10 +276,6 @@ public class MultiLifecycle extends AbstractLifecycle {
         // Reverse the graph to find sources
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
                 context.getModel().getTopology());
-        // Apply the topological sort
-        TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
-                dependencyGraph);
-
 
         //new Groupprovisioning
         Graph<Set<RootComponent>, DefaultEdge> groupGraph = (determineGroupProvisioningOrder(dependencyGraph));
@@ -311,19 +309,12 @@ public class MultiLifecycle extends AbstractLifecycle {
 
 
             logger.info("Begin orchestration ...");
-            // Reverse the graph to find sources
-            EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
-                    context.getModel().getTopology());
-            // Apply the topological sort
-            TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
-                    dependencyGraph);
-
 
             for (int i = 0; i < plan.steps.size(); i++) {
                 List<RootComponent> components = new ArrayList<>();
                 for (var c : plan.steps.get(i).components) {
                     Optional<RootComponent> comp = context.getModel().getComponent(c);
-                    comp.ifPresent(j -> components.add(j));
+                    comp.ifPresent(components::add);
                 }
                 Technology tech = getTechnology(components.get(0));
                 context.setSubFileAcess("step" + i + "_" + tech.toString());
@@ -340,7 +331,10 @@ public class MultiLifecycle extends AbstractLifecycle {
                     String error = String.format("could not find technology: %s for component %s", tech, components);
                     throw new IllegalArgumentException(error);
                 }
-                visitorContext.visit(components);
+                var deployInfo = components.stream()
+                        .map(c -> new DeploymentModelInfo(c, getComputedProperties(c)))
+                        .collect(Collectors.toList());
+                visitorContext.visit(deployInfo);
             }
             Writer writer = new StringWriter();
             context.getModel().getGraph().generateYamlOutput(writer);
@@ -352,6 +346,16 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     }
 
+    private Map<String, Property> getComputedProperties(RootComponent component) {
+        Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(context.getTopologyGraph(), component);
+        Map<String, Property> computedProps = new HashMap<>();
+        for (var prop : allProps.entrySet()) {
+            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
+                computedProps.put(prop.getKey(), prop.getValue());
+            }
+        }
+        return TopologyGraphHelper.resolveAllPropertyReferences(context.getTopologyGraph(), component, computedProps);
+    }
 
     private Technology getTechnology(RootComponent component) {
         Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()

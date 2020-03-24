@@ -5,12 +5,14 @@ orchestration_technology:
   ansible:
     - db
     - dbms
-  terraform:
-    - ubuntu_db
-  kubernetes:
     - pet_clinic
     - pet_clinic_tomcat
+  terraform:
+    - ubuntu_db
     - ubuntu_app
+  kubernetes:
+
+
 
 components:
 

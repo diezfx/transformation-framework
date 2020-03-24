@@ -44,19 +44,9 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
     }
 
 
-    private V1ConfigMap createConfigMap(RootComponent component, File dir) {
-        Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(graph, component);
-        Map<String, Property> computedProps = new HashMap<>();
-        for (var prop : allProps.entrySet()) {
-            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
-                computedProps.put(prop.getKey(), prop.getValue());
-            }
-        }
+    private V1ConfigMap createConfigMap(RootComponent component, Map<String, Property> computedProps, File dir) {
 
-        var resolvedComputedProps = TopologyGraphHelper.resolveAllPropertyReferences(graph, component, computedProps);
-
-
-        var config = new ConfigMapResource(component, resolvedComputedProps);
+        var config = new ConfigMapResource(component, computedProps);
         config.build();
         try {
             File serviceYaml = new File(dir, component.getLabel() + "-config.yaml");
@@ -108,9 +98,9 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
     }
 
-    public void deployConfigMap(RootComponent component, File dir, CoreV1Api api) {
+    public void deployConfigMap(RootComponent component, Map<String, Property> props, File dir, CoreV1Api api) {
         try {
-            V1ConfigMap config = createConfigMap(component, dir);
+            V1ConfigMap config = createConfigMap(component, props, dir);
             // this throws an exception if already exists
             try {
                 api.createNamespacedConfigMap(config.getMetadata().getNamespace(), config, true, null, null);
@@ -128,16 +118,16 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
     }
 
 
-    public void visit(List<RootComponent> components) {
+    public void visit(List<DeploymentModelInfo> deployInfos) {
 
-        for (var component : components) {
-            if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, component)) {
+        for (var info : deployInfos) {
+            if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, info.component)) {
                 return;
             }
             PluginFileAccess fileAccess = this.context.getSubDirAccess();
 
             ProcessBuilder pb = new ProcessBuilder();
-            File compDir = new File(fileAccess.getTargetDirectory(), component.getName());
+            File compDir = new File(fileAccess.getTargetDirectory(), info.component.getName());
             pb.directory(compDir);
             pb.inheritIO();
 
@@ -147,12 +137,12 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
             // docker build &push
             try {
-                pb.command("docker", "build", "-t", component.getLabel() + ":latest", ".");
+                pb.command("docker", "build", "-t", info.component.getLabel() + ":latest", ".");
                 Process init = pb.start();
                 init.waitFor();
-                pb.command("docker", "tag", component.getLabel() + ":latest", registry + component.getLabel());
+                pb.command("docker", "tag", info.component.getLabel() + ":latest", registry + info.component.getLabel());
                 pb.start().waitFor();
-                pb.command("docker", "push", registry + component.getLabel());
+                pb.command("docker", "push", registry + info.component.getLabel());
                 pb.start().waitFor();
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -166,14 +156,14 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
                 api.setApiClient(client);
 
                 // contains the runtime properties
-                deployConfigMap(component, compDir, api);
+                deployConfigMap(info.component, info.properties, compDir, api);
 
                 // deploy everything
-                logger.info("deployed configMap for {}", component.getName());
-                deployDeployment(component, compDir, deploymentApi);
-                logger.info("deployed deployment for {}", component.getName());
-                Optional<V1Service> service = deployService(component, compDir, api);
-                logger.info("deployed service for {}", component.getName());
+                logger.info("deployed configMap for {}", info.component.getName());
+                deployDeployment(info.component, compDir, deploymentApi);
+                logger.info("deployed deployment for {}", info.component.getName());
+                Optional<V1Service> service = deployService(info.component, compDir, api);
+                logger.info("deployed service for {}", info.component.getName());
 
                 // read output
                 for (var port : service.get().getSpec().getPorts()) {
@@ -181,11 +171,11 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
                 }
                 logger.info("the clusterIP is: {}", service.get().getSpec().getClusterIP());
-                component.addProperty("hostname", service.get().getSpec().getClusterIP());
+                info.component.addProperty("hostname", service.get().getSpec().getClusterIP());
 
 
             } catch (IOException e) {
-                logger.error("could not deploy comp: {}", component.getName());
+                logger.error("could not deploy comp: {}", info.component.getName());
                 e.printStackTrace();
 
             }

@@ -124,7 +124,6 @@ public abstract class TopologyGraphHelper {
     public static Map<String, Property> resolveAllPropertyReferences(Graph<RootComponent, RootRelation> graph, RootComponent component, Map<String, Property> props) {
 
         Map<String, Property> result = new HashMap<>();
-
         for (var prop : props.entrySet()) {
             if (prop.getValue().getValue() != null && prop.getValue().getValue().contains("${")) {
                 result.put(prop.getKey(), resolveReferencedProperty(graph, component, prop.getValue()));
@@ -132,7 +131,6 @@ public abstract class TopologyGraphHelper {
                 result.put(prop.getKey(), prop.getValue());
             }
         }
-
         return result;
 
 

@@ -30,15 +30,15 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
     }
 
     @SneakyThrows
-    public void visit(List<RootComponent> components) {
+    public void visit(List<DeploymentModelInfo> deployInfos) {
         Gson gson = new Gson();
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();
         pb.directory(context.getSubDirAccess().getTargetDirectory());
 
 
-        for (var comp : components) {
-            List<Artifact> providerInfo = comp.getArtifacts().stream().filter(a -> a.getName().equals("provider"))
+        for (var info : deployInfos) {
+            List<Artifact> providerInfo = info.component.getArtifacts().stream().filter(a -> a.getName().equals("provider"))
                     .collect(Collectors.toList());
             // todo clean solution
             if (providerInfo.isEmpty()) {
@@ -46,16 +46,12 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
             }
             // read input variables
             String openstackProviderInfo = context.getSubDirAccess().readToString(providerInfo.iterator().next().getValue());
-
             HashMap<String, String> obj = gson.fromJson(openstackProviderInfo, HashMap.class);
 
             Map<String, String> env = pb.environment();
-
-
             for (String key : obj.keySet()) {
                 env.put("TF_VAR_" + key, obj.get(key));
             }
-
 
             // deploy
             pb.command("terraform", "init");
@@ -69,11 +65,11 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
 
 
             // read output variables and write back in model
-            String computeInfo = context.getSubDirAccess().readToStringTargetDir(comp.getName() + "_computed_properties" + ".json");
+            String computeInfo = context.getSubDirAccess().readToStringTargetDir(info.component.getName() + "_computed_properties" + ".json");
             HashMap<String, String> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, String>>() {
             }.getType());
 
-            Map<String, Property> properties = comp.getProperties();
+            Map<String, Property> properties = info.component.getProperties();
 
 
             // set all properties
@@ -82,7 +78,7 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
 
                 if (!properties.containsKey(computed_prop.getKey())) {
                     logger.warn(String.format("The property(%s) is not there, so it was added to props", computed_prop.getKey()));
-                    comp.addProperty(computed_prop.getKey(), computed_prop.getValue());
+                    info.component.addProperty(computed_prop.getKey(), computed_prop.getValue());
                 } else {
                     var prop = properties.get(computed_prop.getKey());
                     prop.setValue(computed_prop.getValue());
