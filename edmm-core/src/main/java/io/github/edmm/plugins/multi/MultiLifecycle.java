@@ -8,15 +8,9 @@ import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
+import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
 import io.github.edmm.plugins.multi.orchestration.*;
 import lombok.var;
-import org.jgrapht.Graph;
-import org.jgrapht.Graphs;
-import org.jgrapht.alg.TransitiveClosure;
-import org.jgrapht.alg.TransitiveReduction;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -27,7 +21,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MultiLifecycle extends AbstractLifecycle {
 
@@ -43,194 +36,38 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     }
 
-    private Map<String, Set<RootComponent>> initGPONodes(Graph<Set<RootComponent>, DefaultEdge> graph, Set<RootComponent> components) {
-        Map<String, Set<RootComponent>> compSets = new HashMap<>();
-        components.forEach((component) -> {
-            Set<RootComponent> compSet = new HashSet<>();
-            compSet.add(component);
-            compSets.put(component.getName(), compSet);
-            graph.addVertex(compSet);
-        });
 
-        return compSets;
-
-
-    }
-
-    private void initGPOEdges(Graph<Set<RootComponent>, DefaultEdge> graph, Map<String, Set<RootComponent>> compSets) {
-        for (Set<RootComponent> sourceComponent : graph.vertexSet()) {
-            for (RootRelation relation : sourceComponent.stream().findFirst().get().getRelations()) {
-                Set<RootComponent> targetComponent = compSets.get(relation.getTarget());
-                graph.addEdge(targetComponent, sourceComponent);
-            }
-        }
-    }
-
-    /**
-     * merge g1 and g2
-     * remove nodes redirect edges to new node
-     *
-     * @param graph
-     * @param g1
-     * @param g2
-     * @param compSets
-     */
-    public DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge> mergeGroups(DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge> graph, Set<RootComponent> g1, Set<RootComponent> g2, Map<String, Set<RootComponent>> compSets) {
-        // get all incoming and outgoing edges
-
-        //make a backup
-        DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge> newGraph = new DirectedAcyclicGraph<>(DefaultEdge.class);
-        Graphs.addGraph(newGraph, graph);
-
-        var edgesIncoming = Stream.concat(newGraph.incomingEdgesOf(g1).stream(), newGraph.incomingEdgesOf(g2).stream())
-                .filter(edge -> !newGraph.getEdgeSource(edge).containsAll(g1) && !newGraph.getEdgeSource(edge).containsAll(g2))
-                .collect(Collectors.toSet());
-        var edgesOutgoing = Stream.concat(newGraph.outgoingEdgesOf(g1).stream(), newGraph.outgoingEdgesOf(g2).stream())
-                .filter(edge -> !newGraph.getEdgeTarget(edge).containsAll(g1) && !newGraph.getEdgeTarget(edge).containsAll(g2))
-                .collect(Collectors.toSet());
-
-        var newGroup = new HashSet<RootComponent>();
-        newGroup.addAll(g1);
-        newGroup.addAll(g2);
-
-        newGraph.addVertex(newGroup);
-        boolean containsCycle = false;
-
-        for (var edge : edgesOutgoing) {
-            var target = newGraph.getEdgeTarget(edge);
-            newGraph.removeEdge(edge);
-            try {
-                newGraph.addEdge(target, newGroup);
-            } catch (IllegalArgumentException e) {
-                containsCycle = true;
-                break;
-            }
-        }
-
-        for (var edge : edgesIncoming) {
-            var source = newGraph.getEdgeSource(edge);
-            newGraph.removeEdge(edge);
-            try {
-                newGraph.addEdge(source, newGroup);
-            } catch (IllegalArgumentException e) {
-                containsCycle = true;
-                break;
-            }
-        }
-
-        //rollback cycles detected
-        if (containsCycle) {
-            return graph;
-        }
-
-        for (var node : newGroup) {
-            compSets.put(node.getName(), newGroup);
-        }
-        newGraph.removeVertex(g1);
-        newGraph.removeVertex(g2);
-        return newGraph;
-    }
-
-
-    public Graph<Set<RootComponent>, DefaultEdge> determineGroupProvisioningOrder(Graph<RootComponent, RootRelation> graph) {
-        DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge> targetGraph = new DirectedAcyclicGraph<Set<RootComponent>, DefaultEdge>(DefaultEdge.class);
-        Map<String, Set<RootComponent>> componentSets = initGPONodes(targetGraph, graph.vertexSet());
-        initGPOEdges(targetGraph, componentSets);
-
-        var order = new HashSet<>(targetGraph.edgeSet());
-
-        TransitiveReduction.INSTANCE.reduce(targetGraph);
-
-
-        for (var e : order) {
-            try {
-                var source = targetGraph.getEdgeSource(e).stream().findFirst().get();
-                var target = targetGraph.getEdgeTarget(e).stream().findFirst().get();
-                if (getTechnology(source) != getTechnology(target)) {
-                    continue;
-                }
-                targetGraph = mergeGroups(targetGraph, componentSets.get(source.getName()), componentSets.get(target.getName()), componentSets);
-
-
-            } catch (IllegalArgumentException err) {
-                err.printStackTrace();
-            }
-
-        }
-        for (var tech : Technology.values()) {
-            var nodes = new HashSet<>(targetGraph.vertexSet());
-            for (var gk : nodes) {
-                if (getTechnology(gk) != tech || !targetGraph.containsVertex(gk)) {
-                    continue;
-                }
-
-                TransitiveClosure.INSTANCE.closeDirectedAcyclicGraph(targetGraph);
-                boolean b1 = true;
-                boolean b2 = true;
-                // no incoming edge exists
-
-                var nodeSet = new HashSet<>(targetGraph.vertexSet());
-                for (var gz : nodeSet) {
-                    if (gk.containsAll(gz) || !targetGraph.containsVertex(gk)) {
-                        continue;
-                    }
-                    for (var e : targetGraph.outgoingEdgesOf(gk)) {
-                        if (targetGraph.getEdgeTarget(e).containsAll(gz)) {
-                            b1 = false;
-                        }
-                    }
-                    for (var e : targetGraph.outgoingEdgesOf(gz)) {
-                        if (targetGraph.getEdgeTarget(e).containsAll(gk)) {
-                            b2 = false;
-                        }
-                    }
-                    if (getTechnology(gk) == getTechnology(gz) && (b1 || b2)) {
-                        targetGraph = mergeGroups(targetGraph, gz, gk, componentSets);
-                    }
-                }
-
-            }
-        }
-
-
-        return targetGraph;
-    }
-
-
-    public void createPlan(Graph<Set<RootComponent>, DefaultEdge> graph) {
+    public void createPlan(List<Group> sortedGroups) {
 
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
                 context.getModel().getTopology());
         TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
                 dependencyGraph);
 
-        TopologicalOrderIterator<Set<RootComponent>, DefaultEdge> iteratorgroupGraph = new TopologicalOrderIterator<>(
-
-                graph);
-
 
         List<PlanStep> stepList = new ArrayList<>();
         List<MultiVisitor> contextList = new ArrayList<>();
-        List<Set<RootComponent>> groups = new ArrayList<>();
+        List<Group> groups = new ArrayList<>();
 
         //init contexts
         MultiVisitor visitorContext;
-        while (iteratorgroupGraph.hasNext()) {
-            var group = iteratorgroupGraph.next();
-            if (getTechnology(group) == Technology.ANSIBLE) {
+
+        for (var group : sortedGroups) {
+            if (group.getTechnology() == Technology.ANSIBLE) {
                 visitorContext = new AnsibleVisitor(context);
-            } else if (getTechnology(group) == Technology.TERRAFORM) {
+            } else if (group.getTechnology() == Technology.TERRAFORM) {
                 visitorContext = new TerraformVisitor(context);
-            } else if (getTechnology(group) == Technology.KUBERNETES) {
+            } else if (group.getTechnology() == Technology.KUBERNETES) {
                 visitorContext = new KubernetesVisitor(context);
             } else {
-                String error = String.format("could not find technology: %s for components %s", getTechnology(group), group);
+                String error = String.format("could not find technology: %s for components %s", group.getTechnology(), group);
                 throw new IllegalArgumentException(error);
             }
             groups.add(group);
             contextList.add(visitorContext);
-            stepList.add(new PlanStep(getTechnology(group)));
+            stepList.add(new PlanStep(group.getTechnology()));
         }
+
 
 
         while (iterator.hasNext()) {
@@ -238,12 +75,12 @@ public class MultiLifecycle extends AbstractLifecycle {
             RootComponent comp = iterator.next();
             int index = -1;
             for (int i = 0; i < groups.size(); i++) {
-                if (groups.get(i).contains(comp)) {
+                if (groups.get(i).getGroupComponents().contains(comp)) {
                     index = i;
                     break;
                 }
             }
-            context.setSubFileAcess("step" + index + "_" + getTechnology(comp).toString());
+            context.setSubFileAcess("step" + index + "_" + context.getModel().getTechnology(comp));
             comp.accept(contextList.get(index));
             stepList.get(index).components.add(comp.getNormalizedName());
 
@@ -271,15 +108,9 @@ public class MultiLifecycle extends AbstractLifecycle {
     @Override
     public void transform() {
         logger.info("Begin transformation to Multi...");
-        PluginFileAccess fileAccess = context.getFileAccess();
-
-        // Reverse the graph to find sources
-        EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
-                context.getModel().getTopology());
-
         //new Groupprovisioning
-        Graph<Set<RootComponent>, DefaultEdge> groupGraph = (determineGroupProvisioningOrder(dependencyGraph));
-        createPlan(groupGraph);
+        List<Group> sortedGroups = GroupProvisioning.determineProvisiongingOrder(context.getModel());
+        createPlan(sortedGroups);
 
 
         // VisitorHelper.visit(context.getModel().getComponents(), visitor, component ->
@@ -316,7 +147,7 @@ public class MultiLifecycle extends AbstractLifecycle {
                     Optional<RootComponent> comp = context.getModel().getComponent(c);
                     comp.ifPresent(components::add);
                 }
-                Technology tech = getTechnology(components.get(0));
+                Technology tech = plan.steps.get(i).tech;
                 context.setSubFileAcess("step" + i + "_" + tech.toString());
 
                 GroupVisitor visitorContext;
@@ -357,15 +188,7 @@ public class MultiLifecycle extends AbstractLifecycle {
         return TopologyGraphHelper.resolveAllPropertyReferences(context.getTopologyGraph(), component, computedProps);
     }
 
-    private Technology getTechnology(RootComponent component) {
-        Optional<Map<RootComponent, Technology>> deploymentTechList = context.getModel().getTechnologyMapping()
-                .map(OrchestrationTechnologyMapping::getTechForComponents);
-        return deploymentTechList.map(c -> c.get(component)).orElse(Technology.UNDEFINED);
-    }
 
-    private Technology getTechnology(Set<RootComponent> components) {
-        return getTechnology(components.stream().findFirst().get());
-    }
 
 
 }

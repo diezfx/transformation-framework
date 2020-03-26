@@ -9,6 +9,8 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
+import io.github.edmm.plugins.multi.Technology;
+import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import lombok.var;
 import org.jgrapht.Graph;
 
@@ -256,4 +258,5 @@ public abstract class TopologyGraphHelper {
         return sourceComponents.isEmpty();
 
     }
+
 }

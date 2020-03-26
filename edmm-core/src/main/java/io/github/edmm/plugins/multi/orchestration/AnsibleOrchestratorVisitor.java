@@ -41,20 +41,20 @@ public class AnsibleOrchestratorVisitor implements GroupVisitor {
         pb.directory(context.getSubDirAccess().getTargetDirectory());
 
         //important for ip-address/hostname/ssh-port...
-        Set<DeploymentModelInfo> hosts = new HashSet<>();
+        Set<Compute> hosts = new HashSet<>();
         try {
             for (var info : deployInfos) {
                 Compute host = TopologyGraphHelper.resolveHostingComputeComponent(graph, info.component)
                         .orElseThrow(() -> new IllegalArgumentException("can't find the hosting component"));
-                hosts.add(info);
+                hosts.add(host);
                 var json = convertPropsToJson(info.properties);
                 context.getSubDirAccess().write(info.component.getName() + "_requiredProps.json", json.toString());
             }
 
 
             for (var compute : hosts) {
-                var json = convertPropsToJson(compute.properties);
-                context.getSubDirAccess().write(compute.component.getName() + "_host.json", json.toString());
+                var json = convertPropsToJson(compute.getProperties());
+                context.getSubDirAccess().write(compute.getName() + "_host.json", json.toString());
 
             }
 

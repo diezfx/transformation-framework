@@ -57,7 +57,6 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
         component.addProperty("hostname", null);
         PluginFileAccess fileAccess = context.getSubDirAccess();
         Container stack = new Container();
-
         List<RootComponent> compStack = TopologyGraphHelper.resolveAllHostingComponents(graph, component);
         for (var comp : compStack) {
             logger.info("add comp:{} to stack", comp.getName());
@@ -67,11 +66,15 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
         resolveBaseImage(stack);
         buildDockerfile(stack, fileAccess);
 
-        KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, component,context.getTopologyGraph(), fileAccess);
+        KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, component, context.getTopologyGraph(), fileAccess);
         resourceBuilder.populateResources();
 
     }
 
+    @Override
+    public void visit(Compute component) {
+        visit((RootComponent) component);
+    }
 
     @Override
     public void visit(Tomcat component) {

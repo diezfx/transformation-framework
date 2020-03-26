@@ -8,6 +8,7 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.TypeWrapper;
+import io.github.edmm.plugins.multi.Technology;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
 import lombok.Getter;
 import lombok.NonNull;
@@ -36,7 +37,7 @@ public final class DeploymentModel {
 
     private final Map<String, RootComponent> componentMap;
     private final Graph<RootComponent, RootRelation> topology = new DirectedMultigraph<>(RootRelation.class);
-    private Set<Graph<RootComponent, RootRelation>> stacks = new HashSet<>();
+    private final Set<Graph<RootComponent, RootRelation>> stacks = new HashSet<>();
 
     public DeploymentModel(String name, EntityGraph graph) {
         this.name = name;
@@ -97,6 +98,12 @@ public final class DeploymentModel {
     public Optional<OrchestrationTechnologyMapping> getTechnologyMapping() {
         return graph.getOrchestrationTechnologyEntity().map(entity -> new OrchestrationTechnologyMapping((MappingEntity) entity, getComponents()));
 
+    }
+
+    public Technology getTechnology(RootComponent component) {
+        Optional<Map<RootComponent, Technology>> deploymentTechList = getTechnologyMapping()
+                .map(OrchestrationTechnologyMapping::getTechForComponents);
+        return deploymentTechList.map(c -> c.get(component)).orElse(Technology.UNDEFINED);
     }
 
     public Graph<RootComponent, RootRelation> getTopology() {
