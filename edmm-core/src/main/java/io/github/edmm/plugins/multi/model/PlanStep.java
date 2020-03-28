@@ -1,4 +1,4 @@
-package io.github.edmm.plugins.multi.orchestration;
+package io.github.edmm.plugins.multi.model;
 
 import io.github.edmm.plugins.multi.Technology;
 import org.yaml.snakeyaml.Yaml;
@@ -11,7 +11,7 @@ import java.util.List;
 public class PlanStep {
     public Technology tech;
     // all components that will be deployed in this step
-    public List<String> components;
+    public List<ComponentResources> components;
 
 
     public PlanStep(Technology tech) {

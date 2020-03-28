@@ -19,12 +19,7 @@ import static java.util.stream.Collectors.toList;
 
 public class OrchestrationTechnologyMapping extends BaseElement {
 
-    private Set<RootComponent> components;
-
-    // todo find solution without this
-    public OrchestrationTechnologyMapping(MappingEntity entity) {
-        super(entity);
-    }
+    private final Set<RootComponent> components;
 
     public OrchestrationTechnologyMapping(MappingEntity entity, Set<RootComponent> components) {
         super(entity);

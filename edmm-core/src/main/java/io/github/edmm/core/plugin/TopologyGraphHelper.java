@@ -233,8 +233,6 @@ public abstract class TopologyGraphHelper {
         Optional<RootComponent> host = TopologyGraphHelper.resolveComponentHostedOn(graph, component);
         while (host.isPresent()) {
             componentStack.add(host.get());
-
-
             host = TopologyGraphHelper.resolveComponentHostedOn(graph, host.get());
         }
         Collections.reverse(componentStack);

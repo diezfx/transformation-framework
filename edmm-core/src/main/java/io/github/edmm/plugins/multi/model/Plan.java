@@ -1,9 +1,7 @@
-package io.github.edmm.plugins.multi.orchestration;
+package io.github.edmm.plugins.multi.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.github.edmm.plugins.multi.Technology;
-import lombok.Data;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 

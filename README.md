@@ -32,14 +32,20 @@ The multi plugin is executed in different lifecycle phases.
 
 The two special phases are `transform` and `orchestration`.
 The phases are called from `edmm-core/src/main/java/io/github/edmm/plugins/multi/MultiLifecycle.java`.
-Most of the implementation is in `edmm-core/src/main/java/io/github/edmm/plugins/multi/.
+Most of the implementation is in `edmm-core/src/main/java/io/github/edmm/plugins/multi/`.
 
 
 ### Transform
-The general idea of the transformation is to visit every component once. 
-At the moment all components are visited in the order they will be deployed. This means it's converted to a reversed directed acyclic graph and then iterated.
-To visit a component, first the chosen deployment technology is looked up. If this component is the topmost component of this particular technology,
-then visit all source component of this tech and this component at last.
+
+A graph with reversed edges is built. Then, components that don't create a cycle are grouped.
+Related to https://link.springer.com/article/10.1007/s00607-019-00721-8 \
+
+For each group a "context" is created that collects all the needed infos for the transforamtion.
+Including a differentation which attributes are only known during runtime and which not.
+Every component is "visited" in order and the result added to the context.
+
+At the end the framework transforms this complete information to a concrete deployment model.
+Additionally it creates a deployment plan `execution.plan.json`. Here the order of deployment is defined.
 
 
 The Visitor implementation depends on the tech.
@@ -52,6 +58,8 @@ This can be changed in `TopologyGraphHelper.findAllProperties`. When uncommentin
 as <targetCompname>.<variablename>.
 
 
+
+
 [Kubernetes](kubernetes.md)
 [Ansible](ansible.md)
 [Terraform](terraform.md)
@@ -59,8 +67,11 @@ as <targetCompname>.<variablename>.
 
 
 ### Orchestration(name is open for alternatives)
-Every top_component of a technology is visited in order.
-The major difference is the implementation of the visitors.
+
+The orchestration step reads the plan `execution.plan.json`. Here the groups and their technology are defined.
+These are read and then the corresponing model is executed. 
+
+The execution works as follows:
 In this step the runtime properties are provided. Then the deployment is executed.
 After that the properties that become known during execution are added back to the model.
 After every step the `state.yaml` is updated to reflect the new infos.

@@ -48,8 +48,8 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
         logger.info("Generate a play for component " + component.getName());
         copyFiles(component);
 
-        Map<String, String> envVars = collectEnvVars(component);
-        List<String> envVarsRuntime = collectRuntimeEnvVars(component);
+        Map<String, String> envVars = TransformationHelper.collectEnvVars(graph, component);
+        List<String> envVarsRuntime = TransformationHelper.collectRuntimeEnvVars(graph, component);
         // scripts that are executed
         List<AnsibleTask> tasks = prepareTasks(collectOperations(component), component);
         List<AnsibleFile> files = collectFiles(component);
@@ -109,51 +109,9 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
     }
 
 
-    private boolean matchesBlacklist(Map.Entry<String, Property> prop) {
-        String[] blacklist = {"*key_name*", "*public_key*", "hostname"};
-        for (var blacklistVal : blacklist) {
-            if (FilenameUtils.wildcardMatch(prop.getKey(), blacklistVal)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Map<String, String> collectEnvVars(RootComponent component) {
-        Map<String, String> envVars = new HashMap<>();
-        var allProps = TopologyGraphHelper.findAllProperties(graph, component);
-
-        for (var prop : allProps.entrySet()) {
-            if (matchesBlacklist(prop)) {
-                continue;
-            }
 
 
-            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
-                continue;
-            }
-            envVars.put(prop.getKey().toUpperCase(), prop.getValue().getValue());
-        }
 
-        return envVars;
-    }
-
-    private List<String> collectRuntimeEnvVars(RootComponent component) {
-        //runtime vars
-        List<String> envVars = new ArrayList<>();
-        var allProps = TopologyGraphHelper.findAllProperties(graph, component);
-
-        for (var prop : allProps.entrySet()) {
-
-            if (matchesBlacklist(prop)) {
-                continue;
-            }
-            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
-                envVars.add(prop.getKey().toUpperCase());
-            }
-        }
-        return envVars;
-    }
 
     private List<AnsibleFile> collectFiles(RootComponent component) {
 
