@@ -10,17 +10,14 @@
 ## kubernetes
 - implement kubernetes (see kubernetes.md)
 - [x] add kubernetes transformer
-- [-] add kubernetes orchestrator
+- [x] add kubernetes orchestrator
 - [x] use configmap for runtime vars
 - [x] read vars during runtime 
-## cloudformation
-- [ ]implement cloudformation
 
 
 
 ## later
 - [ ] testing!!
-- [ ] remove todos
 
 
 ## done 

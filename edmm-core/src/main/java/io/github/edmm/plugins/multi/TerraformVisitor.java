@@ -12,8 +12,8 @@ import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.RelationVisitor;
-import io.github.edmm.plugins.terraform.model.Aws;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
+import io.github.edmm.plugins.terraform.model.Openstack;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
@@ -44,7 +44,6 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
     @SneakyThrows
     @Override
     public void visit(Compute component) {
-        //todo dont use aws instance for openstack
         String abolutePrivkeyPath;
         Path privKeyValue = Paths.get(component.getPrivateKeyPath().get());
         if(privKeyValue.isAbsolute()){
@@ -54,11 +53,12 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
             System.out.println(component.getPrivateKeyPath().get());
            abolutePrivkeyPath= new File(context.getFileAccess().getSourceDirectory(),component.getPrivateKeyPath().get()).getAbsolutePath();
         }
-        Aws.Instance ec2 = Aws.Instance.builder().name(component.getNormalizedName())
+        Openstack.Instance vm = Openstack.Instance.builder().name(component.getNormalizedName())
                 .keyName(component.getKeyName().get())
                 .privKeyFile(abolutePrivkeyPath)
                 .build();
         List<String> operations = collectOperations(component);
+
 
         //convert relative to absolute paths
 
@@ -66,11 +66,12 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
         // add properties that are needed for this component to work
         component.addProperty("hostname", null);
 
-        ec2.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
+        vm.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
+
 
         PluginFileAccess fileAccess = context.getSubDirAccess();
         Map<String, Object> data = new HashMap<>();
-        data.put("ec2", ec2);
+        data.put("ec2", vm);
 
         String filename = String.format("%s.tf", component.getNormalizedName());
         try {
@@ -95,10 +96,11 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
         // set static env variables
         String envScriptName = String.format("%s_env.sh", component.getNormalizedName());
         BashScript envScript = new BashScript(fileAccess, envScriptName);
-        Map<String, String> envVars = collectEnvVars(component);
+        Map<String, String> envVars = TransformationHelper.collectEnvVars(graph, component);
         if (envVars.size() > 0) {
             envVars.forEach((name, value) -> envScript.append("export " + name + "=" + value));
         }
+
         Map<String, Object> data = new HashMap<>();
         data.put("name", component.getName());
         data.put("files", files);
@@ -137,18 +139,7 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
         return operations;
     }
 
-    private Map<String, String> collectEnvVars(RootComponent component) {
 
-        Map<String, String> envVars = new HashMap<>();
-        String[] blacklist = {"key_name", "public_key"};
-        component.getProperties().values().stream().filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                .filter(p -> p.getValue() != null || p.isComputed() == false).forEach(p -> {
-            String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
-            envVars.put(name, p.getValue());
-        });
-
-        return envVars;
-    }
 
 
     @Override
