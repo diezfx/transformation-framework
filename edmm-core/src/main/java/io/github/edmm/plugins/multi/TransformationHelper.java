@@ -17,7 +17,7 @@ public class TransformationHelper {
 
 
     static boolean matchesBlacklist(Map.Entry<String, Property> prop) {
-        String[] blacklist = {"*key_name*", "*public_key*", "hostname"};
+        String[] blacklist = {"*key_name*", "*public_key*"};
         for (var blacklistVal : blacklist) {
             if (FilenameUtils.wildcardMatch(prop.getKey(), blacklistVal)) {
                 return true;

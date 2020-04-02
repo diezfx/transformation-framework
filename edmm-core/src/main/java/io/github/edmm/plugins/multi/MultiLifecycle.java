@@ -10,6 +10,9 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
 import io.github.edmm.plugins.multi.orchestration.*;
+import io.github.edmm.plugins.multi.model.ComponentResources;
+import io.github.edmm.plugins.multi.model.Plan;
+import io.github.edmm.plugins.multi.model.PlanStep;
 import lombok.var;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -81,8 +84,13 @@ public class MultiLifecycle extends AbstractLifecycle {
                 }
             }
             context.setSubFileAcess("step" + index + "_" + context.getModel().getTechnology(comp));
+            // this has to happen first at the moment; otherwise the announced output vars from comp are set as input as well
+            var propList = TransformationHelper.collectRuntimeEnvVars(context.getTopologyGraph(), comp);
+            stepList.get(index).components.add(new ComponentResources(comp.getName(), propList));
+
+
             comp.accept(contextList.get(index));
-            stepList.get(index).components.add(comp.getNormalizedName());
+
 
         }
 
@@ -144,7 +152,7 @@ public class MultiLifecycle extends AbstractLifecycle {
             for (int i = 0; i < plan.steps.size(); i++) {
                 List<RootComponent> components = new ArrayList<>();
                 for (var c : plan.steps.get(i).components) {
-                    Optional<RootComponent> comp = context.getModel().getComponent(c);
+                    Optional<RootComponent> comp = context.getModel().getComponent(c.getName());
                     comp.ifPresent(components::add);
                 }
                 Technology tech = plan.steps.get(i).tech;
