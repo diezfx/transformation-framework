@@ -44,8 +44,7 @@ provider "openstack" {
 
 
 data "tls_public_key" "priv_key" {
-  private_key_pem = file($
-{ec2.privKeyFile})
+  private_key_pem = file(${ec2.privKeyFile})
 }
 
 
