@@ -44,15 +44,15 @@ provider "openstack" {
 
 
 data "tls_public_key" "priv_key" {
-  private_key_pem = file(${ec2.privKeyFile})
+  private_key_pem = file("${ec2.privKeyFile}")
 }
 
 
-resource "openstack_compute_instance_v2" ${ec2.name} {
-name = ${ec2.name}
+resource "openstack_compute_instance_v2" "${ec2.name}" {
+name = "${ec2.name}"
 image_name = "Ubuntu 18.04"
 flavor_name = "m1.small"
-key_pair = ${ec2.keyName}
+key_pair = "${ec2.keyName}"
 security_groups = [
 "default"]
 
