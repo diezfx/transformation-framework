@@ -12,6 +12,7 @@ import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.RelationVisitor;
+import io.github.edmm.plugins.terraform.model.Aws;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
 import io.github.edmm.plugins.terraform.model.Openstack;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
@@ -27,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class TerraformVisitor implements MultiVisitor, RelationVisitor {
 
@@ -34,6 +36,7 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
     protected final TransformationContext context;
     protected final Configuration cfg = TemplateHelper.forClasspath(MultiPlugin.class, "/plugins/multi");
     protected final Graph<RootComponent, RootRelation> graph;
+    private final Map<Compute, Openstack.Instance> computeInstances = new HashMap<>();
 
     public TerraformVisitor(TransformationContext context) {
         this.context = context;
@@ -84,80 +87,68 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
             System.out.println(component.getPrivateKeyPath().get());
            abolutePrivkeyPath= new File(context.getFileAccess().getSourceDirectory(),component.getPrivateKeyPath().get()).getAbsolutePath();
         }
-        Openstack.Instance vm = Openstack.Instance.builder().name(component.getNormalizedName())
+
+
+        Openstack.Instance openstackInstance = Openstack.Instance.builder()
+                .name(component.getNormalizedName())
                 .keyName(component.getKeyName().get())
                 .privKeyFile(abolutePrivkeyPath)
                 .build();
         List<String> operations = collectOperations(component);
+        openstackInstance.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
+        openstackInstance.addFileProvisioner(new FileProvisioner("./env.sh", "/opt/env.sh"));
+        computeInstances.put(component, openstackInstance);
 
-
-        //convert relative to absolute paths
-
-
-        // add properties that are needed for this component to work
+        // add properties that are created by this componentent to announce for the others
         component.addProperty("hostname", null);
-
-        vm.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
-
-
-        PluginFileAccess fileAccess = context.getSubDirAccess();
-        Map<String, Object> data = new HashMap<>();
-        data.put("ec2", vm);
-
-        String filename = String.format("%s.tf", component.getNormalizedName());
-        try {
-            fileAccess.write(filename, TemplateHelper.toString(cfg, "compute.tf", data));
-        } catch (IOException e) {
-            logger.error("Failed to write Terraform file", e);
-            throw new TransformationException(e);
-        }
-
         component.setTransformed(true);
+    }
+
+
+    private void collectFileProvisioners(RootComponent component) {
+        Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component);
+        if (optionalCompute.isPresent()) {
+            Compute hostingCompute = optionalCompute.get();
+            Openstack.Instance awsInstance = computeInstances.get(hostingCompute);
+            for (Artifact artifact : component.getArtifacts()) {
+                String destination = "/opt/" + component.getNormalizedName();
+                logger.info("file provisioner"+artifact.getValue());
+                awsInstance.addFileProvisioner(new FileProvisioner(artifact.getValue(), destination));
+            }
+        }
+    }
+
+    private void collectRemoteExecProvisioners(RootComponent component) {
+        Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component);
+        if (optionalCompute.isPresent()) {
+            Compute hostingCompute = optionalCompute.get();
+            Openstack.Instance awsInstance = computeInstances.get(hostingCompute);
+            List<String> operations = collectOperations(component);
+            awsInstance.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
+        }
+    }
+
+    private void collectEnvVars(RootComponent component) {
+        Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component);
+        if (optionalCompute.isPresent()) {
+            Compute hostingCompute = optionalCompute.get();
+            Openstack.Instance openstackInstance = computeInstances.get(hostingCompute);
+            String[] blacklist = {"key_name", "public_key"};
+            component.getProperties().values().stream()
+                    .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                    .forEach(p -> {
+                        String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
+                        openstackInstance.addEnvVar(name, p.getValue());
+                    });
+        }
     }
 
     @Override
     public void visit(RootComponent component) {
-
-        Optional<Compute> computeSource = TopologyGraphHelper.resolveHostingComputeComponent(graph, component);
-        List<String> operations = collectOperations(component);
-        List<FileProvisioner> files = collectFileProvisioners(component);
-        RemoteExecProvisioner executions = new RemoteExecProvisioner(operations);
-        PluginFileAccess fileAccess = context.getSubDirAccess();
-
-        // set static env variables
-        String envScriptName = String.format("%s_env.sh", component.getNormalizedName());
-        BashScript envScript = new BashScript(fileAccess, envScriptName);
-        Map<String, String> envVars = TransformationHelper.collectEnvVars(graph, component);
-        if (envVars.size() > 0) {
-            envVars.forEach((name, value) -> envScript.append("export " + name + "=" + value));
-        }
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", component.getName());
-        data.put("files", files);
-        data.put("operations", executions);
-        data.put("envScript", envScriptName);
-        data.put("compute", computeSource.get().getName());
-
-        String filename = String.format("%s.tf", component.getNormalizedName());
-
-        try {
-            fileAccess.write(filename, TemplateHelper.toString(cfg, "software.tf", data));
-        } catch (IOException e) {
-            logger.error("Failed to write Terraform file", e);
-            throw new TransformationException(e);
-        }
-
+        collectFileProvisioners(component);
+        collectRemoteExecProvisioners(component);
+        collectEnvVars(component);
         component.setTransformed(true);
-    }
-
-    private List<FileProvisioner> collectFileProvisioners(RootComponent component) {
-        List<FileProvisioner> files = new ArrayList<FileProvisioner>();
-        String destination = "/opt/" + component.getNormalizedName() + "/";
-        for (Artifact artifact : component.getArtifacts()) {
-            files.add(new FileProvisioner(artifact.getValue(), destination));
-        }
-        return files;
     }
 
     private List<String> collectOperations(RootComponent component) {
@@ -168,6 +159,53 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
         component.getStandardLifecycle().getConfigure().ifPresent(artifactsConsumer);
         component.getStandardLifecycle().getStart().ifPresent(artifactsConsumer);
         return operations;
+    }
+
+    @Override
+    public void populate(){
+        PluginFileAccess fileAccess = context.getSubDirAccess();
+        Map<String, Object> data = new HashMap<>();
+
+
+        data.put("instances", computeInstances);
+        try {
+            fileAccess.write("compute.tf", TemplateHelper.toString(cfg, "compute.tf", data));
+        }
+        catch (IOException e) {
+            logger.error("Failed to write Terraform file", e);
+            throw new TransformationException(e);
+        }
+
+
+
+        for (Openstack.Instance openstackInstance : computeInstances.values()) {
+
+            // Write env.sh script entries
+            BashScript envScript = new BashScript(fileAccess, "env.sh");
+            openstackInstance.getEnvVars().forEach((name, value) -> envScript.append("export " + name + "=" + value));
+            // Copy artifacts to target directory
+            // env is already there
+            for (FileProvisioner provisioner : openstackInstance.getFileProvisioners()) {
+                try {
+                    fileAccess.copy(provisioner.getSource(), provisioner.getSource());
+                } catch (IOException e) {
+                    logger.warn("Failed to copy file '{}'", provisioner.getSource());
+                }
+            }
+            // Copy operations to target directory
+            List<String> operations = openstackInstance.getRemoteExecProvisioners().stream()
+                    .map(RemoteExecProvisioner::getScripts)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+            for (String op : operations) {
+                try {
+                    fileAccess.copy(op, op);
+                } catch (IOException e) {
+                    logger.warn("Failed to copy file '{}'", op);
+                }
+            }
+
+        }
     }
 
 

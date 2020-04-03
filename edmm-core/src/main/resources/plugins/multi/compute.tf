@@ -42,7 +42,8 @@ provider "openstack" {
   tenant_id = var.os_project_id
 }
 
-
+<#if instances??>
+<#list instances as k, ec2>
 data "tls_public_key" "priv_key" {
   private_key_pem = file("${ec2.privKeyFile}")
 }
@@ -75,3 +76,5 @@ resource "local_file" "compute_${ec2.name}" {
 output "compute_${ec2.name}_address" {
   value = openstack_compute_instance_v2.${ec2.name}.access_ip_v4
 }
+</#list>
+</#if>
