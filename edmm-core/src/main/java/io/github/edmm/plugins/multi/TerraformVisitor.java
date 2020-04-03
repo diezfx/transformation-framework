@@ -41,9 +41,40 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
     }
 
 
+    private void copyFiles(RootComponent comp) {
+        PluginFileAccess fileAccess = context.getSubDirAccess();
+        for (Artifact artifact : comp.getArtifacts()) {
+            try {
+                // get basename
+                String basename = FilenameUtils.getName(artifact.getValue());
+                String newPath = "./files/" + comp.getNormalizedName() + "/" + basename;
+                fileAccess.copy(artifact.getValue(), newPath);
+            } catch (IOException e) {
+                logger.warn("Failed to copy file '{}'", artifact.getValue());
+            }
+
+        }
+        List<String> operations = collectOperations(comp);
+
+        for (String artifact : operations) {
+            try {
+                String basename = FilenameUtils.getName(artifact);
+                String newPath = "./files/" + comp.getNormalizedName() + "/" + basename;
+                fileAccess.copy(artifact, newPath);
+            } catch (IOException e) {
+                logger.warn("Failed to copy file '{}'", artifact);
+            }
+
+        }
+
+    }
+
     @SneakyThrows
     @Override
     public void visit(Compute component) {
+
+        copyFiles(component);
+
         String abolutePrivkeyPath;
         Path privKeyValue = Paths.get(component.getPrivateKeyPath().get());
         if(privKeyValue.isAbsolute()){

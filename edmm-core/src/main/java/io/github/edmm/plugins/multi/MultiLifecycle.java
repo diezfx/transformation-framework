@@ -8,17 +8,19 @@ import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
-import io.github.edmm.plugins.multi.orchestration.*;
 import io.github.edmm.plugins.multi.model.ComponentResources;
 import io.github.edmm.plugins.multi.model.Plan;
 import io.github.edmm.plugins.multi.model.PlanStep;
+import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
+import io.github.edmm.plugins.multi.orchestration.*;
 import lombok.var;
+import org.jgrapht.graph.AsSubgraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -44,18 +46,21 @@ public class MultiLifecycle extends AbstractLifecycle {
 
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
                 context.getModel().getTopology());
-        TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(
-                dependencyGraph);
 
 
-        List<PlanStep> stepList = new ArrayList<>();
-        List<MultiVisitor> contextList = new ArrayList<>();
-        List<Group> groups = new ArrayList<>();
+        Plan plan = new Plan();
 
-        //init contexts
-        MultiVisitor visitorContext;
+        for (int i = 0; i < sortedGroups.size(); i++) {
+            var group = sortedGroups.get(i);
 
-        for (var group : sortedGroups) {
+            var subgraph = new AsSubgraph<>(dependencyGraph, group.getGroupComponents());
+            logger.info(subgraph.toString());
+            TopologicalOrderIterator<RootComponent, RootRelation> subIterator = new TopologicalOrderIterator<>(
+                    subgraph);
+
+
+            //init contexts
+            MultiVisitor visitorContext;
             if (group.getTechnology() == Technology.ANSIBLE) {
                 visitorContext = new AnsibleVisitor(context);
             } else if (group.getTechnology() == Technology.TERRAFORM) {
@@ -66,41 +71,24 @@ public class MultiLifecycle extends AbstractLifecycle {
                 String error = String.format("could not find technology: %s for components %s", group.getTechnology(), group);
                 throw new IllegalArgumentException(error);
             }
-            groups.add(group);
-            contextList.add(visitorContext);
-            stepList.add(new PlanStep(group.getTechnology()));
-        }
 
 
+            var step = new PlanStep(group.getTechnology());
+            context.setSubFileAcess("step" + i + "_" + group.getTechnology());
+            while (subIterator.hasNext()) {
+                RootComponent comp = subIterator.next();
 
-        while (iterator.hasNext()) {
-
-            RootComponent comp = iterator.next();
-            int index = -1;
-            for (int i = 0; i < groups.size(); i++) {
-                if (groups.get(i).getGroupComponents().contains(comp)) {
-                    index = i;
-                    break;
-                }
+                // this has to happen first at the moment; otherwise the announced output vars from comp are set as input as well
+                var propList = TransformationHelper.collectRuntimeEnvVars(context.getTopologyGraph(), comp);
+                step.components.add(new ComponentResources(comp.getName(), propList));
+                comp.accept(visitorContext);
             }
-            context.setSubFileAcess("step" + index + "_" + context.getModel().getTechnology(comp));
-            // this has to happen first at the moment; otherwise the announced output vars from comp are set as input as well
-            var propList = TransformationHelper.collectRuntimeEnvVars(context.getTopologyGraph(), comp);
-            stepList.get(index).components.add(new ComponentResources(comp.getName(), propList));
 
-
-            comp.accept(contextList.get(index));
-
+            plan.steps.add(step);
+            visitorContext.populate();
 
         }
 
-        Plan plan = new Plan();
-        plan.steps = stepList;
-
-        for (int i = 0; i < contextList.size(); i++) {
-            context.setSubFileAcess("step" + i + "_" + stepList.get(i).tech.toString());
-            contextList.get(i).populate();
-        }
         Writer writer = new StringWriter();
         context.getModel().getGraph().generateYamlOutput(writer);
 
@@ -118,15 +106,12 @@ public class MultiLifecycle extends AbstractLifecycle {
         logger.info("Begin transformation to Multi...");
         //new Groupprovisioning
         List<Group> sortedGroups = GroupProvisioning.determineProvisiongingOrder(context.getModel());
+
         createPlan(sortedGroups);
 
 
-        // VisitorHelper.visit(context.getModel().getComponents(), visitor, component ->
-        // component instanceof Compute);
-        // ... then all others
-        // VisitorHelper.visit(context.getModel().getComponents(), visitor);
+        // ... what to do with relations?
         // VisitorHelper.visit(context.getModel().getRelations(), visitor);
-
 
         logger.info("Transformation to Multi successful");
     }
@@ -146,7 +131,6 @@ public class MultiLifecycle extends AbstractLifecycle {
 
             Plan plan = gson.fromJson(context.getFileAccess().readToStringTargetDir("execution.plan.json"), Plan.class);
 
-
             logger.info("Begin orchestration ...");
 
             for (int i = 0; i < plan.steps.size(); i++) {
@@ -158,22 +142,28 @@ public class MultiLifecycle extends AbstractLifecycle {
                 Technology tech = plan.steps.get(i).tech;
                 context.setSubFileAcess("step" + i + "_" + tech.toString());
 
+                var groupFileAccess=new File(context.getTargetDirectory(),"step" + i + "_" + tech.toString());
+
+                var deployInfo = components.stream()
+                        .map(c -> new DeploymentModelInfo(c, getComputedProperties(c)))
+                        .collect(Collectors.toList());
+
                 GroupVisitor visitorContext;
+                // at the moment they need access to the file access and graph(this could be changed)
                 logger.info("deployment_tool: {} ", tech);
                 if (tech == Technology.ANSIBLE) {
                     visitorContext = new AnsibleOrchestratorVisitor(context);
                 } else if (tech == Technology.TERRAFORM) {
-                    visitorContext = new TerraformOrchestratorVisitor(context);
+                    var orchContext=new OrchestrationContext(groupFileAccess,deployInfo);
+                    visitorContext = new TerraformOrchestratorVisitor(orchContext);
                 } else if (tech == Technology.KUBERNETES) {
                     visitorContext = new KubernetesOrchestratorVisitor(context);
                 } else {
                     String error = String.format("could not find technology: %s for component %s", tech, components);
                     throw new IllegalArgumentException(error);
                 }
-                var deployInfo = components.stream()
-                        .map(c -> new DeploymentModelInfo(c, getComputedProperties(c)))
-                        .collect(Collectors.toList());
                 visitorContext.visit(deployInfo);
+
             }
             Writer writer = new StringWriter();
             context.getModel().getGraph().generateYamlOutput(writer);
@@ -195,8 +185,6 @@ public class MultiLifecycle extends AbstractLifecycle {
         }
         return TopologyGraphHelper.resolveAllPropertyReferences(context.getTopologyGraph(), component, computedProps);
     }
-
-
 
 
 }

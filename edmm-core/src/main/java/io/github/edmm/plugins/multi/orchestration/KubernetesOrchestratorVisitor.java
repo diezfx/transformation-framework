@@ -44,7 +44,7 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
     }
 
 
-    private V1ConfigMap createConfigMap(RootComponent component, Map<String, Property> computedProps, File dir) {
+    private static V1ConfigMap createConfigMap(RootComponent component, Map<String, Property> computedProps, File dir) {
 
         var config = new ConfigMapResource(component, computedProps);
         config.build();
@@ -60,7 +60,7 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
     }
 
 
-    public Optional<V1Service> deployService(RootComponent component, File dir, CoreV1Api api) {
+    public static  Optional<V1Service> deployService(RootComponent component, File dir, CoreV1Api api) {
         V1Service result = null;
         try {
             //apply deployment
@@ -80,7 +80,7 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
     }
 
-    public void deployDeployment(RootComponent component, File dir, AppsV1Api api) {
+    public static  void deployDeployment(RootComponent component, File dir, AppsV1Api api) {
         try {
             //apply deployment
             File deployYaml = new File(dir, component.getLabel() + "-deployment.yaml");
@@ -98,7 +98,7 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
     }
 
-    public void deployConfigMap(RootComponent component, Map<String, Property> props, File dir, CoreV1Api api) {
+    public static void deployConfigMap(RootComponent component, Map<String, Property> props, File dir, CoreV1Api api) {
         try {
             V1ConfigMap config = createConfigMap(component, props, dir);
             // this throws an exception if already exists

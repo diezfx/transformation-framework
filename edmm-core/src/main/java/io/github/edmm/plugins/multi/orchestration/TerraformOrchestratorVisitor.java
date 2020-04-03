@@ -9,10 +9,14 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import lombok.SneakyThrows;
 import lombok.var;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +25,10 @@ import java.util.stream.Collectors;
 public class TerraformOrchestratorVisitor implements GroupVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(TerraformOrchestratorVisitor.class);
-    protected final TransformationContext context;
-    protected final Graph<RootComponent, RootRelation> graph;
+    protected final OrchestrationContext orchContext;
 
-    public TerraformOrchestratorVisitor(TransformationContext context) {
-        this.context = context;
-        this.graph = context.getTopologyGraph();
+    public TerraformOrchestratorVisitor(OrchestrationContext orchContext) {
+        this.orchContext=orchContext;
     }
 
     @SneakyThrows
@@ -34,7 +36,7 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
         Gson gson = new Gson();
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();
-        pb.directory(context.getSubDirAccess().getTargetDirectory());
+        pb.directory(orchContext.getDirAccess());
 
 
         for (var info : deployInfos) {
@@ -45,7 +47,10 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
                 throw new IllegalArgumentException("The providerinfo for openstack was not provided");
             }
             // read input variables
-            String openstackProviderInfo = context.getSubDirAccess().readToString(providerInfo.iterator().next().getValue());
+            String basename = FilenameUtils.getName(providerInfo.stream().findFirst().get().getValue());
+            String newPath = "./files/" + info.component.getNormalizedName() + "/" + basename;
+            File file = new File(orchContext.getDirAccess(),newPath );
+            String openstackProviderInfo=FileUtils.readFileToString(file,StandardCharsets.UTF_8);
             HashMap<String, String> obj = gson.fromJson(openstackProviderInfo, HashMap.class);
 
             Map<String, String> env = pb.environment();
@@ -65,7 +70,9 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
 
 
             // read output variables and write back in model
-            String computeInfo = context.getSubDirAccess().readToStringTargetDir(info.component.getName() + "_computed_properties" + ".json");
+
+            File propFile = new File(orchContext.getDirAccess(), info.component.getName() + "_computed_properties" + ".json");
+            String computeInfo= FileUtils.readFileToString(propFile, StandardCharsets.UTF_8);
             HashMap<String, String> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, String>>() {
             }.getType());
 
