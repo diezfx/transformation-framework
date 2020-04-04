@@ -12,49 +12,48 @@ import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.multi.MultiPlugin;
+import io.github.edmm.utils.Consts;
 import lombok.var;
+import org.apache.commons.io.FileUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
 public class AnsibleOrchestratorVisitor implements GroupVisitor {
     private static final Logger logger = LoggerFactory.getLogger(AnsibleOrchestratorVisitor.class);
-    protected final TransformationContext context;
-    protected final Configuration cfg = TemplateHelper.forClasspath(MultiPlugin.class, "/plugins/multi");
-    protected final Graph<RootComponent, RootRelation> graph;
+    private final OrchestrationContext context;
 
-    public AnsibleOrchestratorVisitor(TransformationContext context) {
-        this.context = context;
-        this.graph = context.getTopologyGraph();
+    public AnsibleOrchestratorVisitor(OrchestrationContext context) {
+                this.context=context;
     }
 
 
     @Override
-    public void visit(List<DeploymentModelInfo> deployInfos) {
-
+    public void execute(List<DeploymentModelInfo> deployInfos) {
+        File directory=context.getDirAccess();
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();
-        pb.directory(context.getSubDirAccess().getTargetDirectory());
+        pb.directory(directory);
 
         //important for ip-address/hostname/ssh-port...
         Set<Compute> hosts = new HashSet<>();
         try {
             for (var info : deployInfos) {
-                Compute host = TopologyGraphHelper.resolveHostingComputeComponent(graph, info.component)
+                Compute host = TopologyGraphHelper.resolveHostingComputeComponent(context.getDeploymentModel().getTopology(), info.component)
                         .orElseThrow(() -> new IllegalArgumentException("can't find the hosting component"));
                 hosts.add(host);
                 var json = convertPropsToJson(info.properties);
-                context.getSubDirAccess().write(info.component.getName() + "_requiredProps.json", json.toString());
+                context.write(info.component.getName() + "_requiredProps.json", json.toString());
             }
-
-
             for (var compute : hosts) {
                 var json = convertPropsToJson(compute.getProperties());
-                context.getSubDirAccess().write(compute.getName() + "_host.json", json.toString());
+                context.write(compute.getName() + "_host.json", json.toString());
 
             }
 

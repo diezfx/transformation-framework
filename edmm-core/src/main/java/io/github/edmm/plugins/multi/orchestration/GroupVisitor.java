@@ -5,7 +5,8 @@ import java.util.List;
 
 public interface GroupVisitor {
 
-   void visit(List<DeploymentModelInfo> components);
+   // todo components in context?
+   void execute(List<DeploymentModelInfo> components);
 }
 
 

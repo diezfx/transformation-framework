@@ -35,12 +35,10 @@ import java.util.Optional;
 public class KubernetesOrchestratorVisitor implements GroupVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesOrchestratorVisitor.class);
-    protected final TransformationContext context;
-    protected final Graph<RootComponent, RootRelation> graph;
+    protected final OrchestrationContext orchContext;
 
-    public KubernetesOrchestratorVisitor(TransformationContext context) {
-        this.context = context;
-        this.graph = context.getTopologyGraph();
+    public KubernetesOrchestratorVisitor(OrchestrationContext context) {
+        this.orchContext = context;
     }
 
 
@@ -118,16 +116,15 @@ public class KubernetesOrchestratorVisitor implements GroupVisitor {
     }
 
 
-    public void visit(List<DeploymentModelInfo> deployInfos) {
-
+    public void execute(List<DeploymentModelInfo> deployInfos) {
+        File fileAccess = this.orchContext.getDirAccess();
         for (var info : deployInfos) {
-            if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, info.component)) {
+            File compDir = new File(fileAccess, info.component.getName());
+            if (!compDir.exists()) {
                 return;
             }
-            PluginFileAccess fileAccess = this.context.getSubDirAccess();
 
             ProcessBuilder pb = new ProcessBuilder();
-            File compDir = new File(fileAccess.getTargetDirectory(), info.component.getName());
             pb.directory(compDir);
             pb.inheritIO();
 

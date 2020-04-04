@@ -32,7 +32,7 @@ public class TerraformOrchestratorVisitor implements GroupVisitor {
     }
 
     @SneakyThrows
-    public void visit(List<DeploymentModelInfo> deployInfos) {
+    public void execute(List<DeploymentModelInfo> deployInfos) {
         Gson gson = new Gson();
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();

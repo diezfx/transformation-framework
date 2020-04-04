@@ -149,20 +149,20 @@ public class MultiLifecycle extends AbstractLifecycle {
                         .collect(Collectors.toList());
 
                 GroupVisitor visitorContext;
+                var orchContext=new OrchestrationContext(groupFileAccess,context.getModel());
                 // at the moment they need access to the file access and graph(this could be changed)
                 logger.info("deployment_tool: {} ", tech);
                 if (tech == Technology.ANSIBLE) {
-                    visitorContext = new AnsibleOrchestratorVisitor(context);
+                    visitorContext = new AnsibleOrchestratorVisitor(orchContext);
                 } else if (tech == Technology.TERRAFORM) {
-                    var orchContext=new OrchestrationContext(groupFileAccess,deployInfo);
                     visitorContext = new TerraformOrchestratorVisitor(orchContext);
                 } else if (tech == Technology.KUBERNETES) {
-                    visitorContext = new KubernetesOrchestratorVisitor(context);
+                    visitorContext = new KubernetesOrchestratorVisitor(orchContext);
                 } else {
                     String error = String.format("could not find technology: %s for component %s", tech, components);
                     throw new IllegalArgumentException(error);
                 }
-                visitorContext.visit(deployInfo);
+                visitorContext.execute(deployInfo);
 
             }
             Writer writer = new StringWriter();
