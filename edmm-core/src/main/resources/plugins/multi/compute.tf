@@ -65,6 +65,36 @@ network {
 name = "public-belwue"
 }
 
+<#list ec2.fileProvisioners as provisioner>
+provisioner "file" {
+source = "${provisioner.source}"
+destination = "${provisioner.destination}"
+connection {
+type = "ssh"
+user = var.ssh_user
+agent = true
+}
+}
+</#list>
+
+<#list ec2.remoteExecProvisioners as provisioner>
+<#if provisioner.scripts?size != 0>
+provisioner "remote-exec" {
+scripts = [
+<#list provisioner.scripts as script>
+"${script}"<#sep>,</#sep>
+</#list>
+]
+connection {
+type = "ssh"
+user = var.ssh_user
+agent = true
+}
+}
+<#else>
+</#if>
+</#list>
+
 }
 
 resource "local_file" "compute_${ec2.name}" {

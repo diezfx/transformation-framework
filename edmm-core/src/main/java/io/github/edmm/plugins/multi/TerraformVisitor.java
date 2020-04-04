@@ -12,7 +12,6 @@ import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.RelationVisitor;
-import io.github.edmm.plugins.terraform.model.Aws;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
 import io.github.edmm.plugins.terraform.model.Openstack;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
@@ -154,7 +153,7 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
     private List<String> collectOperations(RootComponent component) {
         List<String> operations = new ArrayList<>();
         Consumer<Operation> artifactsConsumer = op -> op.getArtifacts()
-                .forEach(artifact -> operations.add("./files/" + FilenameUtils.getName(artifact.getValue())));
+                .forEach(artifact -> operations.add(artifact.getValue()));
         component.getStandardLifecycle().getCreate().ifPresent(artifactsConsumer);
         component.getStandardLifecycle().getConfigure().ifPresent(artifactsConsumer);
         component.getStandardLifecycle().getStart().ifPresent(artifactsConsumer);

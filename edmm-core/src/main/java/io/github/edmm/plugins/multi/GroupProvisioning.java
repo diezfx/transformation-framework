@@ -78,12 +78,14 @@ public class GroupProvisioning {
 
         queue.addAll(workingCopyGPOG.vertexSet().stream().filter(v -> workingCopyGPOG.incomingEdgesOf(v).isEmpty()).collect(Collectors.toSet()));
         int i = 0;
-
         while (!queue.isEmpty()) {
             Group group = queue.poll();
+            if(visitNodes.contains(group)){
+                continue;
+            }
             visitNodes.add(group);
             topologcialSorting.add(i, group);
-            Set<OrderRelation> outgoingRelations = workingCopyGPOG.outgoingEdgesOf(group).stream().collect(Collectors.toSet());
+            Set<OrderRelation> outgoingRelations = new HashSet<>(workingCopyGPOG.outgoingEdgesOf(group));
             workingCopyGPOG.removeAllEdges(outgoingRelations);
             workingCopyGPOG.removeVertex(group);
             queue.addAll(workingCopyGPOG.vertexSet().stream().filter(v -> workingCopyGPOG.incomingEdgesOf(v).isEmpty())
