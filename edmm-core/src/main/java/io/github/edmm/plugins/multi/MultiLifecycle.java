@@ -140,7 +140,6 @@ public class MultiLifecycle extends AbstractLifecycle {
                     comp.ifPresent(components::add);
                 }
                 Technology tech = plan.steps.get(i).tech;
-                context.setSubFileAcess("step" + i + "_" + tech.toString());
 
                 var groupFileAccess=new File(context.getTargetDirectory(),"step" + i + "_" + tech.toString());
 
@@ -148,16 +147,16 @@ public class MultiLifecycle extends AbstractLifecycle {
                         .map(c -> new DeploymentModelInfo(c, getComputedProperties(c)))
                         .collect(Collectors.toList());
 
-                GroupVisitor visitorContext;
+                GroupExecutor visitorContext;
                 var orchContext=new OrchestrationContext(groupFileAccess,context.getModel());
                 // at the moment they need access to the file access and graph(this could be changed)
                 logger.info("deployment_tool: {} ", tech);
                 if (tech == Technology.ANSIBLE) {
-                    visitorContext = new AnsibleOrchestratorVisitor(orchContext);
+                    visitorContext = new AnsibleExecutor(orchContext);
                 } else if (tech == Technology.TERRAFORM) {
-                    visitorContext = new TerraformOrchestratorVisitor(orchContext);
+                    visitorContext = new TerraformExecutor(orchContext);
                 } else if (tech == Technology.KUBERNETES) {
-                    visitorContext = new KubernetesOrchestratorVisitor(orchContext);
+                    visitorContext = new KubernetesExecutor(orchContext);
                 } else {
                     String error = String.format("could not find technology: %s for component %s", tech, components);
                     throw new IllegalArgumentException(error);

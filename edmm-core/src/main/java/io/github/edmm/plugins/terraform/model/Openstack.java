@@ -57,4 +57,19 @@ public class Openstack {
             runtimeVars.add(name);
         }
     }
+
+
+    // the compute instance is deployed with another technology
+    // just connect and execute this stuff
+    @Data
+    public static class SoftwareStack{
+        private String privKeyFile;
+        private String keyName;
+        private List<String> ingressPorts = new ArrayList<>();
+        private List<FileProvisioner> fileProvisioners = new ArrayList<>();
+        private List<RemoteExecProvisioner> remoteExecProvisioners = new ArrayList<>();
+        private List<String> dependencies = new ArrayList<>();
+        private Map<String, String> envVars = new HashMap<>();
+        private List<String> runtimeVars = new ArrayList<>();
+    }
 }

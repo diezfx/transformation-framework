@@ -36,6 +36,7 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
     protected final Configuration cfg = TemplateHelper.forClasspath(MultiPlugin.class, "/plugins/multi");
     protected final Graph<RootComponent, RootRelation> graph;
     private final Map<Compute, Openstack.Instance> computeInstances = new HashMap<>();
+    private final Map<Compute,Openstack.Instance> softwareStacks= new HashMap<>();
 
     public TerraformVisitor(TransformationContext context) {
         this.context = context;
@@ -167,8 +168,10 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
 
 
         data.put("instances", computeInstances);
+        data.put("software_stacks",softwareStacks);
         try {
             fileAccess.write("compute.tf", TemplateHelper.toString(cfg, "compute.tf", data));
+            //fileAccess.write("software.tf", TemplateHelper.toString(cfg, "software.tf", data));
         }
         catch (IOException e) {
             logger.error("Failed to write Terraform file", e);

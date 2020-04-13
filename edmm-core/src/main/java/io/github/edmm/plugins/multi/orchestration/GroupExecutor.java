@@ -3,7 +3,7 @@ package io.github.edmm.plugins.multi.orchestration;
 import java.util.List;
 
 
-public interface GroupVisitor {
+public interface GroupExecutor {
 
    // todo components in context?
    void execute(List<DeploymentModelInfo> components);

@@ -2,16 +2,12 @@ package io.github.edmm.plugins.multi.orchestration;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.relation.RootRelation;
 import lombok.SneakyThrows;
 import lombok.var;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class TerraformOrchestratorVisitor implements GroupVisitor {
+public class TerraformExecutor implements GroupExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerraformOrchestratorVisitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(TerraformExecutor.class);
     protected final OrchestrationContext orchContext;
 
-    public TerraformOrchestratorVisitor(OrchestrationContext orchContext) {
+    public TerraformExecutor(OrchestrationContext orchContext) {
         this.orchContext=orchContext;
     }
 

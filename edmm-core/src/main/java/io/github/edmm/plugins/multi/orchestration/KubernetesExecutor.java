@@ -1,12 +1,8 @@
 package io.github.edmm.plugins.multi.orchestration;
 
-import io.github.edmm.core.plugin.PluginFileAccess;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
-import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.kubernetes.model.ConfigMapResource;
 import io.github.edmm.utils.Consts;
 import io.kubernetes.client.ApiClient;
@@ -20,24 +16,22 @@ import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Yaml;
 import lombok.var;
 import org.apache.commons.io.FileUtils;
-import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class KubernetesOrchestratorVisitor implements GroupVisitor {
+public class KubernetesExecutor implements GroupExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(KubernetesOrchestratorVisitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesExecutor.class);
     protected final OrchestrationContext orchContext;
 
-    public KubernetesOrchestratorVisitor(OrchestrationContext context) {
+    public KubernetesExecutor(OrchestrationContext context) {
         this.orchContext = context;
     }
 
