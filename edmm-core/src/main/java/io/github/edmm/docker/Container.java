@@ -43,6 +43,8 @@ public final class Container {
         return components.get(components.size() - 1).getName();
     }
 
+    public RootComponent getTop() { return components.get(components.size() - 1); }
+
     public String getLabel() {
         return getName().replace("_", "-");
     }

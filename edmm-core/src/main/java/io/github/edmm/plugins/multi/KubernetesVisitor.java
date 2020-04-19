@@ -12,6 +12,7 @@ import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jgrapht.Graph;
@@ -24,15 +25,29 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
     protected final TransformationContext context;
     protected final Graph<RootComponent, RootRelation> graph;
     private static final Logger logger = LoggerFactory.getLogger(KubernetesVisitor.class);
+    private final List<Container> stacks;
+
+
 
     public KubernetesVisitor(TransformationContext context) {
         this.context = context;
         this.graph = context.getTopologyGraph();
+        this.stacks=new ArrayList<>();
     }
 
 
+    @Override
+    public void populate() {
 
+        for (Container stack: stacks){
+            PluginFileAccess fileAccess = context.getSubDirAccess();
+            buildDockerfile(stack, fileAccess);
+            RootComponent component=stack.getTop();
+            KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, component, context.getTopologyGraph(), fileAccess);
+            resourceBuilder.populateResources();
+        }
 
+    }
 
     protected void resolveBaseImage(Container stack) {
         ImageMappingVisitor imageMapper = new ImageMappingVisitor();
@@ -55,8 +70,9 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
         }
         // announce that this will be set later
         component.addProperty("hostname", null);
-        PluginFileAccess fileAccess = context.getSubDirAccess();
-        Container stack = new Container();
+
+
+        Container stack=new Container();
         List<RootComponent> compStack = TopologyGraphHelper.resolveAllHostingComponents(graph, component);
         for (var comp : compStack) {
             logger.info("add comp:{} to stack", comp.getName());
@@ -64,11 +80,7 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
         }
 
         resolveBaseImage(stack);
-        buildDockerfile(stack, fileAccess);
-
-        KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, component, context.getTopologyGraph(), fileAccess);
-        resourceBuilder.populateResources();
-
+        stacks.add(stack);
     }
 
     @Override
