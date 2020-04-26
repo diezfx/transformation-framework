@@ -84,7 +84,6 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
             abolutePrivkeyPath=component.getPrivateKeyPath().get();
         }
         else{
-            System.out.println(component.getPrivateKeyPath().get());
            abolutePrivkeyPath= new File(context.getFileAccess().getSourceDirectory(),component.getPrivateKeyPath().get()).getAbsolutePath();
         }
 

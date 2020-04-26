@@ -67,7 +67,6 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
         if (privKeyValue.isAbsolute()) {
             absoluteKeyPath = compute.getPrivateKeyPath().get();
         } else {
-            System.out.println(compute.getPrivateKeyPath().get());
             absoluteKeyPath = new File(context.getFileAccess().getSourceDirectory(), compute.getPrivateKeyPath().get()).getAbsolutePath();
         }
         hosts.put(host, new AnsibleHost(host, absoluteKeyPath));

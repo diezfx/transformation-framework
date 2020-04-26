@@ -65,7 +65,6 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
     public void visit(RootComponent component) {
 
         if (!TopologyGraphHelper.isComponentHostedOnLeaf(graph, component)) {
-            logger.info("is not leaf");
             return;
         }
         // announce that this will be set later

@@ -54,7 +54,6 @@ public class MultiLifecycle extends AbstractLifecycle {
             var group = sortedGroups.get(i);
 
             var subgraph = new AsSubgraph<>(dependencyGraph, group.getGroupComponents());
-            logger.info(subgraph.toString());
             TopologicalOrderIterator<RootComponent, RootRelation> subIterator = new TopologicalOrderIterator<>(
                     subgraph);
 
