@@ -1,16 +1,17 @@
 package io.github.edmm.plugins.azure.model.resource.network.virtualnetworks;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import io.github.edmm.plugins.azure.model.Parameter;
 import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.network.virtualnetworks.subnets.Subnet;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VirtualNetwork extends Resource {
@@ -24,15 +25,15 @@ public class VirtualNetwork extends Resource {
         super.setDefaults();
         setApiVersion("2019-04-01");
         AddressSpace addressSpace = AddressSpace
-                .builder()
-                .addressPrefixes(Collections.singletonList("[parameters('vnetAddressSpace')]"))
-                .build();
+            .builder()
+            .addressPrefixes(Collections.singletonList("[parameters('vnetAddressSpace')]"))
+            .build();
         Subnet subnet = new Subnet();
         setProperties(VirtualNetworkProperties
-                .builder()
-                .addressSpace(addressSpace)
-                .subnets(Collections.singletonList(subnet))
-                .build());
+            .builder()
+            .addressSpace(addressSpace)
+            .subnets(Collections.singletonList(subnet))
+            .build());
     }
 
     @JsonIgnore
@@ -44,10 +45,10 @@ public class VirtualNetwork extends Resource {
     public Map<String, Parameter> getRequiredParameters() {
         Map<String, Parameter> params = super.getRequiredParameters();
         params.put("vnetAddressSpace", Parameter
-                .builder()
-                .type(ParameterTypeEnum.STRING)
-                .defaultValue("10.0.0.0/16")
-                .build());
+            .builder()
+            .type(ParameterTypeEnum.STRING)
+            .defaultValue("10.0.0.0/16")
+            .build());
         getSubnets().forEach(subnet -> params.putAll(subnet.getRequiredParameters()));
 
         return params;

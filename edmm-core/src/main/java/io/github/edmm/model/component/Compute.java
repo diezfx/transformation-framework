@@ -5,6 +5,7 @@ import io.github.edmm.model.Property;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
+
 import lombok.ToString;
 import org.jgrapht.Graph;
 

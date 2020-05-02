@@ -1,11 +1,18 @@
 package io.github.edmm.plugins.salt.model;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.plugins.salt.SaltStackTransformer;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +32,7 @@ public class SaltBase {
     //private final String BASE_DIR_PILLAR = "pillar";
     private final String NAME = "top.sls";
     private final String BASE_DIR_SALT = "salt";
-    private List<SaltMinion> minions = new ArrayList<>();
+    private final List<SaltMinion> minions = new ArrayList<>();
 
     public SaltBase(PluginFileAccess fileAccess, Configuration cfg) {
         this.cfg = cfg;
@@ -39,9 +46,9 @@ public class SaltBase {
      */
     public void addMinion(Compute component) {
         SaltMinion minion = SaltMinion.builder()
-                .name("minion_" + component.getNormalizedName())
-                .file(component.getNormalizedName())
-                .build();
+            .name("minion_" + component.getNormalizedName())
+            .file(component.getNormalizedName())
+            .build();
         minions.add(minion);
     }
 

@@ -3,6 +3,7 @@ package io.github.edmm.model.component;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
+
 import lombok.ToString;
 
 @ToString
@@ -16,7 +17,7 @@ public class Dbaas extends Platform {
 
     public String getInstanceType() {
         return getProperty(INSTANCE_TYPE)
-                .orElseThrow(() -> new IllegalStateException("Dbaas needs to specify the instance_type property"));
+            .orElseThrow(() -> new IllegalStateException("Dbaas needs to specify the instance_type property"));
     }
 
     @Override

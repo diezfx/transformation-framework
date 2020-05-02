@@ -1,6 +1,7 @@
 package io.github.edmm.core.plugin.support;
 
 import io.github.edmm.model.component.RootComponent;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

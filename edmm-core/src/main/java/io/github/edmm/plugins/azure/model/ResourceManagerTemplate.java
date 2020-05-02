@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+import lombok.Data;
+
 @Data
 public class ResourceManagerTemplate {
     private final String $schema = "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#";

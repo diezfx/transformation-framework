@@ -1,6 +1,11 @@
 package io.github.edmm.model.component;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import io.github.edmm.core.parser.Entity;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
@@ -12,6 +17,8 @@ import io.github.edmm.model.support.ModelEntity;
 import io.github.edmm.model.support.TypeWrapper;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.VisitableComponent;
+
+import com.google.common.collect.Lists;
 import lombok.ToString;
 
 import java.util.*;
@@ -30,7 +37,7 @@ public class RootComponent extends ModelEntity implements VisitableComponent {
         // Resolve the chain of types
         EntityGraph graph = entity.getGraph();
         MappingEntity typeRef = GraphHelper.findTypeEntity(graph, entity).
-                orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
+            orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
         List<MappingEntity> typeChain = GraphHelper.resolveInheritanceChain(graph, typeRef);
         typeChain.forEach(this::updateEntityChain);
     }

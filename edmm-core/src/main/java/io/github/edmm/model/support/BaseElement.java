@@ -1,7 +1,10 @@
 package io.github.edmm.model.support;
 
-import com.google.common.base.CaseFormat;
+import java.util.Collection;
+
 import io.github.edmm.core.parser.MappingEntity;
+
+import com.google.common.base.CaseFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,7 +28,7 @@ public abstract class BaseElement {
 
     public String getNormalizedName() {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getName().toLowerCase())
-                .replace(".", "_");
+            .replace(".", "_");
     }
 
     protected <T> void set(Attribute<T> key, T value) {

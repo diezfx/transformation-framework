@@ -3,6 +3,7 @@ package io.github.edmm.model.component;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
+
 import lombok.ToString;
 
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class Database extends RootComponent {
 
     public String getSchemaName() {
         return getProperty(SCHEMA_NAME)
-                .orElseThrow(() -> new IllegalStateException("Database needs to specify the schema_name property"));
+            .orElseThrow(() -> new IllegalStateException("Database needs to specify the schema_name property"));
     }
 
     public Optional<String> getUser() {

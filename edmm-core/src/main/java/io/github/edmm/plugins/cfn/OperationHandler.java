@@ -1,15 +1,21 @@
 package io.github.edmm.plugins.cfn;
 
-import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
-import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
+import java.io.File;
+
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 
-import java.io.File;
+import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
+import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
 
-import static io.github.edmm.plugins.cfn.CloudFormationModule.*;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_CONFIGURE;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_CREATE;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_SETS;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_START;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.MODE_777;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.OWNER_GROUP_ROOT;
 
 public class OperationHandler {
 
@@ -54,9 +60,9 @@ public class OperationHandler {
             CFNCommand cfnCommand = prepareCommand(file, name);
             CFNFile cfnFile = prepareFile(file);
             module.getOperations(compute)
-                    .getOrAddConfig(CONFIG_SETS, config)
-                    .putFile(cfnFile)
-                    .putCommand(cfnCommand);
+                .getOrAddConfig(CONFIG_SETS, config)
+                .putFile(cfnFile)
+                .putCommand(cfnCommand);
         }
     }
 
@@ -71,9 +77,9 @@ public class OperationHandler {
     private CFNFile prepareFile(String file) {
         String source = String.format("http://%s.s3.amazonaws.com/%s", module.getBucketName(), file);
         return new CFNFile("/opt/" + file)
-                .setSource(source)
-                .setMode(MODE_777) // TODO
-                .setOwner(OWNER_GROUP_ROOT) // TODO
-                .setGroup(OWNER_GROUP_ROOT);
+            .setSource(source)
+            .setMode(MODE_777) // TODO
+            .setOwner(OWNER_GROUP_ROOT) // TODO
+            .setGroup(OWNER_GROUP_ROOT);
     }
 }

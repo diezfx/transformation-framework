@@ -14,6 +14,7 @@ import io.github.edmm.plugins.cloudify.CloudifyVisitor;
 import io.github.edmm.plugins.cloudify.model.azure.Script;
 import io.github.edmm.plugins.cloudify.model.azure.VirtualMachine;
 import io.github.edmm.plugins.terraform.aws.TerraformAwsVisitor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +67,12 @@ public class CloudifyAzureVisitor extends CloudifyVisitor {
     @Override
     public void visit(Compute component) {
         VirtualMachine vm = VirtualMachine.builder()
-                .name(component.getNormalizedName())
-                .ingressPorts(new ArrayList<>())
-                .dependsOn(new ArrayList<>())
-                .operations(new ArrayList<>())
-                .environmentVariables(new HashMap<>())
-                .build();
+            .name(component.getNormalizedName())
+            .ingressPorts(new ArrayList<>())
+            .dependsOn(new ArrayList<>())
+            .operations(new ArrayList<>())
+            .environmentVariables(new HashMap<>())
+            .build();
         this.computeInstances.put(component, vm);
         Optional<String> sshPublicKey = component.getPublicKey();
 
@@ -128,11 +129,11 @@ public class CloudifyAzureVisitor extends CloudifyVisitor {
             Map<String, Property> propertyMap = component.getProperties();
             String[] blacklist = {"key_name", "public_key"};
             propertyMap.values().stream()
-                    .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                    .forEach(p -> {
-                        String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
-                        vm.getEnvironmentVariables().put(name, p.getValue());
-                    });
+                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                .forEach(p -> {
+                    String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
+                    vm.getEnvironmentVariables().put(name, p.getValue());
+                });
         });
     }
 
@@ -187,12 +188,12 @@ public class CloudifyAzureVisitor extends CloudifyVisitor {
     private void addOperation(RootComponent component, VirtualMachine vm, Operation operation) {
         // we only consider the first artifact of an operation
         operation.getArtifacts().stream().findFirst().ifPresent(artifact -> {
-                    String componentName = component.getNormalizedName();
-                    String operationName = operation.getNormalizedName();
-                    String artifactName = artifact.getName();
-                    String artifactPath = artifact.getValue();
-                    vm.addOperation(componentName, operationName, artifactName, artifactPath);
-                }
+                String componentName = component.getNormalizedName();
+                String operationName = operation.getNormalizedName();
+                String artifactName = artifact.getName();
+                String artifactPath = artifact.getValue();
+                vm.addOperation(componentName, operationName, artifactName, artifactPath);
+            }
         );
     }
 

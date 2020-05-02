@@ -6,6 +6,7 @@ import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.ModelEntity;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.model.visitor.VisitableRelation;
+
 import lombok.ToString;
 
 import java.util.Map;

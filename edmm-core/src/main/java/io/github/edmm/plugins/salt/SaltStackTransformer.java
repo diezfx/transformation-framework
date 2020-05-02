@@ -1,6 +1,9 @@
 package io.github.edmm.plugins.salt;
 
-import freemarker.template.Configuration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
@@ -14,6 +17,8 @@ import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.model.visitor.VisitorHelper;
 import io.github.edmm.plugins.salt.model.SaltBase;
 import io.github.edmm.plugins.salt.model.SaltFormula;
+
+import freemarker.template.Configuration;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -34,10 +39,10 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     // Used to generate static ip
     private final IpGenerator ipGenerator;
     private final Graph<RootComponent, RootRelation> graph;
-    private SaltBase baseFile;
+    private final SaltBase baseFile;
     // <ComputeName, Formula>
-    private Map<String, SaltFormula> formulas = new HashMap<>();
-    private PluginFileAccess fileAccess;
+    private final Map<String, SaltFormula> formulas = new HashMap<>();
+    private final PluginFileAccess fileAccess;
 
     public SaltStackTransformer(TransformationContext context) {
         this.context = context;
@@ -53,10 +58,10 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     public void visitComponentsTopologicalOrder() {
         // Reverse the graph to find sources
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph
-                = new EdgeReversedGraph<>(context.getModel().getTopology());
+            = new EdgeReversedGraph<>(context.getModel().getTopology());
         // Apply the topological sort
         TopologicalOrderIterator<RootComponent, RootRelation> iterator
-                = new TopologicalOrderIterator<>(dependencyGraph);
+            = new TopologicalOrderIterator<>(dependencyGraph);
         // Visit all components in topological sort
         while (iterator.hasNext()) {
             RootComponent component = iterator.next();
@@ -93,7 +98,7 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(Tomcat component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         formulas.get(compute.getNormalizedName()).add(component);
         component.setTransformed(true);
     }
@@ -101,7 +106,7 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(MysqlDatabase component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         formulas.get(compute.getNormalizedName()).add(component);
         component.setTransformed(true);
     }
@@ -109,7 +114,7 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(MysqlDbms component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         formulas.get(compute.getNormalizedName()).add(component);
         component.setTransformed(true);
     }
@@ -117,7 +122,7 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     @Override
     public void visit(WebApplication component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         formulas.get(compute.getNormalizedName()).add(component);
         component.setTransformed(true);
     }

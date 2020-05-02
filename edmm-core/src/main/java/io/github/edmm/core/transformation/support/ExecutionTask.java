@@ -3,6 +3,7 @@ package io.github.edmm.core.transformation.support;
 import io.github.edmm.core.plugin.Plugin;
 import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
+
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,10 @@ public final class ExecutionTask implements Callable<Void> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionTask.class);
 
-    private final Plugin plugin;
+    private final Plugin<?> plugin;
     private final TransformationContext context;
 
-    public ExecutionTask(@NonNull Plugin plugin, @NonNull TransformationContext context) {
+    public ExecutionTask(@NonNull Plugin<?> plugin, @NonNull TransformationContext context) {
         this.plugin = plugin;
         this.context = context;
     }

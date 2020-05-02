@@ -3,6 +3,7 @@ package io.github.edmm.model.component;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.visitor.ComponentVisitor;
+
 import lombok.ToString;
 
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class Paas extends Platform {
 
     public String getArchetype() {
         return getProperty(ARCHETYPE)
-                .orElseThrow(() -> new IllegalStateException("Paas needs to specify the archetype property"));
+            .orElseThrow(() -> new IllegalStateException("Paas needs to specify the archetype property"));
     }
 
     public Optional<Integer> getMinInstances() {

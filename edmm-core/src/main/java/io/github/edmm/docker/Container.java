@@ -1,6 +1,7 @@
 package io.github.edmm.docker;
 
 import io.github.edmm.model.component.RootComponent;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;

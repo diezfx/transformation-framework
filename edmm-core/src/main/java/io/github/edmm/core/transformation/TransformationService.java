@@ -3,6 +3,8 @@ package io.github.edmm.core.transformation;
 import io.github.edmm.core.plugin.Plugin;
 import io.github.edmm.core.plugin.PluginService;
 import io.github.edmm.core.transformation.support.ExecutionTask;
+import io.github.edmm.model.DeploymentModel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class TransformationService {
 
     public void startTransformation(TransformationContext context) {
         TargetTechnology targetTechnology = context.getTargetTechnology();
-        Optional<Plugin> plugin = pluginService.findByTargetTechnology(targetTechnology);
+        Optional<Plugin<?>> plugin = pluginService.findByTargetTechnology(targetTechnology);
         if (!plugin.isPresent()) {
             logger.error("Plugin for given technology '{}' could not be found", targetTechnology.getId());
             return;
@@ -39,5 +41,13 @@ public class TransformationService {
                 logger.error("Error executing transformation task", e);
             }
         }
+    }
+
+    public TransformationContext createContext(DeploymentModel model, String target, File sourceDirectory, File targetDirectory) {
+        TargetTechnology targetTechnology = pluginService.getSupportedTargetTechnologies().stream()
+            .filter(p -> p.getId().equals(target))
+            .findFirst()
+            .orElseThrow(IllegalStateException::new);
+        return new TransformationContext(model, targetTechnology, sourceDirectory, targetDirectory);
     }
 }

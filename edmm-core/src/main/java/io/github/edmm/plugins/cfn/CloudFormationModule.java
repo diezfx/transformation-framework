@@ -1,5 +1,18 @@
 package io.github.edmm.plugins.cfn;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import io.github.edmm.core.transformation.TransformationException;
+import io.github.edmm.model.component.Compute;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.utils.Consts;
+
 import com.scaleset.cfbuilder.cloudformation.Authentication;
 import com.scaleset.cfbuilder.core.Fn;
 import com.scaleset.cfbuilder.core.Module;
@@ -10,10 +23,6 @@ import com.scaleset.cfbuilder.ec2.SecurityGroup;
 import com.scaleset.cfbuilder.ec2.UserData;
 import com.scaleset.cfbuilder.ec2.metadata.CFNInit;
 import com.scaleset.cfbuilder.iam.Role;
-import io.github.edmm.core.transformation.TransformationException;
-import io.github.edmm.model.component.Compute;
-import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.utils.Consts;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
@@ -42,7 +51,9 @@ public class CloudFormationModule extends Module {
     public static final String KEY_NAME_CONSTRAINT_DESCRIPTION = "Must be the name of an existing EC2 key pair";
     public static final String MODE_777 = "000777";
     public static final String OWNER_GROUP_ROOT = "root";
+
     private static final Logger logger = LoggerFactory.getLogger(CloudFormationModule.class);
+
     private final String region;
     private final Object keyNameVar;
     private final String stackName = CloudFormationUtils.getRandomStackName();
@@ -144,9 +155,9 @@ public class CloudFormationModule extends Module {
     public void build() {
         if (keyPair) {
             strParam(KEY_NAME)
-                    .type(KEY_NAME_TYPE)
-                    .description(KEY_NAME_DESCRIPTION)
-                    .constraintDescription(KEY_NAME_CONSTRAINT_DESCRIPTION);
+                .type(KEY_NAME_TYPE)
+                .description(KEY_NAME_DESCRIPTION)
+                .constraintDescription(KEY_NAME_CONSTRAINT_DESCRIPTION);
         }
         portMapping.forEach((name, ports) -> {
             SecurityGroup securityGroup = (SecurityGroup) getResource(name + SECURITY_GROUP);

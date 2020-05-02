@@ -1,8 +1,9 @@
 package io.github.edmm.plugins.salt.model;
 
+import io.github.edmm.core.plugin.TemplateHelper;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import io.github.edmm.core.plugin.TemplateHelper;
 import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;

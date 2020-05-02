@@ -1,4 +1,4 @@
-# EDMM Transformation Framework
+# EDMM Transformation and Deployment Framework
 
 > Transformation framework for the Essential Deployment Metamodel.
 

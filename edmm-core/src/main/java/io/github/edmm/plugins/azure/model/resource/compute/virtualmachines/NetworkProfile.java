@@ -1,7 +1,10 @@
 package io.github.edmm.plugins.azure.model.resource.compute.virtualmachines;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
+
 import io.github.edmm.plugins.azure.model.resource.network.networkinterfaces.NetworkInterface;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 

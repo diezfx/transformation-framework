@@ -1,13 +1,14 @@
 package io.github.edmm.plugins.azure.model.resource.network.publicipaddresses;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.github.edmm.plugins.azure.model.Parameter;
 import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PublicIpAddress extends Resource {
@@ -24,9 +25,9 @@ public class PublicIpAddress extends Resource {
         Map<String, String> dnsSettings = new HashMap<>();
         dnsSettings.put("domainNameLabel", "[parameters('DnsName')]");
         this.setProperties(PublicIpAddressProperties.builder()
-                .publicIpAllocationMethod("Dynamic")
-                .dnsSettings(dnsSettings)
-                .build()
+            .publicIpAllocationMethod("Dynamic")
+            .dnsSettings(dnsSettings)
+            .build()
         );
     }
 

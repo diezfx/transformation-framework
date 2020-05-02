@@ -16,6 +16,9 @@ public class CFNPackage {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Map<String, List<String>> packages;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private final Map<String, List<String>> packages;
+
     public CFNPackage(String id) {
         this.id = id;
         this.packages = new HashMap<>();

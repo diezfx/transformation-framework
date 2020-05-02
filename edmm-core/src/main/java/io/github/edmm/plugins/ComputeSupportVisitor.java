@@ -4,6 +4,7 @@ import io.github.edmm.core.plugin.support.CheckModelResult;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.visitor.ComponentVisitor;
+
 import lombok.Getter;
 
 import java.util.HashSet;
@@ -24,8 +25,8 @@ public class ComputeSupportVisitor implements ComponentVisitor {
 
     public CheckModelResult getResult() {
         List<RootComponent> unsupportedComponents = context.getModel().getComponents().stream()
-                .filter(c -> !supportedComponents.contains(c))
-                .collect(Collectors.toList());
+            .filter(c -> !supportedComponents.contains(c))
+            .collect(Collectors.toList());
         return new CheckModelResult(unsupportedComponents);
     }
 

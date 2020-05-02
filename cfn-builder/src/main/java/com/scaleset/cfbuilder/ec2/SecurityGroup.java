@@ -47,6 +47,7 @@ public interface SecurityGroup extends Resource {
     }
 
     public class PortRange {
+
         int from;
         int to;
 

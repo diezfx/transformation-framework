@@ -15,6 +15,7 @@ import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.exten
 import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions.EnvVarVirtualMachineExtension;
 import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions.VirtualMachineExtension;
 import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions.VirtualMachineExtensionProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
 public class AzureLifecycle extends AbstractLifecycle {
 
     public static final String FILE_NAME = "deploy.json";
+    private static final Logger logger = LoggerFactory.getLogger(AzureLifecycle.class);
+
     private static final Logger logger = LoggerFactory.getLogger(AzureLifecycle.class);
 
     public AzureLifecycle(TransformationContext context) {
@@ -59,15 +62,15 @@ public class AzureLifecycle extends AbstractLifecycle {
 
     private void copyOperationsToTargetDirectory(ResourceManagerTemplate resultTemplate) {
         List<String> toCopy = resultTemplate.getResources()
-                .stream()
-                .filter(resource -> resource instanceof VirtualMachineExtension && !(resource instanceof EnvVarVirtualMachineExtension)).map(resource -> {
-                    VirtualMachineExtension extension = (VirtualMachineExtension) resource;
-                    VirtualMachineExtensionProperties properties = (VirtualMachineExtensionProperties) extension.getProperties();
-                    CustomScriptSettings settings = properties.getSettings();
-                    return settings.getFileUrls();
-                })
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+            .stream()
+            .filter(resource -> resource instanceof VirtualMachineExtension && !(resource instanceof EnvVarVirtualMachineExtension)).map(resource -> {
+                VirtualMachineExtension extension = (VirtualMachineExtension) resource;
+                VirtualMachineExtensionProperties properties = (VirtualMachineExtensionProperties) extension.getProperties();
+                CustomScriptSettings settings = properties.getSettings();
+                return settings.getFileUrls();
+            })
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
         toCopy.forEach(toCopyArtifact -> {
             try {
                 context.getFileAccess().copy(toCopyArtifact, toCopyArtifact);
@@ -79,17 +82,17 @@ public class AzureLifecycle extends AbstractLifecycle {
 
     private void createEnvironmentVariableScripts(ResourceManagerTemplate resultTemplate) {
         resultTemplate.getResources()
-                .stream()
-                .filter(resource -> resource instanceof EnvVarVirtualMachineExtension)
-                .forEach(resource -> {
-                    EnvVarVirtualMachineExtension extension = (EnvVarVirtualMachineExtension) resource;
-                    extension.getScriptPath().ifPresent(path -> {
-                        BashScript envScript = new BashScript(context.getFileAccess(), path);
-                        extension.getEnvironmentVariables().forEach((key, value) -> {
-                            envScript.append("export " + key + "=" + value);
-                        });
+            .stream()
+            .filter(resource -> resource instanceof EnvVarVirtualMachineExtension)
+            .forEach(resource -> {
+                EnvVarVirtualMachineExtension extension = (EnvVarVirtualMachineExtension) resource;
+                extension.getScriptPath().ifPresent(path -> {
+                    BashScript envScript = new BashScript(context.getFileAccess(), path);
+                    extension.getEnvironmentVariables().forEach((key, value) -> {
+                        envScript.append("export " + key + "=" + value);
                     });
                 });
+            });
     }
 
     @Override

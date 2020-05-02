@@ -1,6 +1,7 @@
 package io.github.edmm.web.model;
 
 import io.github.edmm.web.model.support.ValidTargetTechnology;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class TransformationModel {
+public class TransformationRequest {
 
     @NotEmpty
     @ValidTargetTechnology

@@ -1,7 +1,14 @@
 package io.github.edmm.plugins.juju;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
@@ -12,6 +19,9 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.juju.model.EnvironmentVariable;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,26 +30,26 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class JujuTransformer {
-
     public static final String CHARM_FOLDER_PREAMBLE = "layer-";
     public static final String CHARM_SERIES = "xenial";
     public static final String HOOKS_FOLDER = "hooks";
     public static final String HOOK_INSTALL = "install";
     public static final String LAYER_FILENAME = "layer.yaml";
     public static final String METADATA_FILENAME = "metadata.yaml";
+
     private static final Logger logger = LoggerFactory.getLogger(JujuTransformer.class);
+
     private static final String DEFAULT_ENV_VAR_CONNECTION = "_HOSTNAME";
     private static final String DEFAULT_STARTING_LAYER = "basic";
     private static final String DEFAULT_TARGET_LOCATION = "localhost";
     private static final List<String> HOOK_PLACEHOLDERS = Arrays.asList(
-            "config-changed",
-            "leader-elected",
-            "leader-settings-changed",
-            "start",
-            "stop",
-            "upgrade-charm",
-            "update-status"
+        "config-changed",
+        "leader-elected",
+        "leader-settings-changed",
+        "start",
+        "stop",
+        "upgrade-charm",
+        "update-status"
     );
     private final TransformationContext context;
     private final Configuration cfg = TemplateHelper.forClasspath(JujuPlugin.class, "/plugins/juju");
@@ -53,11 +63,11 @@ public class JujuTransformer {
         for (Graph<RootComponent, RootRelation> stack : context.getModel().findComponentStacks()) {
             // Setting charm name to the name of the base compute node of "stack"
             String charmName = stack.vertexSet()
-                    .stream()
-                    .filter(v -> v instanceof Compute)
-                    .findFirst()
-                    .get()
-                    .getNormalizedName();
+                .stream()
+                .filter(v -> v instanceof Compute)
+                .findFirst()
+                .get()
+                .getNormalizedName();
             logger.info("*** Charming application stack '{}' ***", charmName);
 
             // Retrieving environment variables, artifacts and operations allowing to provision the nodes in "stack"
@@ -80,7 +90,7 @@ public class JujuTransformer {
                     for (RootRelation relation : node.getRelations())
                         if (relation instanceof ConnectsTo)
                             envVars.put(relation.getTarget().concat(DEFAULT_ENV_VAR_CONNECTION).toUpperCase(),
-                                    DEFAULT_TARGET_LOCATION);
+                                DEFAULT_TARGET_LOCATION);
                     // Retrieving management operations for "node"
                     logger.info("Retrieving artifacts associated with component '{}'", node.getName());
                     node.getArtifacts().stream().forEach(artifacts::add);
@@ -220,9 +230,9 @@ public class JujuTransformer {
      * - the "hooksFolder".
      */
     private void generateInstallHook(
-            Map<String, String> variables,
-            Map<String, List<Operation>> operations,
-            String hooksFolder) throws IOException {
+        Map<String, String> variables,
+        Map<String, List<Operation>> operations,
+        String hooksFolder) throws IOException {
         // Setting path to target file
         String installFile = Paths.get(hooksFolder, HOOK_INSTALL).normalize().toString();
         // Listing environment variables to be exported

@@ -1,12 +1,13 @@
 package io.github.edmm.plugins.azure.model.resource.network.virtualnetworks.subnets;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Map;
+
 import io.github.edmm.plugins.azure.model.Parameter;
 import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Subnet extends Resource {
@@ -19,8 +20,8 @@ public class Subnet extends Resource {
     protected void setDefaults() {
         super.setDefaults();
         setProperties(SubnetProperties.builder()
-                .addressPrefix(("[parameters('subnet_addressPrefix')]"))
-                .build());
+            .addressPrefix(("[parameters('subnet_addressPrefix')]"))
+            .build());
     }
 
     @Override

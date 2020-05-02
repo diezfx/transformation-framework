@@ -1,7 +1,11 @@
 package io.github.edmm.plugins.compose.support;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
@@ -11,6 +15,9 @@ import io.github.edmm.docker.DependencyGraph;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.plugins.compose.DockerComposePlugin;
 import io.github.edmm.plugins.compose.model.Service;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

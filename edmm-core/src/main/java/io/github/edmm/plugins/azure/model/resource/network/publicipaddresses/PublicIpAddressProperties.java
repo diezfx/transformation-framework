@@ -1,6 +1,7 @@
 package io.github.edmm.plugins.azure.model.resource.network.publicipaddresses;
 
 import io.github.edmm.plugins.azure.model.resource.Properties;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

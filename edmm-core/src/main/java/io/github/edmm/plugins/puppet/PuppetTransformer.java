@@ -1,8 +1,14 @@
 package io.github.edmm.plugins.puppet;
 
-import com.google.common.collect.Lists;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -14,6 +20,10 @@ import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.puppet.model.Task;
+
+import com.google.common.collect.Lists;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +52,11 @@ public class PuppetTransformer {
                 try {
                     // TODO check if compute node is present in the stack
                     String stackName = stack.vertexSet()
-                            .stream()
-                            .filter(v -> v instanceof Compute)
-                            .findFirst()
-                            .get()
-                            .getNormalizedName();
+                        .stream()
+                        .filter(v -> v instanceof Compute)
+                        .findFirst()
+                        .get()
+                        .getNormalizedName();
                     logger.info("Generate a repository structure for application stack '{}'", stackName);
 
                     // Sort the reversed topology topologically to have a global order
@@ -77,8 +87,8 @@ public class PuppetTransformer {
         for (RootComponent component : stack) {
             Map<String, Property> properties = component.getProperties();
             properties.values().stream()
-                    .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                    .forEach(p -> envVars.add(String.format("%s=%s", component.getNormalizedName() + "_" + p.getNormalizedName(), p.getValue())));
+                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                .forEach(p -> envVars.add(String.format("%s=%s", component.getNormalizedName() + "_" + p.getNormalizedName(), p.getValue())));
         }
         return envVars;
     }
@@ -117,10 +127,10 @@ public class PuppetTransformer {
                 Path p = Paths.get(a.getValue());
 
                 Task t = Task.builder()
-                        .name(o.getNormalizedName())
-                        .envVars(envVars)
-                        .scriptFileName(p.getFileName().toString())
-                        .build();
+                    .name(o.getNormalizedName())
+                    .envVars(envVars)
+                    .scriptFileName(p.getFileName().toString())
+                    .build();
 
                 tasks.add(t);
                 taskData.put("task", t);

@@ -1,14 +1,15 @@
 package io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.edmm.plugins.azure.model.resource.Resource;
-import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
-import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.VirtualMachine;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import io.github.edmm.plugins.azure.model.resource.Resource;
+import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
+import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.VirtualMachine;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class VirtualMachineExtension extends Resource {
     public VirtualMachineExtension(VirtualMachine vm, String componentName, String artifactName) {
@@ -26,10 +27,10 @@ public class VirtualMachineExtension extends Resource {
 
     public void setScriptPath(String scriptPath) {
         ((VirtualMachineExtensionProperties) getProperties()).setSettings(CustomScriptSettings
-                .builder()
-                .fileUrls(Collections.singletonList(scriptPath))
-                .commandToExecute(String.format("'sh %s'", scriptPath))
-                .build());
+            .builder()
+            .fileUrls(Collections.singletonList(scriptPath))
+            .commandToExecute(String.format("'sh %s'", scriptPath))
+            .build());
     }
 
     @Override
@@ -37,12 +38,12 @@ public class VirtualMachineExtension extends Resource {
         super.setDefaults();
         setApiVersion("2019-03-01");
         setProperties(VirtualMachineExtensionProperties
-                .builder()
-                .autoUpgradeMinorVersion(true)
-                .publisher("Microsoft.Azure.Extensions")
-                .type("CustomScript")
-                .typeHandlerVersion("2.0")
-                // setting the settings happens when examining the corresponding operation
-                .build());
+            .builder()
+            .autoUpgradeMinorVersion(true)
+            .publisher("Microsoft.Azure.Extensions")
+            .type("CustomScript")
+            .typeHandlerVersion("2.0")
+            // setting the settings happens when examining the corresponding operation
+            .build());
     }
 }

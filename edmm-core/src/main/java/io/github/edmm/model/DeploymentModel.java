@@ -1,6 +1,15 @@
 package io.github.edmm.model;
 
-import com.amazonaws.util.StringInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.transformation.TransformationException;
@@ -8,14 +17,14 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.TypeWrapper;
-import io.github.edmm.plugins.multi.Technology;
-import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
+
+import com.amazonaws.util.StringInputStream;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.jgrapht.Graph;
-import org.jgrapht.alg.CycleDetector;
+import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.slf4j.Logger;
@@ -121,9 +130,9 @@ public final class DeploymentModel {
     public Set<Graph<RootComponent, RootRelation>> findComponentStacks() {
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = getReversedTopology();
         List<RootComponent> stackSources = topology.vertexSet()
-                .stream()
-                .filter(v -> dependencyGraph.inDegreeOf(v) == 0)
-                .collect(Collectors.toList());
+            .stream()
+            .filter(v -> dependencyGraph.inDegreeOf(v) == 0)
+            .collect(Collectors.toList());
 
         Set<Graph<RootComponent, RootRelation>> stacks = new HashSet<>();
         stackSources.forEach(source -> {

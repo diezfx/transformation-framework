@@ -2,6 +2,7 @@ package io.github.edmm.core.parser;
 
 import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.core.parser.support.GraphNormalizer;
+
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,7 +30,9 @@ public class EntityGraph extends SimpleDirectedGraph<Entity, EntityGraph.Edge> {
     public static final EntityId ORCHESTRATION_TECHNOLOGY = ROOT.extend("orchestration_technology");
 
     public EntityGraph() {
-        super((source, target) -> new Edge(target.getName(), source, target));
+        // the edge supplier isn't needed if we use always the function
+        // addEdge(V sourceVertex, V targetVertex, E e) of the AbstractBaseClass
+        super(null, null, false);
         addVertex(new MappingEntity(ROOT, this));
     }
 
@@ -46,8 +49,8 @@ public class EntityGraph extends SimpleDirectedGraph<Entity, EntityGraph.Edge> {
 
     public Optional<Entity> getEntity(EntityId id) {
         return this.vertexSet().stream()
-                .filter(entity -> id.equals(entity.getId()))
-                .findFirst();
+            .filter(entity -> id.equals(entity.getId()))
+            .findFirst();
     }
 
     public Optional<Entity> getEntity(List<String> path) {
@@ -61,7 +64,7 @@ public class EntityGraph extends SimpleDirectedGraph<Entity, EntityGraph.Edge> {
         Entity parent = entity.getParent().get();
         boolean added = addVertex(entity);
         if (added) {
-            addEdge(parent, entity);
+            addEdge(parent, entity, new Edge(entity.getName(), parent, entity));
         }
     }
 
@@ -77,9 +80,9 @@ public class EntityGraph extends SimpleDirectedGraph<Entity, EntityGraph.Edge> {
     public void replaceEntity(Entity source, Entity target) {
         // Collect incoming and outgoing edges of the source
         Set<Pair<Entity, String>> predecessors = incomingEdgesOf(source).stream()
-                .map(c -> Pair.of(c.getSource(), c.getName())).collect(Collectors.toSet());
+            .map(c -> Pair.of(c.getSource(), c.getName())).collect(Collectors.toSet());
         Set<Pair<Entity, String>> successors = outgoingEdgesOf(source).stream()
-                .map(c -> Pair.of(c.getTarget(), c.getName())).collect(Collectors.toSet());
+            .map(c -> Pair.of(c.getTarget(), c.getName())).collect(Collectors.toSet());
         removeVertex(source);
         addVertex(target);
         // Redirect existing edges to target entity
@@ -201,7 +204,7 @@ public class EntityGraph extends SimpleDirectedGraph<Entity, EntityGraph.Edge> {
             if (o == null || getClass() != o.getClass()) return false;
             Edge edge = (Edge) o;
             return Objects.equals(source, edge.source) &&
-                    Objects.equals(target, edge.target);
+                Objects.equals(target, edge.target);
         }
 
         @Override

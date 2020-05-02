@@ -1,8 +1,14 @@
 package io.github.edmm.plugins.chef;
 
-import com.google.common.collect.Lists;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
@@ -17,6 +23,10 @@ import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.chef.model.Metadata;
 import io.github.edmm.plugins.chef.model.PolicyFile;
 import io.github.edmm.plugins.chef.model.ShellRecipe;
+
+import com.google.common.collect.Lists;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +61,11 @@ public class ChefTransformer {
                 try {
                     // TODO check if compute node is present in the stack
                     String stackName = stack.vertexSet()
-                            .stream()
-                            .filter(v -> v instanceof Compute)
-                            .findFirst()
-                            .get()
-                            .getNormalizedName();
+                        .stream()
+                        .filter(v -> v instanceof Compute)
+                        .findFirst()
+                        .get()
+                        .getNormalizedName();
 
                     // sort the reversed topology topologically to have a global order
                     TopologicalOrderIterator<RootComponent, RootRelation> iterator = new TopologicalOrderIterator<>(stack);
@@ -99,8 +109,8 @@ public class ChefTransformer {
         for (RootComponent component : stack) {
             Map<String, Property> properties = component.getProperties();
             properties.values().stream()
-                    .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                    .forEach(p -> envVars.put(component.getNormalizedName() + "_" + p.getNormalizedName(), p.getValue()));
+                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                .forEach(p -> envVars.put(component.getNormalizedName() + "_" + p.getNormalizedName(), p.getValue()));
         }
     }
 
@@ -137,12 +147,12 @@ public class ChefTransformer {
                 }
 
                 ShellRecipe recipe = ShellRecipe.builder()
-                        .name(o.getNormalizedName())
-                        .fileName(p.getFileName().toString())
-                        .filePath(a.getValue())
-                        .targetPath("/tmp/".concat(p.getFileName().toString()))
-                        .sourcePath(recipeFilePath.toString().replace("\\", "/"))
-                        .build();
+                    .name(o.getNormalizedName())
+                    .fileName(p.getFileName().toString())
+                    .filePath(a.getValue())
+                    .targetPath("/tmp/".concat(p.getFileName().toString()))
+                    .sourcePath(recipeFilePath.toString().replace("\\", "/"))
+                    .build();
 
                 recipes.add(recipe);
             }
@@ -157,7 +167,7 @@ public class ChefTransformer {
         Map<String, Object> machineData = new HashMap<>();
         machineData.put("name", component.getNormalizedName());
         String image = ((Compute) component).getMachineImage()
-                .orElseThrow(() -> new TransformationException("Error transforming Machine "));
+            .orElseThrow(() -> new TransformationException("Error transforming Machine "));
         machineData.put("image", image);
         context.getFileAccess().append(recipePath.toString(), TemplateHelper.toString(machineRecipe, machineData));
     }
@@ -166,8 +176,8 @@ public class ChefTransformer {
         Template metadata = cfg.getTemplate("metadata.rb");
         templateData.put("metadata", Metadata.builder().name(component.getNormalizedName()).build());
         context.getFileAccess().append(
-                cookbookPath.resolve(COOKBOOK_METADATA_FILENAME).toString(),
-                TemplateHelper.toString(metadata, templateData)
+            cookbookPath.resolve(COOKBOOK_METADATA_FILENAME).toString(),
+            TemplateHelper.toString(metadata, templateData)
         );
     }
 

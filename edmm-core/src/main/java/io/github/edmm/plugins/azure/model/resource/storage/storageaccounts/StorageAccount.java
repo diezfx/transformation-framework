@@ -5,6 +5,7 @@ import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import io.github.edmm.plugins.azure.model.resource.Properties;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -37,9 +38,9 @@ public class StorageAccount extends Resource {
     public Map<String, Parameter> getRequiredParameters() {
         Map<String, Parameter> params = super.getRequiredParameters();
         params.put("storageAccountName", Parameter.builder()
-                .type(ParameterTypeEnum.STRING)
-                .defaultValue("[concat(uniquestring(resourceGroup().id), 'myvmsa')]")
-                .build());
+            .type(ParameterTypeEnum.STRING)
+            .defaultValue("[concat(uniquestring(resourceGroup().id), 'myvmsa')]")
+            .build());
 
         return params;
     }

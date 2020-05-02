@@ -1,10 +1,10 @@
 package io.github.edmm.cli;
 
 import io.github.edmm.core.plugin.PluginService;
-import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationService;
 import io.github.edmm.model.DeploymentModel;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 @Component
 @CommandLine.Command(
-        name = "transform",
-        descriptionHeading = "%n",
-        description = "Starts a transformation to a target technology",
-        customSynopsis = "@|bold edmm transform|@ @|yellow <target>|@ @|yellow <input>|@"
+    name = "transform",
+    descriptionHeading = "%n",
+    description = "Starts a transformation to a target technology",
+    customSynopsis = "@|bold edmm transform|@ @|yellow <target>|@ @|yellow <input>|@"
 )
 public class TransformCommand implements Callable<Integer> {
 
@@ -35,7 +35,7 @@ public class TransformCommand implements Callable<Integer> {
     @CommandLine.Parameters(arity = "1..1", index = "0", description = "The name of the transformation target")
     public void setTarget(String target) {
         List<String> availableTargets = pluginService.getPlugins().stream()
-                .map(p -> p.getTargetTechnology().getId()).collect(Collectors.toList());
+            .map(p -> p.getTargetTechnology().getId()).collect(Collectors.toList());
         if (!availableTargets.contains(target)) {
             String message = String.format("Specified target technology not supported. Valid values are: %s", availableTargets);
             throw new CommandLine.ParameterException(spec.commandLine(), message);
@@ -56,11 +56,7 @@ public class TransformCommand implements Callable<Integer> {
         File sourceDirectory = input.getParentFile();
         File targetDirectory = new File(sourceDirectory, target);
         DeploymentModel model = DeploymentModel.of(input);
-        TargetTechnology targetTechnology = pluginService.getSupportedTargetTechnologies().stream()
-                .filter(p -> p.getId().equals(target))
-                .findFirst()
-                .orElseThrow(IllegalStateException::new);
-        TransformationContext context = new TransformationContext(model, targetTechnology, sourceDirectory, targetDirectory);
+        TransformationContext context = transformationService.createContext(model, target, sourceDirectory, targetDirectory);
         transformationService.startTransformation(context);
         return 42;
     }

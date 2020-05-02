@@ -1,9 +1,12 @@
 package io.github.edmm.plugins.azure.model.resource.network.networkinterfaces;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
+
 import io.github.edmm.plugins.azure.model.resource.Properties;
 import io.github.edmm.plugins.azure.model.resource.network.networksecuritygroups.NetworkSecurityGroup;
 import io.github.edmm.plugins.azure.model.resource.network.publicipaddresses.PublicIpAddress;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

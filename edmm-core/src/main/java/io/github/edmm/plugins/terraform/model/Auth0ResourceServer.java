@@ -1,6 +1,7 @@
 package io.github.edmm.plugins.terraform.model;
 
 import io.github.edmm.utils.Consts;
+
 import lombok.Data;
 
 import java.util.ArrayList;

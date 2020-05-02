@@ -1,9 +1,14 @@
 package io.github.edmm.plugins.azure.model.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.github.edmm.plugins.azure.model.Parameter;
 import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -48,9 +53,9 @@ public abstract class Resource {
     public Map<String, Parameter> getRequiredParameters() {
         Map<String, Parameter> params = new HashMap<>();
         params.put("location", Parameter.builder()
-                .type(ParameterTypeEnum.STRING)
-                .defaultValue("[resourceGroup().location]")
-                .build());
+            .type(ParameterTypeEnum.STRING)
+            .defaultValue("[resourceGroup().location]")
+            .build());
 
         return params;
     }

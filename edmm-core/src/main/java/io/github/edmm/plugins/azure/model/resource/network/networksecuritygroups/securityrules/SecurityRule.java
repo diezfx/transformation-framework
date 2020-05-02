@@ -1,8 +1,9 @@
 package io.github.edmm.plugins.azure.model.resource.network.networksecuritygroups.securityrules;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.edmm.plugins.azure.model.resource.Resource;
 import io.github.edmm.plugins.azure.model.resource.ResourceTypeEnum;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SecurityRule extends Resource {
@@ -17,11 +18,11 @@ public class SecurityRule extends Resource {
         super.setDefaults();
         setApiVersion("2019-04-01");
         setProperties(SecurityRuleProperties.builder()
-                .access(SecurityRuleAccessEnum.Allow)
-                .destinationAddressPrefix("*")
-                .direction(SecurityRuleDirectionEnum.Inbound)
-                .protocol(SecurityRuleProtocolEnum.TCP)
-                .sourcePortRange("*")
-                .build());
+            .access(SecurityRuleAccessEnum.Allow)
+            .destinationAddressPrefix("*")
+            .direction(SecurityRuleDirectionEnum.Inbound)
+            .protocol(SecurityRuleProtocolEnum.TCP)
+            .sourcePortRange("*")
+            .build());
     }
 }

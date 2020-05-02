@@ -1,9 +1,12 @@
 package io.github.edmm.plugins.cfn;
 
-import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
-import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
+import java.util.Map;
+
 import io.github.edmm.core.plugin.BashScript;
 import io.github.edmm.core.plugin.PluginFileAccess;
+
+import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
+import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,23 +57,23 @@ public class EnvHandler {
             String computeName = computeEntry.getKey();
             String filename = getFilename(computeName);
             String name = filename
-                    .replace("-", "_")
-                    .replace(".", "_");
+                .replace("-", "_")
+                .replace(".", "_");
             String source = String.format("http://%s.s3.amazonaws.com/%s", module.getBucketName(), filename);
             CFNFile cfnFile = new CFNFile("/opt/env.sh")
-                    .setSource(source)
-                    .setMode(MODE_777)
-                    .setOwner(OWNER_GROUP_ROOT)
-                    .setGroup(OWNER_GROUP_ROOT);
+                .setSource(source)
+                .setMode(MODE_777)
+                .setOwner(OWNER_GROUP_ROOT)
+                .setGroup(OWNER_GROUP_ROOT);
             CFNCommand cfnCommand = new CFNCommand(name, "/opt/env.sh")
-                    .setCwd("/opt/");
+                .setCwd("/opt/");
             for (Map.Entry<String, Object> var : computeEntry.getValue().entrySet()) {
                 cfnCommand.addEnv(var.getKey(), var.getValue());
             }
             module.getOperations(computeName).ifPresent(init -> init
-                    .getOrAddConfig(CONFIG_SETS, CONFIG_INIT)
-                    .putFile(cfnFile)
-                    .putCommand(cfnCommand));
+                .getOrAddConfig(CONFIG_SETS, CONFIG_INIT)
+                .putFile(cfnFile)
+                .putCommand(cfnCommand));
         }
     }
 }

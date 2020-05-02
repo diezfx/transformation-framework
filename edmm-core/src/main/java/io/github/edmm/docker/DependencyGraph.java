@@ -3,6 +3,7 @@ package io.github.edmm.docker;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
+
 import lombok.NonNull;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMultigraph;
@@ -26,15 +27,15 @@ public final class DependencyGraph extends DirectedMultigraph<Container, Connect
         for (Container sourceStack : stacks) {
             sourceStack.getComponents().forEach(source -> {
                 source.getRelations().stream()
-                        .filter(r -> r instanceof ConnectsTo)
-                        .forEach(r -> {
-                            RootComponent target = graph.getEdgeTarget(r);
-                            for (Container targetStack : stacks) {
-                                if (targetStack.hasComponent(target)) {
-                                    this.addEdge(sourceStack, targetStack, (ConnectsTo) r);
-                                }
+                    .filter(r -> r instanceof ConnectsTo)
+                    .forEach(r -> {
+                        RootComponent target = graph.getEdgeTarget(r);
+                        for (Container targetStack : stacks) {
+                            if (targetStack.hasComponent(target)) {
+                                this.addEdge(sourceStack, targetStack, (ConnectsTo) r);
                             }
-                        });
+                        }
+                    });
             });
         }
     }

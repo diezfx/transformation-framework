@@ -1,10 +1,13 @@
 package io.github.edmm.plugins.cfn;
 
-import com.google.common.collect.Lists;
-import com.scaleset.cfbuilder.core.Fn;
-import com.scaleset.cfbuilder.ec2.Instance;
-import com.scaleset.cfbuilder.ec2.SecurityGroup;
-import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -16,6 +19,12 @@ import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
+
+import com.google.common.collect.Lists;
+import com.scaleset.cfbuilder.core.Fn;
+import com.scaleset.cfbuilder.ec2.Instance;
+import com.scaleset.cfbuilder.ec2.SecurityGroup;
+import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jgrapht.Graph;
@@ -52,10 +61,10 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
             RootComponent targetComponent = connection.getRight();
             if (module.containsFn(targetComponent.getNormalizedName())) {
                 TopologyGraphHelper.resolveHostingComputeComponent(graph, sourceComponent)
-                        .ifPresent(compute -> {
-                            String name = targetComponent.getNormalizedName().toUpperCase() + "_HOSTNAME";
-                            module.addEnvVar(compute, name, module.getFn(targetComponent.getNormalizedName()));
-                        });
+                    .ifPresent(compute -> {
+                        String name = targetComponent.getNormalizedName().toUpperCase() + "_HOSTNAME";
+                        module.addEnvVar(compute, name, module.getFn(targetComponent.getNormalizedName()));
+                    });
             }
         }
         envHandler.handleEnvVars();
@@ -68,12 +77,12 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
             logger.debug("Compute '{}' will be transformed to EC2", name);
             // Default security group the EC2 Instance
             SecurityGroup securityGroup = module
-                    .resource(SecurityGroup.class, name + SECURITY_GROUP);
+                .resource(SecurityGroup.class, name + SECURITY_GROUP);
             // Add EC2 instance
             Instance instance = module.resource(Instance.class, name)
-                    .securityGroupIds(securityGroup)
-                    .imageId("ami-0bbc25e23a7640b9b")
-                    .instanceType("t2.micro");
+                .securityGroupIds(securityGroup)
+                .imageId("ami-0bbc25e23a7640b9b")
+                .instanceType("t2.micro");
             module.addComputeResource(component);
             // Enable SSH port
             if (module.isKeyPair()) {
@@ -89,7 +98,7 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
     @Override
     public void visit(MysqlDatabase component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         // Add operations and properties
         visit(component, compute);
         component.setTransformed(true);
@@ -98,7 +107,7 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
     @Override
     public void visit(MysqlDbms component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         // Open port
         component.getPort().ifPresent(port -> module.addPortMapping(compute, port));
         // Add operations and properties
@@ -109,7 +118,7 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
     @Override
     public void visit(WebApplication component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         // Add operations and properties
         visit(component, compute);
         component.setTransformed(true);
@@ -118,7 +127,7 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
     @Override
     public void visit(Tomcat component) {
         Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
-                .orElseThrow(TransformationException::new);
+            .orElseThrow(TransformationException::new);
         // Open port
         component.getPort().ifPresent(port -> module.addPortMapping(compute, port));
         // Add operations and properties
@@ -170,11 +179,11 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
             }
             RootComponent targetComponent = connection.getRight();
             TopologyGraphHelper.resolveHostingComputeComponent(graph, targetComponent)
-                    .ifPresent(targetCompute -> {
-                        List<RootComponent> targetStack = Lists.newArrayList(targetComponent);
-                        TopologyGraphHelper.resolveChildComponents(graph, targetStack, targetComponent);
-                        doPrepareProperties(envVars, targetStack);
-                    });
+                .ifPresent(targetCompute -> {
+                    List<RootComponent> targetStack = Lists.newArrayList(targetComponent);
+                    TopologyGraphHelper.resolveChildComponents(graph, targetStack, targetComponent);
+                    doPrepareProperties(envVars, targetStack);
+                });
         }
     }
 
@@ -183,11 +192,11 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
         for (RootComponent component : stack) {
             Map<String, Property> properties = component.getProperties();
             properties.values().stream()
-                    .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                    .forEach(p -> {
-                        String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
-                        envVars.put(name, p.getValue());
-                    });
+                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+                .forEach(p -> {
+                    String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
+                    envVars.put(name, p.getValue());
+                });
         }
     }
 
@@ -218,13 +227,13 @@ public class CloudFormationVisitor implements ComponentVisitor, RelationVisitor 
             }
             String source = String.format("http://%s.s3.amazonaws.com/%s", module.getBucketName(), filename);
             CFNFile cfnFile = new CFNFile("/opt/" + filename)
-                    .setSource(source)
-                    .setMode(MODE_777)
-                    .setOwner(OWNER_GROUP_ROOT)
-                    .setGroup(OWNER_GROUP_ROOT);
+                .setSource(source)
+                .setMode(MODE_777)
+                .setOwner(OWNER_GROUP_ROOT)
+                .setGroup(OWNER_GROUP_ROOT);
             module.getOperations(compute)
-                    .getOrAddConfig(CONFIG_SETS, CONFIG_INIT)
-                    .putFile(cfnFile);
+                .getOrAddConfig(CONFIG_SETS, CONFIG_INIT)
+                .putFile(cfnFile);
             PluginFileAccess fileAccess = context.getFileAccess();
             try {
                 fileAccess.copy(file, file);

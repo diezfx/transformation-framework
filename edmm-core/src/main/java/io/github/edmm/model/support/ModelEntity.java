@@ -8,6 +8,7 @@ import io.github.edmm.core.parser.support.DefaultKeys;
 import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
+
 import lombok.ToString;
 import lombok.var;
 
@@ -36,7 +37,7 @@ public abstract class ModelEntity extends DescribableElement {
         Map<String, Property> result = new HashMap<>();
         // Resolve the chain of types
         MappingEntity typeRef = GraphHelper.findTypeEntity(graph, entity).
-                orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
+            orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
         List<MappingEntity> typeChain = GraphHelper.resolveInheritanceChain(graph, typeRef);
         // Get initial properties by assignments
         Optional<Entity> propertiesEntity = entity.getChild(PROPERTIES);
@@ -121,7 +122,7 @@ public abstract class ModelEntity extends DescribableElement {
         Map<String, Operation> result = new HashMap<>();
         // Resolve the chain of types
         MappingEntity typeRef = GraphHelper.findTypeEntity(graph, entity).
-                orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
+            orElseThrow(() -> new IllegalStateException("A component must be an instance of an existing type"));
         List<MappingEntity> typeChain = GraphHelper.resolveInheritanceChain(graph, typeRef);
         // Get initial operations by component assignment
         Optional<Entity> operationsEntity = entity.getChild(OPERATIONS);
@@ -156,7 +157,7 @@ public abstract class ModelEntity extends DescribableElement {
                 result.put(property.getName(), property);
             } else {
                 result.get(propertyEntity.getName())
-                        .updateEntityChain(propertyEntity);
+                    .updateEntityChain(propertyEntity);
             }
         }
     }
@@ -171,7 +172,7 @@ public abstract class ModelEntity extends DescribableElement {
                 result.put(operation.getName(), operation);
             } else {
                 result.get(operationEntity.getName())
-                        .updateEntityChain(operationEntity);
+                    .updateEntityChain(operationEntity);
             }
         }
     }

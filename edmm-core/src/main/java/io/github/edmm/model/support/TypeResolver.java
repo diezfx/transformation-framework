@@ -4,6 +4,7 @@ import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.DependsOn;
 import io.github.edmm.model.relation.HostedOn;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
