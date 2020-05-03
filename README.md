@@ -47,7 +47,7 @@ The context contains on one hand the whole deployment model and on the other han
 Additionally, the target directory where the technology specific models will be placed.
 The access to the whole deployment is necessary, through relations other properties may be needed here.
 Then all lifecycle phases are called. (modelcheck,prepare,transform,cleanup...).
-This could be made cleaner?
+This could be made cleaner?:
 
 
 Valid for all techs:
