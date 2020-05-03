@@ -3,11 +3,11 @@ package io.github.edmm.core.parser;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 public class ScalarEntity extends Entity {
 
-    private final String value;
+    private String value;
 
     public ScalarEntity(String value, EntityId id, EntityGraph graph) {
         super(id, graph);

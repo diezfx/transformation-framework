@@ -1,4 +1,4 @@
-package io.github.edmm.plugins.multi;
+package io.github.edmm.plugins.multi.terraform;
 
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.BashScript;
@@ -11,7 +11,9 @@ import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
+import io.github.edmm.model.visitor.ComponentVisitor;
 import io.github.edmm.model.visitor.RelationVisitor;
+import io.github.edmm.plugins.multi.MultiPlugin;
 import io.github.edmm.plugins.terraform.model.FileProvisioner;
 import io.github.edmm.plugins.terraform.model.Openstack;
 import io.github.edmm.plugins.terraform.model.RemoteExecProvisioner;
@@ -29,7 +31,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class TerraformVisitor implements MultiVisitor, RelationVisitor {
+public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(TerraformVisitor.class);
     protected final TransformationContext context;
@@ -45,7 +47,7 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
 
 
     private void copyFiles(RootComponent comp) {
-        PluginFileAccess fileAccess = context.getSubDirAccess();
+        PluginFileAccess fileAccess = context.getFileAccess();
         for (Artifact artifact : comp.getArtifacts()) {
             try {
                 // get basename
@@ -160,9 +162,8 @@ public class TerraformVisitor implements MultiVisitor, RelationVisitor {
         return operations;
     }
 
-    @Override
     public void populate(){
-        PluginFileAccess fileAccess = context.getSubDirAccess();
+        PluginFileAccess fileAccess = context.getFileAccess();
         Map<String, Object> data = new HashMap<>();
 
 

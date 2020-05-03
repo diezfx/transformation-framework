@@ -1,6 +1,5 @@
 package io.github.edmm.plugins.multi.orchestration;
 
-import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.model.DeploymentModel;
 import io.github.edmm.utils.Consts;
 import org.apache.commons.io.FileUtils;
@@ -10,9 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
-public class OrchestrationContext {
+public class ExecutionContext {
 
     private final File directory;
 
@@ -21,9 +19,9 @@ public class OrchestrationContext {
     }
 
     private final DeploymentModel deploymentModel;
-    private static final Logger logger = LoggerFactory.getLogger(OrchestrationContext.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExecutionContext.class);
 
-    public OrchestrationContext(File directory, DeploymentModel deploymentModel ){
+    public ExecutionContext(File directory, DeploymentModel deploymentModel ){
         this.directory=directory;
         this.deploymentModel=deploymentModel;
     }

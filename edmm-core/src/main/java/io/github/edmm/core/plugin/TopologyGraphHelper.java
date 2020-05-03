@@ -9,6 +9,7 @@ import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
+import lombok.var;
 import org.jgrapht.Graph;
 
 import java.util.*;
@@ -112,10 +113,8 @@ public abstract class TopologyGraphHelper {
         Map<String, Property> result = new HashMap<>();
         var hosts = TopologyGraphHelper.resolveAllHostingComponents(graph, component);
 
-        for (var host : hosts) {
-            for (var prop : host.getProperties().entrySet()) {
-                result.put(prop.getKey(), prop.getValue());
-            }
+        for (RootComponent host : hosts) {
+            host.getProperties().forEach((key, value) -> result.put(key, value));
         }
         return result;
     }

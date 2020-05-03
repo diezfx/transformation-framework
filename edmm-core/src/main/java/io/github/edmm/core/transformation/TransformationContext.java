@@ -9,6 +9,7 @@ import io.github.edmm.model.DeploymentModel;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 
+import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -26,10 +27,13 @@ public final class TransformationContext {
     private final File targetDirectory;
     private final Timestamp timestamp;
 
+    @Getter
+    private final Group group;
+
+
     @Setter
     private String id;
 
-    private String subTargetDirectory;
 
     @Setter
     private State state = State.READY;
@@ -40,17 +44,18 @@ public final class TransformationContext {
 
     public TransformationContext(@NonNull DeploymentModel model, @NonNull TargetTechnology targetTechnology,
                                  @Nullable File sourceDirectory, @Nullable File targetDirectory) {
-        this(UUID.randomUUID().toString(), model, targetTechnology, sourceDirectory, targetDirectory);
+        this(UUID.randomUUID().toString(), model, targetTechnology, sourceDirectory, targetDirectory,null);
     }
 
     public TransformationContext(@NonNull String id, @NonNull DeploymentModel model, @NonNull TargetTechnology targetTechnology,
-                                 @Nullable File sourceDirectory, @Nullable File targetDirectory) {
+                                 @Nullable File sourceDirectory, @Nullable File targetDirectory, @Nullable Group group) {
         this.id = id;
         this.model = model;
         this.targetTechnology = targetTechnology;
         this.sourceDirectory = sourceDirectory;
         this.targetDirectory = targetDirectory;
         this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.group=group;
     }
 
     public DeploymentModel getModel() {
@@ -65,19 +70,7 @@ public final class TransformationContext {
         return new PluginFileAccess(sourceDirectory, targetDirectory);
     }
 
-    public void setSubFileAcess(String relativePath) {
-        this.subTargetDirectory = relativePath;
-    }
 
-
-    /**
-     *
-     * @return access to the directory for this component
-     */
-    public PluginFileAccess getSubDirAccess() {
-        File subdir = new File(this.targetDirectory, this.subTargetDirectory);
-        return new PluginFileAccess(sourceDirectory, subdir);
-    }
 
 
     public enum State {

@@ -25,7 +25,7 @@ public abstract class AbstractLifecycle implements PluginLifecycle, LifecyclePha
     }
 
     @Override
-    public void orchestrate() {
+    public void execute() {
 
     }
 
@@ -49,7 +49,7 @@ public abstract class AbstractLifecycle implements PluginLifecycle, LifecyclePha
         })); */
         phases.add(new LifecyclePhase<>("prepare", this, PluginLifecycle::prepare));
         phases.add(new LifecyclePhase<>("transformation", this, PluginLifecycle::transform));
-        phases.add(new LifecyclePhase<>("orchestrate", this, PluginLifecycle::orchestrate));
+        phases.add(new LifecyclePhase<>("execute", this, PluginLifecycle::execute));
         phases.add(new LifecyclePhase<>("cleanup", this, PluginLifecycle::cleanup));
         return Collections.unmodifiableList(phases);
     }

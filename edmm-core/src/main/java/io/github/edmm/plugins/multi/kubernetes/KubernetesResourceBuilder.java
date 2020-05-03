@@ -1,10 +1,10 @@
-package io.github.edmm.plugins.multi.support.kubernetes;
+package io.github.edmm.plugins.multi.kubernetes;
 
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.docker.Container;
-import io.github.edmm.model.relation.ConnectsTo;
+import io.github.edmm.docker.DependencyGraph;
 import io.github.edmm.plugins.kubernetes.model.DeploymentResource;
 import io.github.edmm.plugins.kubernetes.model.KubernetesResource;
 import io.github.edmm.plugins.kubernetes.model.ServiceResource;
@@ -13,7 +13,6 @@ import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +26,15 @@ public class KubernetesResourceBuilder {
     private final List<KubernetesResource> resources = new ArrayList<>();
 
     private final Container stack;
-    private final RootComponent topComp;
     private final Graph<RootComponent, RootRelation> dependencyGraph;
     private final PluginFileAccess fileAccess;
 
-    public KubernetesResourceBuilder(Container stack, RootComponent topComp, Graph<RootComponent, RootRelation> dependencyGraph, PluginFileAccess fileAccess) {
+    public KubernetesResourceBuilder(Container stack, Graph<RootComponent, RootRelation> dependencyGraph, PluginFileAccess fileAccess) {
         this.stack = stack;
         this.dependencyGraph = dependencyGraph;
         this.fileAccess = fileAccess;
-        this.topComp = topComp;
     }
+
 
     public void populateResources() {
         resolveEnvVars();
@@ -69,7 +67,7 @@ public class KubernetesResourceBuilder {
 
     // build time stuff now
     private void resolveEnvVars() {
-        var allProps = TopologyGraphHelper.findAllProperties(dependencyGraph, topComp);
+        var allProps = TopologyGraphHelper.findAllProperties(dependencyGraph, stack.getTop());
         for (var prop : allProps.entrySet()) {
 
             if (matchesBlacklist(prop)) {

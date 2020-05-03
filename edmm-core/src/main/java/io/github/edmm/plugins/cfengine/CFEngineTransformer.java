@@ -53,7 +53,6 @@ public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
     private final Graph<RootComponent, RootRelation> graph;
     private final PluginFileAccess fileAccess;
     private final Map<String, List<RootComponent>> runningOrder; //List<RootComponent> runningOrder
-    private PluginFileAccess fileAccess;
     private int last_ip = 0;
 
     public CFEngineTransformer(TransformationContext context) {

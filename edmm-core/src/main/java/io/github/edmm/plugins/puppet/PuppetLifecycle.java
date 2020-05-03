@@ -17,7 +17,6 @@ public class PuppetLifecycle extends AbstractLifecycle {
     public static final String MANIFEST_EXTENSION = ".pp";
     private static final Logger logger = LoggerFactory.getLogger(PuppetLifecycle.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(PuppetLifecycle.class);
 
     public PuppetLifecycle(TransformationContext context) {
         super(context);

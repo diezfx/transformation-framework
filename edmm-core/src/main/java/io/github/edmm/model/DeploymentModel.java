@@ -2,16 +2,12 @@ package io.github.edmm.model;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
+import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
@@ -19,6 +15,9 @@ import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.TypeWrapper;
 
 import com.amazonaws.util.StringInputStream;
+import io.github.edmm.plugins.multi.Technology;
+import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
+import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -30,14 +29,9 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Getter
 @ToString
-public final class DeploymentModel {
+public class DeploymentModel {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentModel.class);
 
@@ -47,6 +41,7 @@ public final class DeploymentModel {
     private final Map<String, RootComponent> componentMap;
     private final Graph<RootComponent, RootRelation> topology = new DirectedMultigraph<>(RootRelation.class);
     private final Set<Graph<RootComponent, RootRelation>> stacks = new HashSet<>();
+
 
     public DeploymentModel(String name, EntityGraph graph) {
         this.name = name;

@@ -1,21 +1,15 @@
 package io.github.edmm.plugins.multi.model_extensions;
 
 import io.github.edmm.core.parser.Entity;
-import io.github.edmm.core.parser.EntityId;
 import io.github.edmm.core.parser.MappingEntity;
 import io.github.edmm.core.parser.ScalarEntity;
-import io.github.edmm.core.parser.support.GraphHelper;
 import io.github.edmm.model.component.RootComponent;
-import io.github.edmm.model.support.Attribute;
 import io.github.edmm.model.support.BaseElement;
 import io.github.edmm.plugins.multi.Technology;
 import lombok.var;
-import org.springframework.scheduling.concurrent.ScheduledExecutorTask;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 public class OrchestrationTechnologyMapping extends BaseElement {
 

@@ -1,9 +1,12 @@
-package io.github.edmm.plugins.multi.orchestration;
+package io.github.edmm.plugins.multi.kubernetes;
 
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.plugins.kubernetes.model.ConfigMapResource;
+import io.github.edmm.plugins.multi.orchestration.ExecutionCompInfo;
+import io.github.edmm.plugins.multi.orchestration.ExecutionContext;
+import io.github.edmm.plugins.multi.orchestration.GroupExecutor;
 import io.github.edmm.utils.Consts;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -29,9 +32,9 @@ import java.util.Optional;
 public class KubernetesExecutor implements GroupExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesExecutor.class);
-    protected final OrchestrationContext orchContext;
+    protected final ExecutionContext orchContext;
 
-    public KubernetesExecutor(OrchestrationContext context) {
+    public KubernetesExecutor(ExecutionContext context) {
         this.orchContext = context;
     }
 
@@ -110,10 +113,10 @@ public class KubernetesExecutor implements GroupExecutor {
     }
 
 
-    public void execute(List<DeploymentModelInfo> deployInfos) {
+    public void execute(List<ExecutionCompInfo> deployInfos) {
         File fileAccess = this.orchContext.getDirAccess();
         for (var info : deployInfos) {
-            File compDir = new File(fileAccess, info.component.getName());
+            File compDir = new File(fileAccess, info.getComponent().getName());
             if (!compDir.exists()) {
                 return;
             }
@@ -128,12 +131,12 @@ public class KubernetesExecutor implements GroupExecutor {
 
             // docker build &push
             try {
-                pb.command("docker", "build", "-t", info.component.getLabel() + ":latest", ".");
+                pb.command("docker", "build", "-t", info.getComponent().getLabel() + ":latest", ".");
                 Process init = pb.start();
                 init.waitFor();
-                pb.command("docker", "tag", info.component.getLabel() + ":latest", registry + info.component.getLabel());
+                pb.command("docker", "tag", info.getComponent().getLabel() + ":latest", registry + info.getComponent().getLabel());
                 pb.start().waitFor();
-                pb.command("docker", "push", registry + info.component.getLabel());
+                pb.command("docker", "push", registry + info.getComponent().getLabel());
                 pb.start().waitFor();
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -147,14 +150,14 @@ public class KubernetesExecutor implements GroupExecutor {
                 api.setApiClient(client);
 
                 // contains the runtime properties
-                deployConfigMap(info.component, info.properties, compDir, api);
+                deployConfigMap(info.getComponent(), info.getProperties(), compDir, api);
 
                 // deploy everything
-                logger.info("deployed configMap for {}", info.component.getName());
-                deployDeployment(info.component, compDir, deploymentApi);
-                logger.info("deployed deployment for {}", info.component.getName());
-                Optional<V1Service> service = deployService(info.component, compDir, api);
-                logger.info("deployed service for {}", info.component.getName());
+                logger.info("deployed configMap for {}", info.getComponent().getName());
+                deployDeployment(info.getComponent(), compDir, deploymentApi);
+                logger.info("deployed deployment for {}", info.getComponent().getName());
+                Optional<V1Service> service = deployService(info.getComponent(), compDir, api);
+                logger.info("deployed service for {}", info.getComponent().getName());
 
                 // read output
                 for (var port : service.get().getSpec().getPorts()) {
@@ -162,11 +165,11 @@ public class KubernetesExecutor implements GroupExecutor {
 
                 }
                 logger.info("the clusterIP is: {}", service.get().getSpec().getClusterIP());
-                info.component.addProperty("hostname", service.get().getSpec().getClusterIP());
+                info.getComponent().addProperty("hostname", service.get().getSpec().getClusterIP());
 
 
             } catch (IOException e) {
-                logger.error("could not deploy comp: {}", info.component.getName());
+                logger.error("could not deploy comp: {}", info.getComponent().getName());
                 e.printStackTrace();
 
             }

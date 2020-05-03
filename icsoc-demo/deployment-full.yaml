@@ -5,15 +5,13 @@ orchestration_technology:
   ansible:
     - db
     - dbms
-    - pet_clinic
-    - pet_clinic_tomcat
   terraform:
     - ubuntu_db
-    - ubuntu_app
+
   kubernetes:
-
-
-
+    - ubuntu_app
+    - pet_clinic_tomcat
+    - pet_clinic
 components:
 
   ## Spring PetClinic Application

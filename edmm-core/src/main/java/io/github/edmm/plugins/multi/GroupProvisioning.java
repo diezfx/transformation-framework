@@ -18,9 +18,9 @@ import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
 import io.github.edmm.plugins.multi.model_extensions.groupingGraph.GroupProvisioningOrderGraph;
 import io.github.edmm.plugins.multi.model_extensions.groupingGraph.OrderRelation;
 import org.jgrapht.Graph;
-import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.alg.TransitiveClosure;
 import org.jgrapht.alg.TransitiveReduction;
+import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
 import java.util.*;

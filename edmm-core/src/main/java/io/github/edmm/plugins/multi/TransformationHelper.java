@@ -27,7 +27,7 @@ public class TransformationHelper {
     }
 
 
-    static Map<String, String> collectEnvVars(Graph<RootComponent, RootRelation> graph, RootComponent component) {
+    public static Map<String, String> collectEnvVars(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         Map<String, String> envVars = new HashMap<>();
         var allProps = TopologyGraphHelper.findAllProperties(graph, component);
 
@@ -47,7 +47,7 @@ public class TransformationHelper {
     }
 
 
-    static List<String> collectRuntimeEnvVars(Graph<RootComponent, RootRelation> graph, RootComponent component) {
+    public static List<String> collectRuntimeEnvVars(Graph<RootComponent, RootRelation> graph, RootComponent component) {
         //runtime vars
         List<String> envVars = new ArrayList<>();
         var allProps = TopologyGraphHelper.findAllProperties(graph, component);

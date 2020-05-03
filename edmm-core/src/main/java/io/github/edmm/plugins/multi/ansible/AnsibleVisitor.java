@@ -1,4 +1,4 @@
-package io.github.edmm.plugins.multi;
+package io.github.edmm.plugins.multi.ansible;
 
 import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.PluginFileAccess;
@@ -7,7 +7,6 @@ import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.Property;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.RelationVisitor;
@@ -15,7 +14,8 @@ import io.github.edmm.plugins.ansible.model.AnsibleFile;
 import io.github.edmm.plugins.ansible.model.AnsibleHost;
 import io.github.edmm.plugins.ansible.model.AnsiblePlay;
 import io.github.edmm.plugins.ansible.model.AnsibleTask;
-import lombok.var;
+import io.github.edmm.plugins.multi.MultiVisitor;
+import io.github.edmm.plugins.multi.TransformationHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
 
         // host is the compute if exists
         Compute compute = TopologyGraphHelper
-                .resolveHostingComputeComponent(context.getTopologyGraph(), component)
+                .resolveHostingComputeComponent(graph, component)
                 .orElseThrow(() -> new IllegalStateException(String.format("The component %s could doesn't have a hosting compute", component.getName())));
 
         String host = compute.getNormalizedName();
@@ -67,7 +67,7 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
         if (privKeyValue.isAbsolute()) {
             absoluteKeyPath = compute.getPrivateKeyPath().get();
         } else {
-            absoluteKeyPath = new File(context.getFileAccess().getSourceDirectory(), compute.getPrivateKeyPath().get()).getAbsolutePath();
+            absoluteKeyPath = new File(context.getTargetDirectory(), compute.getPrivateKeyPath().get()).getAbsolutePath();
         }
         hosts.put(host, new AnsibleHost(host, absoluteKeyPath));
         AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(host).vars(envVars).runtimeVars(envVarsRuntime).tasks(tasks)
@@ -141,7 +141,7 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
     }
 
     private void copyFiles(RootComponent comp) {
-        PluginFileAccess fileAccess = context.getSubDirAccess();
+        PluginFileAccess fileAccess = context.getFileAccess();
         for (Artifact artifact : comp.getArtifacts()) {
             try {
                 // get basename
@@ -178,14 +178,13 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
     }
 
     public void populate() {
-        PluginFileAccess fileAccess = context.getSubDirAccess();
-        String filename = String.format("deployment.yml");
+        PluginFileAccess fileAccess = context.getFileAccess();
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("plays", plays);
         templateData.put("hosts", hosts);
 
         try {
-            fileAccess.write(filename, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
+            fileAccess.write(AnsibleAreaLifecycle.FILE_NAME, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
         } catch (IOException e) {
             logger.error("Failed to write Ansible file", e);
         }

@@ -1,5 +1,6 @@
 package io.github.edmm.plugins.multi.model;
 
+
 import io.github.edmm.plugins.multi.Technology;
 import org.yaml.snakeyaml.Yaml;
 

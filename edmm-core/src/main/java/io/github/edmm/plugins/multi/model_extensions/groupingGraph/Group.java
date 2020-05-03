@@ -1,8 +1,11 @@
 package io.github.edmm.plugins.multi.model_extensions.groupingGraph;
 
 
+import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.multi.Technology;
+import org.jgrapht.Graph;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +13,7 @@ import java.util.Set;
 
 public class Group {
 
-
+    public Graph<RootComponent, RootRelation> subGraph;
     public Set<RootComponent> groupComponents;
     private Technology tech;
 
@@ -42,6 +45,13 @@ public class Group {
 
     public Technology getTechnology() {
         return tech;
+    }
+
+    public void setSubGraph(Graph<RootComponent, RootRelation> subGraph){
+        this.subGraph=subGraph;
+    }
+    public Graph<RootComponent, RootRelation> getSubGraph(){
+        return subGraph;
     }
 
     public void setTechnology(Technology tech) {

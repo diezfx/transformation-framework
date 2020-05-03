@@ -1,4 +1,4 @@
-package io.github.edmm.plugins.multi.support.kubernetes;
+package io.github.edmm.plugins.multi.kubernetes;
 
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.transformation.TransformationException;
@@ -10,7 +10,6 @@ import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.visitor.ComponentVisitor;
-import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

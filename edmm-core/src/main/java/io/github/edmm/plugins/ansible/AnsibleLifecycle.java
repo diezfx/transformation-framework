@@ -14,8 +14,6 @@ public class AnsibleLifecycle extends AbstractLifecycle {
     public static final String FILE_NAME = "deployment.yml";
     private static final Logger logger = LoggerFactory.getLogger(AnsibleLifecycle.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(AnsibleLifecycle.class);
-
     public AnsibleLifecycle(TransformationContext context) {
         super(context);
     }

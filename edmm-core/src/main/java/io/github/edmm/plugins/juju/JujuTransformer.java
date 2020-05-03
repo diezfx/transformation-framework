@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
-
+public class JujuTransformer {
     public static final String CHARM_FOLDER_PREAMBLE = "layer-";
     public static final String CHARM_SERIES = "xenial";
     public static final String HOOKS_FOLDER = "hooks";

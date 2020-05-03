@@ -1,9 +1,12 @@
-package io.github.edmm.plugins.multi.orchestration;
+package io.github.edmm.plugins.multi.terraform;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Property;
+import io.github.edmm.plugins.multi.orchestration.ExecutionCompInfo;
+import io.github.edmm.plugins.multi.orchestration.ExecutionContext;
+import io.github.edmm.plugins.multi.orchestration.GroupExecutor;
 import lombok.SneakyThrows;
 import lombok.var;
 import org.apache.commons.io.FileUtils;
@@ -21,14 +24,14 @@ import java.util.stream.Collectors;
 public class TerraformExecutor implements GroupExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(TerraformExecutor.class);
-    protected final OrchestrationContext orchContext;
+    protected final ExecutionContext orchContext;
 
-    public TerraformExecutor(OrchestrationContext orchContext) {
+    public TerraformExecutor(ExecutionContext orchContext) {
         this.orchContext=orchContext;
     }
 
     @SneakyThrows
-    public void execute(List<DeploymentModelInfo> deployInfos) {
+    public void execute(List<ExecutionCompInfo> deployInfos) {
         Gson gson = new Gson();
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();
@@ -36,7 +39,7 @@ public class TerraformExecutor implements GroupExecutor {
 
 
         for (var info : deployInfos) {
-            List<Artifact> providerInfo = info.component.getArtifacts().stream().filter(a -> a.getName().equals("provider"))
+            List<Artifact> providerInfo = info.getComponent().getArtifacts().stream().filter(a -> a.getName().equals("provider"))
                     .collect(Collectors.toList());
             // todo clean solution
             if (providerInfo.isEmpty()) {
@@ -44,7 +47,7 @@ public class TerraformExecutor implements GroupExecutor {
             }
             // read input variables
             String basename = FilenameUtils.getName(providerInfo.stream().findFirst().get().getValue());
-            String newPath = "./files/" + info.component.getNormalizedName() + "/" + basename;
+            String newPath = "./files/" + info.getComponent().getNormalizedName() + "/" + basename;
             File file = new File(orchContext.getDirAccess(),newPath );
             String openstackProviderInfo=FileUtils.readFileToString(file,StandardCharsets.UTF_8);
             HashMap<String, String> obj = gson.fromJson(openstackProviderInfo, HashMap.class);
@@ -67,12 +70,12 @@ public class TerraformExecutor implements GroupExecutor {
 
             // read output variables and write back in model
 
-            File propFile = new File(orchContext.getDirAccess(), info.component.getName() + "_computed_properties" + ".json");
+            File propFile = new File(orchContext.getDirAccess(), info.getComponent().getName() + "_computed_properties" + ".json");
             String computeInfo= FileUtils.readFileToString(propFile, StandardCharsets.UTF_8);
             HashMap<String, String> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, String>>() {
             }.getType());
 
-            Map<String, Property> properties = info.component.getProperties();
+            Map<String, Property> properties = info.getComponent().getProperties();
 
 
             // set all properties
@@ -81,7 +84,7 @@ public class TerraformExecutor implements GroupExecutor {
 
                 if (!properties.containsKey(computed_prop.getKey())) {
                     logger.warn(String.format("The property(%s) is not there, so it was added to props", computed_prop.getKey()));
-                    info.component.addProperty(computed_prop.getKey(), computed_prop.getValue());
+                    info.getComponent().addProperty(computed_prop.getKey(), computed_prop.getValue());
                 } else {
                     var prop = properties.get(computed_prop.getKey());
                     prop.setValue(computed_prop.getValue());

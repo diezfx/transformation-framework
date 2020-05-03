@@ -13,8 +13,6 @@ public class CFNPackage {
 
     @JsonIgnore
     public String id;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Map<String, List<String>> packages;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final Map<String, List<String>> packages;

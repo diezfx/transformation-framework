@@ -10,14 +10,15 @@
 ## kubernetes
 - implement kubernetes (see kubernetes.md)
 - [x] add kubernetes transformer
-- [x] add kubernetes orchestrator
+- [x] add kubernetes executor
 - [x] use configmap for runtime vars
 - [x] read vars during runtime 
 
 
 
-## later
-- [ ] testing!!
+## considerations
+- use real plugin structure not mock it
+- executor could be made completely independent
 
 
 ## done 

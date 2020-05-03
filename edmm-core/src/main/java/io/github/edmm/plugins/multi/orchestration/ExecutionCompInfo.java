@@ -6,13 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 
+import java.util.List;
 import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class DeploymentModelInfo {
+public class ExecutionCompInfo {
 
     RootComponent component;
     Map<String, Property> properties;
+
 
 }

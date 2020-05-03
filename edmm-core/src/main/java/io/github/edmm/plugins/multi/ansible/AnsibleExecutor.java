@@ -1,9 +1,15 @@
-package io.github.edmm.plugins.multi.orchestration;
+package io.github.edmm.plugins.multi.ansible;
 
 import com.google.gson.JsonObject;
+
+
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.model.Property;
+
 import io.github.edmm.model.component.Compute;
+import io.github.edmm.plugins.multi.orchestration.ExecutionCompInfo;
+import io.github.edmm.plugins.multi.orchestration.ExecutionContext;
+import io.github.edmm.plugins.multi.orchestration.GroupExecutor;
 import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +21,15 @@ import java.util.*;
 
 public class AnsibleExecutor implements GroupExecutor {
     private static final Logger logger = LoggerFactory.getLogger(AnsibleExecutor.class);
-    private final OrchestrationContext context;
+    private final ExecutionContext context;
 
-    public AnsibleExecutor(OrchestrationContext context) {
+    public AnsibleExecutor(ExecutionContext context) {
                 this.context=context;
     }
 
 
     @Override
-    public void execute(List<DeploymentModelInfo> deployInfos) {
+    public void execute(List<ExecutionCompInfo> deployInfos) {
         File directory=context.getDirAccess();
         ProcessBuilder pb = new ProcessBuilder();
         pb.inheritIO();
@@ -33,11 +39,11 @@ public class AnsibleExecutor implements GroupExecutor {
         Set<Compute> hosts = new HashSet<>();
         try {
             for (var info : deployInfos) {
-                Compute host = TopologyGraphHelper.resolveHostingComputeComponent(context.getDeploymentModel().getTopology(), info.component)
+                Compute host = TopologyGraphHelper.resolveHostingComputeComponent(context.getDeploymentModel().getTopology(), info.getComponent())
                         .orElseThrow(() -> new IllegalArgumentException("can't find the hosting component"));
                 hosts.add(host);
-                var json = convertPropsToJson(info.properties);
-                context.write(info.component.getName() + "_requiredProps.json", json.toString());
+                var json = convertPropsToJson(info.getProperties());
+                context.write(info.getComponent().getName() + "_requiredProps.json", json.toString());
             }
             for (var compute : hosts) {
                 var json = convertPropsToJson(compute.getProperties());

@@ -11,7 +11,7 @@ public interface PluginLifecycle extends LifecyclePhaseAccess {
 
     void transform();
 
-    void orchestrate();
+    void execute();
 
     void cleanup();
 }

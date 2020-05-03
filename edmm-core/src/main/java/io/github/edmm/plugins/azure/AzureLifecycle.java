@@ -28,7 +28,6 @@ public class AzureLifecycle extends AbstractLifecycle {
     public static final String FILE_NAME = "deploy.json";
     private static final Logger logger = LoggerFactory.getLogger(AzureLifecycle.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(AzureLifecycle.class);
 
     public AzureLifecycle(TransformationContext context) {
         super(context);

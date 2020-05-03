@@ -22,7 +22,6 @@ public class ChefLifecycle extends AbstractLifecycle {
     public static final String COOKBOOK_CHEFIGNORE_FILENAME = "chefignore";
     private static final Logger logger = LoggerFactory.getLogger(ChefLifecycle.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(ChefLifecycle.class);
 
     public ChefLifecycle(TransformationContext context) {
         super(context);

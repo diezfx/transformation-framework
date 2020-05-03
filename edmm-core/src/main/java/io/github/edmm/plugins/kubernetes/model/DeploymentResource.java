@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,15 @@ public final class DeploymentResource implements KubernetesResource {
             .addAllToEnv(stack.getEnvVars().entrySet().stream()
                 .map(e -> new EnvVar(e.getKey(), e.getValue(), null))
                 .collect(Collectors.toSet()))
+            .addAllToEnv(stack.getEnvVarsRuntime().stream()
+                .map(varName -> {
+                    var envVarSource = new EnvVarSourceBuilder().withNewConfigMapKeyRef()
+                        .withNewKey(varName)
+                        .withNewName(stack.getConfigMapName())
+                        .endConfigMapKeyRef()
+                        .build();
+                    return new EnvVarBuilder().withName(varName).withValueFrom(envVarSource).build();
+                }).collect(Collectors.toSet()))
             .build();
         deployment = new DeploymentBuilder()
             .withNewMetadata()

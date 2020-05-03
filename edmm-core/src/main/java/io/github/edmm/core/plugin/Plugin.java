@@ -49,7 +49,7 @@ public abstract class Plugin<L extends AbstractLifecycle> {
         logger.info("Transformation finished after {} ms", time);
     }
 
-    private int countExecutionPhases(TransformationContext context, List<? extends LifecyclePhase> phases) {
+    protected int countExecutionPhases(TransformationContext context, List<? extends LifecyclePhase> phases) {
         return (int) phases.stream().filter(e -> e.shouldExecute(context)).count();
     }
 
