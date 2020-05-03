@@ -47,6 +47,7 @@ The context contains on one hand the whole deployment model and on the other han
 Additionally, the target directory where the technology specific models will be placed.
 The access to the whole deployment is necessary, through relations other properties may be needed here.
 Then all lifecycle phases are called. (modelcheck,prepare,transform,cleanup...).
+This could be made cleaner?
 
 
 Valid for all techs:
@@ -62,7 +63,7 @@ This can be changed in `TopologyGraphHelper.findAllProperties`.
 
 
 
-### Execution(name is open for alternatives)
+### Execution
 `edmm-core/src/main/java/io/github/edmm/plugins/multi/MultiLifecycle.java`(execute)
 
 The orchestration step reads the plan `execution.plan.json`. Here the groups and their technology are defined.
