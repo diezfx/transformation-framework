@@ -1,5 +1,8 @@
 package io.github.edmm.model;
 
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+
 import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.component.SoftwareComponent;
@@ -9,10 +12,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class DeploymentModelTest {
 
