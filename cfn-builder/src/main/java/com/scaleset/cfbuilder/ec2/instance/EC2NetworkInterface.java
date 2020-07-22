@@ -1,11 +1,11 @@
 package com.scaleset.cfbuilder.ec2.instance;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.scaleset.cfbuilder.ec2.Instance;
 import com.scaleset.cfbuilder.ec2.networkinterface.Ipv6Address;
 import com.scaleset.cfbuilder.ec2.networkinterface.PrivateIpAddressSpecification;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Constructs a {@code EC2NetworkInterface} to be attached to an EC2 {@link Instance}.
@@ -195,12 +195,12 @@ public class EC2NetworkInterface {
         return subnetId;
     }
 
-    public void setSubnetId(Object subnetId) {
-        this.subnetId = subnetId;
-    }
-
     public EC2NetworkInterface subnetId(Object subnetId) {
         this.subnetId = subnetId;
         return this;
+    }
+
+    public void setSubnetId(Object subnetId) {
+        this.subnetId = subnetId;
     }
 }

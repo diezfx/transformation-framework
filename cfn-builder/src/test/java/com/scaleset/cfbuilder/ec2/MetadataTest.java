@@ -1,16 +1,27 @@
 package com.scaleset.cfbuilder.ec2;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.scaleset.cfbuilder.cloudformation.Authentication;
 import com.scaleset.cfbuilder.core.Fn;
 import com.scaleset.cfbuilder.core.Module;
 import com.scaleset.cfbuilder.core.Template;
-import com.scaleset.cfbuilder.ec2.metadata.*;
-import com.scaleset.cfbuilder.iam.*;
+import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
+import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
+import com.scaleset.cfbuilder.ec2.metadata.CFNInit;
+import com.scaleset.cfbuilder.ec2.metadata.CFNPackage;
+import com.scaleset.cfbuilder.ec2.metadata.CFNService;
+import com.scaleset.cfbuilder.ec2.metadata.Config;
+import com.scaleset.cfbuilder.ec2.metadata.SimpleService;
+import com.scaleset.cfbuilder.iam.InstanceProfile;
+import com.scaleset.cfbuilder.iam.Policy;
+import com.scaleset.cfbuilder.iam.PolicyDocument;
+import com.scaleset.cfbuilder.iam.Principal;
+import com.scaleset.cfbuilder.iam.Role;
+import com.scaleset.cfbuilder.iam.Statement;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;

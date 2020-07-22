@@ -3,7 +3,7 @@ package com.scaleset.cfbuilder.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"Description", "Value"})
+@JsonPropertyOrder( {"Description", "Value"})
 public class Output {
 
     @JsonIgnore

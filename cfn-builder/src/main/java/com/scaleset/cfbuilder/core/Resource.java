@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 
-@JsonPropertyOrder({"Type", "Metadata", "Properties"})
+@JsonPropertyOrder( {"Type", "Metadata", "Properties"})
 public interface Resource extends Referenceable {
 
     @JsonIgnore

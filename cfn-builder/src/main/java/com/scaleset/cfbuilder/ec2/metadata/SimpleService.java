@@ -1,9 +1,13 @@
 package com.scaleset.cfbuilder.ec2.metadata;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.*;
 
 public class SimpleService {
 
@@ -27,6 +31,16 @@ public class SimpleService {
 
     public String getId() {
         return this.id;
+    }
+
+    public SimpleService setEnsureRunning(Boolean ensureRunning) {
+        this.ensureRunning = ensureRunning;
+        return this;
+    }
+
+    public SimpleService setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+        return this;
     }
 
     public SimpleService addFile(String file) {
@@ -54,19 +68,9 @@ public class SimpleService {
         return ensureRunning;
     }
 
-    public SimpleService setEnsureRunning(Boolean ensureRunning) {
-        this.ensureRunning = ensureRunning;
-        return this;
-    }
-
     @JsonProperty("enabled")
     public Boolean getEnabled() {
         return enabled;
-    }
-
-    public SimpleService setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-        return this;
     }
 
     @JsonProperty("files")

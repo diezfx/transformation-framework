@@ -1,11 +1,11 @@
 package com.scaleset.cfbuilder.iam;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Constructs a {@code Principal} to specify the user (IAM user, federated user, or assumed-role user), AWS account, AWS

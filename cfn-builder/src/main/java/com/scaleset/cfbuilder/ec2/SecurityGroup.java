@@ -1,9 +1,9 @@
 package com.scaleset.cfbuilder.ec2;
 
+import java.util.function.Consumer;
+
 import com.scaleset.cfbuilder.annotations.Type;
 import com.scaleset.cfbuilder.core.Resource;
-
-import java.util.function.Consumer;
 
 /**
  * Constructs a {@code SecurityGroup} to create an an Amazon EC2 security group.
