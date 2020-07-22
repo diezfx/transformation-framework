@@ -13,8 +13,6 @@ import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.VisitorHelper;
 import io.github.edmm.plugins.ComputeAreaSupportVisitor;
-
-
 import io.github.edmm.plugins.kubernetes.support.ImageMappingVisitor;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
@@ -48,9 +46,9 @@ public class KubernetesAreaLifecycle extends AbstractLifecycle {
 
     @Override
     public void prepare() {
-        List<Compute> computeComponents=context.getGroup().getGroupComponents().stream()
+        List<Compute> computeComponents = context.getGroup().getGroupComponents().stream()
             .filter((comp) -> (comp instanceof Compute))
-            .map((comp) -> (Compute)comp)
+            .map((comp) -> (Compute) comp)
             .collect(Collectors.toList());
 
         for (Compute compute : computeComponents) {
@@ -77,8 +75,6 @@ public class KubernetesAreaLifecycle extends AbstractLifecycle {
         }
         logger.info("Transformation to Kubernetes successful");
     }
-
-
 
 
     public void cleanup() {

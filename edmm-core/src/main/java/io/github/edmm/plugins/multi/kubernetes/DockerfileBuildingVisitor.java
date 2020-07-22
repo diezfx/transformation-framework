@@ -47,7 +47,7 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
             for (FileMapping mapping : stack.getOperations()) {
                 String sourcePath = mapping.getArtifact().getValue();
                 String filename = mapping.getComponent().getNormalizedName() +
-                        "_" + determineFilename(mapping.getArtifact());
+                    "_" + determineFilename(mapping.getArtifact());
                 String targetPath = targetDirectory + "/" + filename;
                 fileAccess.copy(sourcePath, targetPath);
                 builder.add("./" + filename, filename);
@@ -60,7 +60,7 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
                 FileMapping mapping = stack.getStartOperations().get(stack.getStartOperations().size() - 1);
                 String sourcePath = mapping.getArtifact().getValue();
                 String filename = mapping.getComponent().getNormalizedName() +
-                        "_" + determineFilename(mapping.getArtifact());
+                    "_" + determineFilename(mapping.getArtifact());
                 String targetPath = targetDirectory + "/" + filename;
                 fileAccess.copy(sourcePath, targetPath);
                 builder.add("./" + filename, filename);
@@ -84,20 +84,20 @@ public class DockerfileBuildingVisitor implements ComponentVisitor {
 
     private void collectPorts(RootComponent component) {
         component.getProperty(PORT)
-                .ifPresent(port -> stack.addPort(new PortMapping(component.getNormalizedName(), port)));
+            .ifPresent(port -> stack.addPort(new PortMapping(component.getNormalizedName(), port)));
     }
 
     private void collectEnvVars(RootComponent component) {
         String[] blacklist = {"key_name", "public_key"};
         component.getProperties().values().stream()
-                .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
-                .filter(p -> p.getValue() != null)
-                .filter(p -> !p.getValue().contains("$"))
-                .forEach(p -> {
-                    String name = p.getNormalizedName().toUpperCase();
-                    builder.env(name, p.getValue());
-                    stack.addEnvVar(name, p.getValue());
-                });
+            .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+            .filter(p -> p.getValue() != null)
+            .filter(p -> !p.getValue().contains("$"))
+            .forEach(p -> {
+                String name = p.getNormalizedName().toUpperCase();
+                builder.env(name, p.getValue());
+                stack.addEnvVar(name, p.getValue());
+            });
     }
 
     private void collectLifecycleOperation(RootComponent component, Operation operation, boolean isStartOperation) {

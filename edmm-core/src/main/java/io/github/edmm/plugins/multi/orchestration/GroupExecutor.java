@@ -5,8 +5,8 @@ import java.util.List;
 
 public interface GroupExecutor {
 
-   // todo components in context?
-   void execute(List<ExecutionCompInfo> components);
+    // todo components in context?
+    void execute(List<ExecutionCompInfo> components);
 }
 
 

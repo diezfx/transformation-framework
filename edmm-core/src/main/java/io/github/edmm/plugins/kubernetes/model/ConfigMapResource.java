@@ -17,11 +17,10 @@ public final class ConfigMapResource implements KubernetesResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceResource.class);
     private final RootComponent component;
-    private V1ConfigMap configMap;
     private final String namespace = "default";
     private final Map<String, Property> props;
-
-    String[] blacklist = { "key_name", "public_key", "hostname" };
+    String[] blacklist = {"key_name", "public_key", "hostname"};
+    private V1ConfigMap configMap;
 
     public ConfigMapResource(RootComponent component, Map<String, Property> props) {
         this.component = component;
@@ -32,7 +31,7 @@ public final class ConfigMapResource implements KubernetesResource {
     public void build() {
 
         var configMapBuilder = new V1ConfigMapBuilder().withApiVersion("v1").withNewMetadata().withName(getName())
-                .withNamespace(namespace).endMetadata();
+            .withNamespace(namespace).endMetadata();
 
         for (var prop : props.entrySet()) {
 

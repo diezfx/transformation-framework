@@ -27,7 +27,7 @@ public class TerraformExecutor implements GroupExecutor {
     protected final ExecutionContext orchContext;
 
     public TerraformExecutor(ExecutionContext orchContext) {
-        this.orchContext=orchContext;
+        this.orchContext = orchContext;
     }
 
     @SneakyThrows
@@ -40,16 +40,16 @@ public class TerraformExecutor implements GroupExecutor {
 
         for (var info : deployInfos) {
             List<Artifact> providerInfo = info.getComponent().getArtifacts().stream().filter(a -> a.getName().equals("provider"))
-                    .collect(Collectors.toList());
-            // todo clean solution
+                .collect(Collectors.toList());
+            // todo cleaner solution
             if (providerInfo.isEmpty()) {
                 throw new IllegalArgumentException("The providerinfo for openstack was not provided");
             }
             // read input variables
             String basename = FilenameUtils.getName(providerInfo.stream().findFirst().get().getValue());
             String newPath = "./files/" + info.getComponent().getNormalizedName() + "/" + basename;
-            File file = new File(orchContext.getDirAccess(),newPath );
-            String openstackProviderInfo=FileUtils.readFileToString(file,StandardCharsets.UTF_8);
+            File file = new File(orchContext.getDirAccess(), newPath);
+            String openstackProviderInfo = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             HashMap<String, String> obj = gson.fromJson(openstackProviderInfo, HashMap.class);
 
             Map<String, String> env = pb.environment();
@@ -71,7 +71,7 @@ public class TerraformExecutor implements GroupExecutor {
             // read output variables and write back in model
 
             File propFile = new File(orchContext.getDirAccess(), info.getComponent().getName() + "_computed_properties" + ".json");
-            String computeInfo= FileUtils.readFileToString(propFile, StandardCharsets.UTF_8);
+            String computeInfo = FileUtils.readFileToString(propFile, StandardCharsets.UTF_8);
             HashMap<String, String> output = gson.fromJson(computeInfo, new TypeToken<HashMap<String, String>>() {
             }.getType());
 

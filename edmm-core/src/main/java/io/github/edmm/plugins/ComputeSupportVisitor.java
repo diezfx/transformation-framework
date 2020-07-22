@@ -4,7 +4,6 @@ import io.github.edmm.core.plugin.support.CheckModelResult;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.component.*;
 import io.github.edmm.model.visitor.ComponentVisitor;
-
 import lombok.Getter;
 
 import java.util.HashSet;

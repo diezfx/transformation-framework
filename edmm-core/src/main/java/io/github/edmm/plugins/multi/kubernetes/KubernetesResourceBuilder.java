@@ -4,20 +4,21 @@ import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.docker.Container;
-import io.github.edmm.docker.DependencyGraph;
+import io.github.edmm.model.Property;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.kubernetes.model.DeploymentResource;
 import io.github.edmm.plugins.kubernetes.model.KubernetesResource;
 import io.github.edmm.plugins.kubernetes.model.ServiceResource;
 import lombok.var;
-import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.model.Property;
-import io.github.edmm.model.component.*;
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class KubernetesResourceBuilder {
 

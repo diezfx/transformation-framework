@@ -1,48 +1,46 @@
 package io.github.edmm.plugins.multi.kubernetes;
 
 import io.github.edmm.core.plugin.PluginFileAccess;
+import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.docker.Container;
+import io.github.edmm.model.component.*;
+import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.plugins.kubernetes.support.ImageMappingVisitor;
 import io.github.edmm.plugins.multi.MultiVisitor;
 import lombok.var;
-import io.github.edmm.model.component.*;
-import io.github.edmm.model.relation.RootRelation;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
 
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesVisitor.class);
     protected final TransformationContext context;
     protected final Graph<RootComponent, RootRelation> graph;
-    private static final Logger logger = LoggerFactory.getLogger(KubernetesVisitor.class);
     private final List<Container> stacks;
-
 
 
     public KubernetesVisitor(TransformationContext context) {
         this.context = context;
         this.graph = context.getTopologyGraph();
-        this.stacks=new ArrayList<>();
+        this.stacks = new ArrayList<>();
     }
 
 
     @Override
     public void populate() {
 
-        for (Container stack: stacks){
+        for (Container stack : stacks) {
             PluginFileAccess fileAccess = context.getFileAccess();
             buildDockerfile(stack, fileAccess);
-            RootComponent component=stack.getTop();
-            KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack,  graph, fileAccess);
+            RootComponent component = stack.getTop();
+            KubernetesResourceBuilder resourceBuilder = new KubernetesResourceBuilder(stack, graph, fileAccess);
             resourceBuilder.populateResources();
         }
 
@@ -70,7 +68,7 @@ public class KubernetesVisitor implements MultiVisitor, RelationVisitor {
         component.addProperty("hostname", null);
 
 
-        Container stack=new Container();
+        Container stack = new Container();
         List<RootComponent> compStack = TopologyGraphHelper.resolveAllHostingComponents(graph, component);
         for (var comp : compStack) {
             logger.info("add comp:{} to stack", comp.getName());

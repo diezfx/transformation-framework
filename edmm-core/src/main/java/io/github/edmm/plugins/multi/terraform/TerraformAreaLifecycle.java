@@ -15,7 +15,6 @@ public class TerraformAreaLifecycle extends AbstractLifecycle {
     private static final Logger logger = LoggerFactory.getLogger(TerraformAreaLifecycle.class);
 
 
-
     public TerraformAreaLifecycle(TransformationContext context) {
         super(context);
     }
@@ -44,7 +43,6 @@ public class TerraformAreaLifecycle extends AbstractLifecycle {
         visitor.populate();
         logger.info("Transformation to Terraform successful");
     }
-
 
 
     @Override

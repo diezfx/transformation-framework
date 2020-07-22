@@ -12,22 +12,20 @@ import java.nio.charset.StandardCharsets;
 
 public class ExecutionContext {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExecutionContext.class);
     private final File directory;
+    private final DeploymentModel deploymentModel;
+    public ExecutionContext(File directory, DeploymentModel deploymentModel) {
+        this.directory = directory;
+        this.deploymentModel = deploymentModel;
+    }
 
     public DeploymentModel getDeploymentModel() {
         return deploymentModel;
     }
 
-    private final DeploymentModel deploymentModel;
-    private static final Logger logger = LoggerFactory.getLogger(ExecutionContext.class);
-
-    public ExecutionContext(File directory, DeploymentModel deploymentModel ){
-        this.directory=directory;
-        this.deploymentModel=deploymentModel;
-    }
-
     public File getDirAccess() {
-      return directory;
+        return directory;
     }
 
 

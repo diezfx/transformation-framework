@@ -1,23 +1,15 @@
 package io.github.edmm.model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.amazonaws.util.StringInputStream;
 import io.github.edmm.core.parser.EntityGraph;
 import io.github.edmm.core.parser.MappingEntity;
-import io.github.edmm.core.transformation.TargetTechnology;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.HostedOn;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.support.TypeWrapper;
-
-import com.amazonaws.util.StringInputStream;
 import io.github.edmm.plugins.multi.Technology;
 import io.github.edmm.plugins.multi.model_extensions.OrchestrationTechnologyMapping;
-import io.github.edmm.plugins.multi.model_extensions.groupingGraph.Group;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -28,6 +20,11 @@ import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -42,7 +39,6 @@ public class DeploymentModel {
     private final Graph<RootComponent, RootRelation> topology = new DirectedMultigraph<>(RootRelation.class);
     private final Set<Graph<RootComponent, RootRelation>> stacks = new HashSet<>();
 
-
     public DeploymentModel(String name, EntityGraph graph) {
         this.name = name;
         this.graph = graph;
@@ -54,7 +50,8 @@ public class DeploymentModel {
     @SneakyThrows
     public static DeploymentModel of(@NonNull File file) {
         if (!file.isFile() || !file.canRead()) {
-            throw new IllegalStateException(String.format("File '%s' does not exist - failed to construct internal graph", file));
+            throw new IllegalStateException(
+                String.format("File '%s' does not exist - failed to construct internal graph", file));
         }
         EntityGraph graph = new EntityGraph(new FileInputStream(file));
         return new DeploymentModel(file.getName(), graph);
@@ -86,7 +83,6 @@ public class DeploymentModel {
         }
     }
 
-
     public Set<RootComponent> getComponents() {
         return topology.vertexSet();
     }
@@ -100,13 +96,14 @@ public class DeploymentModel {
     }
 
     public Optional<OrchestrationTechnologyMapping> getTechnologyMapping() {
-        return graph.getOrchestrationTechnologyEntity().map(entity -> new OrchestrationTechnologyMapping((MappingEntity) entity, getComponents()));
+        return graph.getOrchestrationTechnologyEntity()
+            .map(entity -> new OrchestrationTechnologyMapping((MappingEntity) entity, getComponents()));
 
     }
 
     public Technology getTechnology(RootComponent component) {
         Optional<Map<RootComponent, Technology>> deploymentTechList = getTechnologyMapping()
-                .map(OrchestrationTechnologyMapping::getTechForComponents);
+            .map(OrchestrationTechnologyMapping::getTechForComponents);
         return deploymentTechList.map(c -> c.get(component)).orElse(Technology.UNDEFINED);
     }
 
@@ -124,9 +121,7 @@ public class DeploymentModel {
 
     public Set<Graph<RootComponent, RootRelation>> findComponentStacks() {
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = getReversedTopology();
-        List<RootComponent> stackSources = topology.vertexSet()
-            .stream()
-            .filter(v -> dependencyGraph.inDegreeOf(v) == 0)
+        List<RootComponent> stackSources = topology.vertexSet().stream().filter(v -> dependencyGraph.inDegreeOf(v) == 0)
             .collect(Collectors.toList());
 
         Set<Graph<RootComponent, RootRelation>> stacks = new HashSet<>();
@@ -139,7 +134,8 @@ public class DeploymentModel {
         return stacks;
     }
 
-    private void constructGraph(EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph, RootComponent currentNode, Graph<RootComponent, RootRelation> stack) {
+    private void constructGraph(EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph,
+                                RootComponent currentNode, Graph<RootComponent, RootRelation> stack) {
         if (dependencyGraph.outDegreeOf(currentNode) != 0) {
             dependencyGraph.outgoingEdgesOf(currentNode).forEach(edge -> {
                 if (edge instanceof HostedOn) {
