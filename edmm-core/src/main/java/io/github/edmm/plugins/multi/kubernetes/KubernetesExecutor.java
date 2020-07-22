@@ -64,7 +64,7 @@ public class KubernetesExecutor implements GroupExecutor {
                 result = api.createNamespacedService(service.getMetadata().getNamespace(), service, "true", null, null);
             } catch (ApiException e) {
                 api.deleteNamespacedService(service.getMetadata().getName(), service.getMetadata().getNamespace(), null,
-                    null, null, null, null, null);
+                        null, null, null, null, null);
                 result = api.createNamespacedService(service.getMetadata().getNamespace(), service, "true", null, null);
             }
         } catch (IOException | ApiException e) {
@@ -84,7 +84,7 @@ public class KubernetesExecutor implements GroupExecutor {
                 api.createNamespacedDeployment(depl.getMetadata().getNamespace(), depl, "true", null, null);
             } catch (ApiException e) {
                 api.deleteNamespacedDeployment(depl.getMetadata().getName(), depl.getMetadata().getNamespace(), null,
-                    null, null, null, null, null);
+                        null, null, null, null, null);
                 api.createNamespacedDeployment(depl.getMetadata().getNamespace(), depl, "true", null, null);
             }
         } catch (IOException | ApiException e) {
@@ -102,7 +102,7 @@ public class KubernetesExecutor implements GroupExecutor {
                 api.createNamespacedConfigMap(config.getMetadata().getNamespace(), config, "true", null, null);
             } catch (ApiException e) {
                 api.deleteNamespacedConfigMap(config.getMetadata().getName(), config.getMetadata().getNamespace(), null,
-                    null, null, null, null, null);
+                        null, null, null, null, null);
                 api.createNamespacedConfigMap(config.getMetadata().getNamespace(), config, null, null, null);
             }
 
@@ -132,7 +132,7 @@ public class KubernetesExecutor implements GroupExecutor {
                 Process init = pb.start();
                 init.waitFor();
                 pb.command("docker", "tag", info.getComponent().getLabel() + ":latest",
-                    registry + info.getComponent().getLabel());
+                        registry + info.getComponent().getLabel());
                 pb.start().waitFor();
                 pb.command("docker", "push", registry + info.getComponent().getLabel());
                 pb.start().waitFor();
