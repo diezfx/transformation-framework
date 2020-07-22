@@ -6,8 +6,8 @@ import java.util.Optional;
 
 public class Module {
 
-    protected Template template;
     private String id;
+    protected Template template;
     private Map<String, Object> options = new HashMap<>();
 
     public Module() {

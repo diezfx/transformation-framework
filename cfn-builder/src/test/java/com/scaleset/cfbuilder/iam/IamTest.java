@@ -1,11 +1,11 @@
 package com.scaleset.cfbuilder.iam;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.scaleset.cfbuilder.core.Module;
 import com.scaleset.cfbuilder.core.Template;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 

@@ -1,8 +1,7 @@
 package io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.extensions;
 
-import io.github.edmm.plugins.azure.model.resource.Properties;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.github.edmm.plugins.azure.model.resource.Properties;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

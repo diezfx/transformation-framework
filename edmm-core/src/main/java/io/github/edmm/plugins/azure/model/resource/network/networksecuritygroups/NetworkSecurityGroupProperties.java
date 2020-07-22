@@ -2,15 +2,12 @@ package io.github.edmm.plugins.azure.model.resource.network.networksecuritygroup
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.edmm.plugins.azure.model.resource.Properties;
 import io.github.edmm.plugins.azure.model.resource.network.networksecuritygroups.securityrules.SecurityRule;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.List;
 
 @Data
 @Builder

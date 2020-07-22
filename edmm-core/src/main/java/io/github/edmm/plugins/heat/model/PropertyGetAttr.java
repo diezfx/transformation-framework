@@ -1,9 +1,9 @@
 package io.github.edmm.plugins.heat.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Value;
-
-import java.util.List;
 
 @Value
 public class PropertyGetAttr implements PropertyAssignment {

@@ -9,18 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.BashScript;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.component.RootComponent;
-
-import freemarker.template.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Class that abstracts the configuration of the formula files includes all the commands to copy files to the minions
@@ -192,7 +187,7 @@ public class SaltFormula {
             file = file.substring(2);
         }
         String name = new File(file).getName();
-        return new String[]{file, name};
+        return new String[] {file, name};
     }
 
     /**

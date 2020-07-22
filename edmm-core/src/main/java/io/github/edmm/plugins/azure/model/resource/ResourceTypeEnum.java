@@ -13,8 +13,8 @@ public enum ResourceTypeEnum {
     VIRTUAL_MACHINES("Microsoft.Compute", "virtualMachines"),
     VIRTUAL_MACHINE_EXTENSIONS("Microsoft.Compute", "virtualMachines/extensions");
 
-    private final String providerNamespace;
-    private final String serviceName;
+    private String providerNamespace;
+    private String serviceName;
 
     ResourceTypeEnum(String providerNamespace, String serviceName) {
         this.providerNamespace = providerNamespace;

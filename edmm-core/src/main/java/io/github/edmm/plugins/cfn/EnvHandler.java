@@ -2,17 +2,17 @@ package io.github.edmm.plugins.cfn;
 
 import java.util.Map;
 
-import io.github.edmm.core.plugin.BashScript;
-import io.github.edmm.core.plugin.PluginFileAccess;
-
 import com.scaleset.cfbuilder.ec2.metadata.CFNCommand;
 import com.scaleset.cfbuilder.ec2.metadata.CFNFile;
+import io.github.edmm.core.plugin.BashScript;
+import io.github.edmm.core.plugin.PluginFileAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
-import static io.github.edmm.plugins.cfn.CloudFormationModule.*;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_INIT;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.CONFIG_SETS;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.MODE_777;
+import static io.github.edmm.plugins.cfn.CloudFormationModule.OWNER_GROUP_ROOT;
 
 public class EnvHandler {
 

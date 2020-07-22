@@ -4,16 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.github.edmm.plugins.azure.model.Parameter;
-import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.github.edmm.plugins.azure.model.Parameter;
+import io.github.edmm.plugins.azure.model.ParameterTypeEnum;
 import lombok.Data;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A generic Azure resource. It includes the values that are expected to exist in all concrete resource classes.

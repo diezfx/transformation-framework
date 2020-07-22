@@ -1,9 +1,21 @@
 package io.github.edmm.plugins.azure;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Operation;
-import io.github.edmm.model.component.*;
+import io.github.edmm.model.component.Compute;
+import io.github.edmm.model.component.Database;
+import io.github.edmm.model.component.Dbms;
+import io.github.edmm.model.component.MysqlDatabase;
+import io.github.edmm.model.component.MysqlDbms;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.Tomcat;
+import io.github.edmm.model.component.WebApplication;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -17,18 +29,12 @@ import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.exten
 import io.github.edmm.plugins.azure.model.resource.network.networkinterfaces.NetworkInterface;
 import io.github.edmm.plugins.azure.model.resource.network.virtualnetworks.VirtualNetwork;
 import io.github.edmm.plugins.azure.model.resource.storage.storageaccounts.StorageAccount;
-
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.github.edmm.model.component.WebServer.PORT;
 

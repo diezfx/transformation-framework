@@ -3,8 +3,6 @@ package io.github.edmm.plugins.heat.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.github.edmm.core.transformation.TransformationException;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,10 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import io.github.edmm.core.transformation.TransformationException;
 import lombok.Data;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
 public class Template {

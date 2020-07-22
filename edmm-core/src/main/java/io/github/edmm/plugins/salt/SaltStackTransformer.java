@@ -4,12 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import freemarker.template.Configuration;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
-import io.github.edmm.model.component.*;
+import io.github.edmm.model.component.Compute;
+import io.github.edmm.model.component.MysqlDatabase;
+import io.github.edmm.model.component.MysqlDbms;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.Tomcat;
+import io.github.edmm.model.component.WebApplication;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -17,17 +23,11 @@ import io.github.edmm.model.visitor.RelationVisitor;
 import io.github.edmm.model.visitor.VisitorHelper;
 import io.github.edmm.plugins.salt.model.SaltBase;
 import io.github.edmm.plugins.salt.model.SaltFormula;
-
-import freemarker.template.Configuration;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
 
@@ -39,10 +39,10 @@ public class SaltStackTransformer implements ComponentVisitor, RelationVisitor {
     // Used to generate static ip
     private final IpGenerator ipGenerator;
     private final Graph<RootComponent, RootRelation> graph;
-    private final SaltBase baseFile;
+    private SaltBase baseFile;
     // <ComputeName, Formula>
-    private final Map<String, SaltFormula> formulas = new HashMap<>();
-    private final PluginFileAccess fileAccess;
+    private Map<String, SaltFormula> formulas = new HashMap<>();
+    private PluginFileAccess fileAccess;
 
     public SaltStackTransformer(TransformationContext context) {
         this.context = context;

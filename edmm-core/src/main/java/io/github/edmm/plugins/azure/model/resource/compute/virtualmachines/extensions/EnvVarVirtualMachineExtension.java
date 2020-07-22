@@ -4,27 +4,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.plugins.azure.model.resource.compute.virtualmachines.VirtualMachine;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EnvVarVirtualMachineExtension extends VirtualMachineExtension {
 
     @JsonIgnore
-    private final String[] blacklist = {"key_name", "public_key"};
+    private String[] blacklist = {"key_name", "public_key"};
 
     @JsonIgnore
     @Getter
-    private final Map<String, String> environmentVariables = new HashMap<>();
+    private Map<String, String> environmentVariables = new HashMap<>();
 
     public EnvVarVirtualMachineExtension(VirtualMachine vm) {
         super(vm, vm.getName().replaceFirst("vm_", ""), "env");

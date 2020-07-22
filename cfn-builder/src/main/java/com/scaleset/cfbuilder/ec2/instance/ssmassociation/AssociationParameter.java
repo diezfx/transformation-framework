@@ -1,9 +1,9 @@
 package com.scaleset.cfbuilder.ec2.instance.ssmassociation;
 
-import com.scaleset.cfbuilder.ec2.instance.SSMAssociation;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.scaleset.cfbuilder.ec2.instance.SSMAssociation;
 
 /**
  * Constructs an {@code AssociationParameter} to specify input parameter values for an Amazon EC2 Systems Manager (SSM)

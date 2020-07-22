@@ -1,9 +1,9 @@
 package io.github.edmm.plugins.cloudify.model.azure;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 public class Operation {
     @Setter

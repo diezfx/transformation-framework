@@ -1,11 +1,15 @@
 package io.github.edmm.plugins.heat.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.*;
 
 @Data
 @Builder

@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.github.edmm.core.plugin.PluginFileAccess;
-
 import freemarker.template.Configuration;
+import io.github.edmm.core.plugin.PluginFileAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Class that abstracts the configuration of the top.sls file of the  pillar

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import io.github.edmm.core.plugin.PluginFileAccess;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -16,7 +17,16 @@ import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.component.*;
+import io.github.edmm.model.component.Compute;
+import io.github.edmm.model.component.Database;
+import io.github.edmm.model.component.Dbms;
+import io.github.edmm.model.component.MysqlDatabase;
+import io.github.edmm.model.component.MysqlDbms;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.SoftwareComponent;
+import io.github.edmm.model.component.Tomcat;
+import io.github.edmm.model.component.WebApplication;
+import io.github.edmm.model.component.WebServer;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.model.visitor.ComponentVisitor;
@@ -31,17 +41,11 @@ import io.github.edmm.plugins.heat.model.PropertyObject;
 import io.github.edmm.plugins.heat.model.PropertyValue;
 import io.github.edmm.plugins.heat.model.Resource;
 import io.github.edmm.plugins.heat.model.Template;
-
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class HeatVisitor implements ComponentVisitor, RelationVisitor {
 
@@ -79,8 +83,8 @@ public class HeatVisitor implements ComponentVisitor, RelationVisitor {
     private final Graph<RootComponent, RootRelation> graph;
     private final Template template;
 
-    private final Map<Compute, Resource> computeResources = new HashMap<>();
-    private final List<Pair<RootComponent, RootComponent>> connectionPairs = new ArrayList<>();
+    private Map<Compute, Resource> computeResources = new HashMap<>();
+    private List<Pair<RootComponent, RootComponent>> connectionPairs = new ArrayList<>();
 
     public HeatVisitor(TransformationContext context) {
         this.context = context;

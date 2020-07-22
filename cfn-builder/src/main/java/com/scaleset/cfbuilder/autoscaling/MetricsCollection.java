@@ -14,12 +14,12 @@ public class MetricsCollection {
         return granularity;
     }
 
-    public void setGranularity(String granularity) {
-        this.granularity = granularity;
-    }
-
     public String[] getMetrics() {
         return metrics;
+    }
+
+    public void setGranularity(String granularity) {
+        this.granularity = granularity;
     }
 
     public void setMetrics(String[] metrics) {

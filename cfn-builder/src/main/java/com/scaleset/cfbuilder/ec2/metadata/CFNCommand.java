@@ -1,13 +1,13 @@
 package com.scaleset.cfbuilder.ec2.metadata;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import java.util.HashMap;
-import java.util.Map;
-
-@JsonPropertyOrder({"command", "env", "cwd"})
+@JsonPropertyOrder( {"command", "env", "cwd"})
 public class CFNCommand {
 
     @JsonProperty("command")

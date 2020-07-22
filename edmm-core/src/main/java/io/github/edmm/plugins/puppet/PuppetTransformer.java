@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import io.github.edmm.core.plugin.TemplateHelper;
 import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
@@ -20,20 +23,14 @@ import io.github.edmm.model.component.Compute;
 import io.github.edmm.model.component.RootComponent;
 import io.github.edmm.model.relation.RootRelation;
 import io.github.edmm.plugins.puppet.model.Task;
-
-import com.google.common.collect.Lists;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static io.github.edmm.plugins.puppet.PuppetLifecycle.*;
+import static io.github.edmm.plugins.puppet.PuppetLifecycle.MANIFEST_EXTENSION;
+import static io.github.edmm.plugins.puppet.PuppetLifecycle.MANIFEST_MAIN;
+import static io.github.edmm.plugins.puppet.PuppetLifecycle.MODULE_FILES_FOLDER;
+import static io.github.edmm.plugins.puppet.PuppetLifecycle.MODULE_MANIFESTS_FOLDER;
 
 public class PuppetTransformer {
 
