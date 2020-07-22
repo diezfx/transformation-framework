@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import io.github.edmm.core.plugin.TemplateHelper;
+import io.github.edmm.core.TemplateHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.model.Artifact;
 import io.github.edmm.model.Operation;
@@ -26,10 +26,8 @@ import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.*;
 public class JujuTransformer {
+
     public static final String CHARM_FOLDER_PREAMBLE = "layer-";
     public static final String CHARM_SERIES = "xenial";
     public static final String HOOKS_FOLDER = "hooks";
@@ -51,6 +49,7 @@ public class JujuTransformer {
         "upgrade-charm",
         "update-status"
     );
+
     private final TransformationContext context;
     private final Configuration cfg = TemplateHelper.forClasspath(JujuPlugin.class, "/plugins/juju");
 
