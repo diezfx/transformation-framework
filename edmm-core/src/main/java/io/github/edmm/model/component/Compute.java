@@ -22,7 +22,6 @@ public class Compute extends RootComponent {
 
     public static final Attribute<String> PRIVATE_KEY_PATH = new Attribute<>("priv_key_path", String.class);
 
-
     public Compute(MappingEntity mappingEntity) {
 
         super(mappingEntity);
@@ -52,12 +51,10 @@ public class Compute extends RootComponent {
         return getProperty(PRIVATE_KEY_PATH);
     }
 
-
     @Override
     public void accept(ComponentVisitor v) {
         v.visit(this);
     }
-
 
     public void setInterfaceValue(Attribute<String> attribute, String newVal) {
         Optional<Property> prop = getProperty(attribute.getName());
@@ -67,6 +64,5 @@ public class Compute extends RootComponent {
         }
         prop.get().setValue(newVal);
     }
-
 
 }

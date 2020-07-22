@@ -33,46 +33,25 @@ public final class DeploymentResource implements KubernetesResource {
     @Override
     public void build() {
         io.fabric8.kubernetes.api.model.Container container = new ContainerBuilder()
-            .withImage(stack.getLabel() + ":latest")
-            .withName(stack.getLabel())
-            .withImagePullPolicy("Never")
-            .addAllToPorts(stack.getPorts().stream()
-                .map(PortMapping::toContainerPort)
-                .collect(Collectors.toList()))
-            .addAllToEnv(stack.getEnvVars().entrySet().stream()
-                .map(e -> new EnvVar(e.getKey(), e.getValue(), null))
-                .collect(Collectors.toSet()))
-            .addAllToEnv(stack.getEnvVarsRuntime().stream()
-                .map(varName -> {
-                    var envVarSource = new EnvVarSourceBuilder().withNewConfigMapKeyRef()
-                        .withNewKey(varName)
-                        .withNewName(stack.getConfigMapName())
-                        .endConfigMapKeyRef()
-                        .build();
+                .withImage(stack.getLabel() + ":latest").withName(stack.getLabel()).withImagePullPolicy("Never")
+                .addAllToPorts(stack.getPorts().stream().map(PortMapping::toContainerPort).collect(Collectors.toList()))
+                .addAllToEnv(stack.getEnvVars().entrySet().stream().map(e -> new EnvVar(e.getKey(), e.getValue(), null))
+                        .collect(Collectors.toSet()))
+                .addAllToEnv(stack.getEnvVarsRuntime().stream().map(varName -> {
+                    var envVarSource = new EnvVarSourceBuilder().withNewConfigMapKeyRef().withNewKey(varName)
+                            .withNewName(stack.getConfigMapName()).endConfigMapKeyRef().build();
                     return new EnvVarBuilder().withName(varName).withValueFrom(envVarSource).build();
-                }).collect(Collectors.toSet()))
-            .build();
+                }).collect(Collectors.toSet())).build();
         deployment = new DeploymentBuilder()
-            .withNewMetadata()
-            .withName(stack.getLabel())
-            // The Unspecific name is used here to improve the ability to find objects belonging together
-            .addToLabels("app", stack.getLabel())
-            .endMetadata()
-            .withNewSpec()
-            .withReplicas(1)
-            .withNewSelector()
-            .addToMatchLabels("app", stack.getLabel())
-            .endSelector()
-            .withNewTemplate()
-            .withNewMetadata()
-            .withName(stack.getLabel())
-            .addToLabels("app", stack.getLabel())
-            .endMetadata()
-            .withNewSpec()
-            .addAllToContainers(Lists.newArrayList(container))
-            .endSpec()
-            .endTemplate()
-            .endSpec().build();
+
+                .withNewMetadata().withName(stack.getLabel())
+                // The Unspecific name is used here to improve the ability to find objects
+                // belonging together
+                .addToLabels("app", stack.getLabel()).withNamespace(namespace).endMetadata().withNewSpec()
+                .withReplicas(1).withNewSelector().addToMatchLabels("app", stack.getLabel()).endSelector()
+                .withNewTemplate().withNewMetadata().withName(stack.getLabel()).addToLabels("app", stack.getLabel())
+                .endMetadata().withNewSpec().addAllToContainers(Lists.newArrayList(container)).endSpec().endTemplate()
+                .endSpec().build();
     }
 
     @Override

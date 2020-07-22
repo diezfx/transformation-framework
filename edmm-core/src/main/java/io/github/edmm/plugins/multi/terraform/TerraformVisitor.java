@@ -38,13 +38,12 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
     protected final Configuration cfg = TemplateHelper.forClasspath(MultiPlugin.class, "/plugins/multi");
     protected final Graph<RootComponent, RootRelation> graph;
     private final Map<Compute, Openstack.Instance> computeInstances = new HashMap<>();
-    private final Map<Compute,Openstack.Instance> softwareStacks= new HashMap<>();
+    private final Map<Compute, Openstack.Instance> softwareStacks = new HashMap<>();
 
     public TerraformVisitor(TransformationContext context) {
         this.context = context;
         this.graph = context.getTopologyGraph();
     }
-
 
     private void copyFiles(RootComponent comp) {
         PluginFileAccess fileAccess = context.getFileAccess();
@@ -82,29 +81,25 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
 
         String abolutePrivkeyPath;
         Path privKeyValue = Paths.get(component.getPrivateKeyPath().get());
-        if(privKeyValue.isAbsolute()){
-            abolutePrivkeyPath=component.getPrivateKeyPath().get();
-        }
-        else{
-           abolutePrivkeyPath= new File(context.getFileAccess().getSourceDirectory(),component.getPrivateKeyPath().get()).getAbsolutePath();
+        if (privKeyValue.isAbsolute()) {
+            abolutePrivkeyPath = component.getPrivateKeyPath().get();
+        } else {
+            abolutePrivkeyPath = new File(context.getFileAccess().getSourceDirectory(),
+                    component.getPrivateKeyPath().get()).getAbsolutePath();
         }
 
-
-        Openstack.Instance openstackInstance = Openstack.Instance.builder()
-                .name(component.getNormalizedName())
-                .keyName(component.getKeyName().get())
-                .privKeyFile(abolutePrivkeyPath)
-                .build();
+        Openstack.Instance openstackInstance = Openstack.Instance.builder().name(component.getNormalizedName())
+                .keyName(component.getKeyName().get()).privKeyFile(abolutePrivkeyPath).build();
         List<String> operations = collectOperations(component);
         openstackInstance.addRemoteExecProvisioner(new RemoteExecProvisioner(operations));
         openstackInstance.addFileProvisioner(new FileProvisioner("./env.sh", "/opt/env.sh"));
         computeInstances.put(component, openstackInstance);
 
-        // add properties that are created by this componentent to announce for the others
+        // add properties that are created by this componentent to announce for the
+        // others
         component.addProperty("hostname", null);
         component.setTransformed(true);
     }
-
 
     private void collectFileProvisioners(RootComponent component) {
         Optional<Compute> optionalCompute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component);
@@ -113,7 +108,7 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
             Openstack.Instance awsInstance = computeInstances.get(hostingCompute);
             for (Artifact artifact : component.getArtifacts()) {
                 String destination = "/opt/" + component.getNormalizedName();
-                logger.info("file provisioner"+artifact.getValue());
+                logger.info("file provisioner" + artifact.getValue());
                 awsInstance.addFileProvisioner(new FileProvisioner(artifact.getValue(), destination));
             }
         }
@@ -134,9 +129,8 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
         if (optionalCompute.isPresent()) {
             Compute hostingCompute = optionalCompute.get();
             Openstack.Instance openstackInstance = computeInstances.get(hostingCompute);
-            String[] blacklist = {"key_name", "public_key"};
-            component.getProperties().values().stream()
-                    .filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
+            String[] blacklist = { "key_name", "public_key" };
+            component.getProperties().values().stream().filter(p -> !Arrays.asList(blacklist).contains(p.getName()))
                     .forEach(p -> {
                         String name = (component.getNormalizedName() + "_" + p.getNormalizedName()).toUpperCase();
                         openstackInstance.addEnvVar(name, p.getValue());
@@ -162,23 +156,20 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
         return operations;
     }
 
-    public void populate(){
+    public void populate() {
         PluginFileAccess fileAccess = context.getFileAccess();
         Map<String, Object> data = new HashMap<>();
 
-
         data.put("instances", computeInstances);
-        data.put("software_stacks",softwareStacks);
+        data.put("software_stacks", softwareStacks);
         try {
             fileAccess.write("compute.tf", TemplateHelper.toString(cfg, "compute.tf", data));
-            //fileAccess.write("software.tf", TemplateHelper.toString(cfg, "software.tf", data));
-        }
-        catch (IOException e) {
+            // fileAccess.write("software.tf", TemplateHelper.toString(cfg, "software.tf",
+            // data));
+        } catch (IOException e) {
             logger.error("Failed to write Terraform file", e);
             throw new TransformationException(e);
         }
-
-
 
         for (Openstack.Instance openstackInstance : computeInstances.values()) {
 
@@ -196,9 +187,7 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
             }
             // Copy operations to target directory
             List<String> operations = openstackInstance.getRemoteExecProvisioners().stream()
-                    .map(RemoteExecProvisioner::getScripts)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
+                    .map(RemoteExecProvisioner::getScripts).flatMap(Collection::stream).collect(Collectors.toList());
             for (String op : operations) {
                 try {
                     fileAccess.copy(op, op);
@@ -209,9 +198,6 @@ public class TerraformVisitor implements ComponentVisitor, RelationVisitor {
 
         }
     }
-
-
-
 
     @Override
     public void visit(Tomcat component) {

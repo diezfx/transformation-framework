@@ -1,6 +1,5 @@
 package io.github.edmm.plugins.kubernetes.model;
 
-
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Property;
 import io.github.edmm.model.component.RootComponent;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 
-
 public final class ConfigMapResource implements KubernetesResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceResource.class);
@@ -23,7 +21,7 @@ public final class ConfigMapResource implements KubernetesResource {
     private final String namespace = "default";
     private final Map<String, Property> props;
 
-    String[] blacklist = {"key_name", "public_key", "hostname"};
+    String[] blacklist = { "key_name", "public_key", "hostname" };
 
     public ConfigMapResource(RootComponent component, Map<String, Property> props) {
         this.component = component;
@@ -33,10 +31,8 @@ public final class ConfigMapResource implements KubernetesResource {
     @Override
     public void build() {
 
-        var configMapBuilder = new V1ConfigMapBuilder().withNewMetadata()
-                .withName(getName())
-                .withNamespace(namespace)
-                .endMetadata();
+        var configMapBuilder = new V1ConfigMapBuilder().withApiVersion("v1").withNewMetadata().withName(getName())
+                .withNamespace(namespace).endMetadata();
 
         for (var prop : props.entrySet()) {
 

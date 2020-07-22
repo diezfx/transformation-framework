@@ -44,7 +44,6 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     private final List<AbstractLifecycle> groupLifecycles;
 
-
     public MultiLifecycle(TransformationContext context) {
 
         super(context);
@@ -57,12 +56,10 @@ public class MultiLifecycle extends AbstractLifecycle {
 
     }
 
-
     public void createWorkflow(List<Group> sortedGroups) {
 
         EdgeReversedGraph<RootComponent, RootRelation> dependencyGraph = new EdgeReversedGraph<>(
-            context.getModel().getTopology());
-
+                context.getModel().getTopology());
 
         Plan plan = new Plan();
 
@@ -70,16 +67,15 @@ public class MultiLifecycle extends AbstractLifecycle {
             var group = sortedGroups.get(i);
             var subgraph = new AsSubgraph<>(dependencyGraph, group.getGroupComponents());
             TopologicalOrderIterator<RootComponent, RootRelation> subIterator = new TopologicalOrderIterator<>(
-                subgraph);
+                    subgraph);
             group.setSubGraph(subgraph);
 
-
-            //init contexts
+            // init contexts
             AbstractLifecycle grpLifecycle;
             String subDir = "step" + i + "_" + group.getTechnology().toString();
-            File targetDir=new File(context.getTargetDirectory(),subDir);
-            var groupContext = new TransformationContext(subDir,context.getModel(),context.getTargetTechnology(),context.getSourceDirectory(),targetDir, group);
-
+            File targetDir = new File(context.getTargetDirectory(), subDir);
+            var groupContext = new TransformationContext(subDir, context.getModel(), context.getTargetTechnology(),
+                    context.getSourceDirectory(), targetDir, group);
 
             if (group.getTechnology() == Technology.ANSIBLE) {
                 grpLifecycle = new AnsibleAreaLifecycle(groupContext);
@@ -88,18 +84,17 @@ public class MultiLifecycle extends AbstractLifecycle {
             } else if (group.getTechnology() == Technology.KUBERNETES) {
                 grpLifecycle = new KubernetesAreaLifecycle(groupContext);
             } else {
-                String error = String.format("could not find technology: %s for components %s", group.getTechnology(), group);
+                String error = String.format("could not find technology: %s for components %s", group.getTechnology(),
+                        group);
                 throw new IllegalArgumentException(error);
             }
             groupLifecycles.add(grpLifecycle);
-
 
             var step = new PlanStep(group.getTechnology());
 
             while (subIterator.hasNext()) {
                 RootComponent comp = subIterator.next();
-                var propList = TransformationHelper.collectRuntimeEnvVars(context.getTopologyGraph(), comp);
-                step.components.add(new ComponentResources(comp.getName(), propList));
+                step.components.add(new ComponentResources(comp.getName()));
             }
 
             plan.steps.add(step);
@@ -117,20 +112,20 @@ public class MultiLifecycle extends AbstractLifecycle {
         }
     }
 
-
     @Override
     public void transform() {
         logger.info("Begin transformation to Multi...");
-        //new Groupprovisioning
+        // new Groupprovisioning
         List<Group> sortedGroups = GroupProvisioning.determineProvisiongingOrder(context.getModel());
 
         createWorkflow(sortedGroups);
 
         // suboptimally do 3 lifecycle step for groups here
-        for (int i=0;i<groupLifecycles.size();i++) {
+        for (int i = 0; i < groupLifecycles.size(); i++) {
             var result = groupLifecycles.get(i).checkModel();
             if (result.getState() == CheckModelResult.State.UNSUPPORTED_COMPONENTS) {
-                throw new TransformationException(String.format("unspported components  %s", sortedGroups.get(i).getTechnology()));
+                throw new TransformationException(
+                        String.format("unspported components  %s", sortedGroups.get(i).getTechnology()));
             }
             groupLifecycles.get(i).prepare();
             groupLifecycles.get(i).transform();
@@ -139,7 +134,8 @@ public class MultiLifecycle extends AbstractLifecycle {
         logger.info("Transformation to Multi successful");
     }
 
-    //this could be another lifecycle step, but is planned to be completely independent in the future
+    // this could be another lifecycle step, but is planned to be completely
+    // independent in the future
     @Override
     public void execute() {
         PluginFileAccess fileAccess = context.getFileAccess();
@@ -165,14 +161,14 @@ public class MultiLifecycle extends AbstractLifecycle {
                 }
                 Technology tech = plan.steps.get(i).tech;
 
-                var groupFileAccess=new File(context.getTargetDirectory(),"step" + i + "_" + tech.toString());
-                var deployInfo = components.stream()
-                    .map(c -> new ExecutionCompInfo(c, getComputedProperties(c)))
-                    .collect(Collectors.toList());
+                var groupFileAccess = new File(context.getTargetDirectory(), "step" + i + "_" + tech.toString());
+                var deployInfo = components.stream().map(c -> new ExecutionCompInfo(c, getComputedProperties(c)))
+                        .collect(Collectors.toList());
 
                 GroupExecutor visitorContext;
                 var orchContext = new ExecutionContext(groupFileAccess, context.getModel());
-                // at the moment they need access to the file access and graph(this could be changed)
+                // at the moment they need access to the file access and graph(this could be
+                // changed)
                 logger.info("deployment_tool: {} ", tech);
                 if (tech == Technology.ANSIBLE) {
                     visitorContext = new AnsibleExecutor(orchContext);
@@ -184,6 +180,7 @@ public class MultiLifecycle extends AbstractLifecycle {
                     String error = String.format("could not find technology: %s for component %s", tech, components);
                     throw new IllegalArgumentException(error);
                 }
+                logger.info("execute next tech");
                 visitorContext.execute(deployInfo);
 
             }
@@ -201,12 +198,12 @@ public class MultiLifecycle extends AbstractLifecycle {
         Map<String, Property> allProps = TopologyGraphHelper.findAllProperties(context.getTopologyGraph(), component);
         Map<String, Property> computedProps = new HashMap<>();
         for (var prop : allProps.entrySet()) {
-            if (prop.getValue().isComputed() || prop.getValue().getValue() == null || prop.getValue().getValue().startsWith("$")) {
+            if (prop.getValue().isComputed() || prop.getValue().getValue() == null
+                    || prop.getValue().getValue().startsWith("$")) {
                 computedProps.put(prop.getKey(), prop.getValue());
             }
         }
         return TopologyGraphHelper.resolveAllPropertyReferences(context.getTopologyGraph(), component, computedProps);
     }
-
 
 }

@@ -55,23 +55,22 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
         List<AnsibleFile> files = collectFiles(component);
 
         // host is the compute if exists
-        Compute compute = TopologyGraphHelper
-                .resolveHostingComputeComponent(graph, component)
-                .orElseThrow(() -> new IllegalStateException(String.format("The component %s could doesn't have a hosting compute", component.getName())));
+        Compute compute = TopologyGraphHelper.resolveHostingComputeComponent(graph, component)
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("The component %s could doesn't have a hosting compute", component.getName())));
 
         String host = compute.getNormalizedName();
 
-
-        String absoluteKeyPath;
+        String keyPath;
         Path privKeyValue = Paths.get(compute.getPrivateKeyPath().get());
         if (privKeyValue.isAbsolute()) {
-            absoluteKeyPath = compute.getPrivateKeyPath().get();
+            keyPath = compute.getPrivateKeyPath().get();
         } else {
-            absoluteKeyPath = new File(context.getTargetDirectory(), compute.getPrivateKeyPath().get()).getAbsolutePath();
+            keyPath = new File(context.getTargetDirectory(), compute.getPrivateKeyPath().get()).getAbsolutePath();
         }
-        hosts.put(host, new AnsibleHost(host, absoluteKeyPath));
-        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(host).vars(envVars).runtimeVars(envVarsRuntime).tasks(tasks)
-                .files(files).build();
+        hosts.put(host, new AnsibleHost(host, keyPath));
+        AnsiblePlay play = AnsiblePlay.builder().name(component.getName()).hosts(host).vars(envVars)
+                .runtimeVars(envVarsRuntime).tasks(tasks).files(files).build();
 
         plays.add(play);
         component.setTransformed(true);
@@ -107,20 +106,16 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
         visit((RootComponent) component);
     }
 
-
-
-
-
-
     private List<AnsibleFile> collectFiles(RootComponent component) {
 
         List<AnsibleFile> fileList = new ArrayList<>();
         for (Artifact artifact : component.getArtifacts()) {
             String basename = FilenameUtils.getName(artifact.getValue());
-            String newPath = "./files/"+component.getNormalizedName() +"/"+ basename;
+            String newPath = "./files/" + component.getNormalizedName() + "/" + basename;
             String destination = "/opt/" + component.getNormalizedName() + "/";
             fileList.add(new AnsibleFile(newPath, destination + basename));
         }
+
         return fileList;
 
     }
@@ -132,8 +127,9 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
             String basename = FilenameUtils.getName(operation.getValue());
             String newPath = "./files/" + component.getNormalizedName() + "/" + basename;
             Map<String, String> args = new HashMap<>();
-            //args.put("chdir", "/opt/" + component.getNormalizedName());
-            AnsibleTask task = AnsibleTask.builder().name(operation.getNormalizedName()).script(newPath).args(args).build();
+            // args.put("chdir", "/opt/" + component.getNormalizedName());
+            AnsibleTask task = AnsibleTask.builder().name(operation.getNormalizedName()).script(newPath).args(args)
+                    .build();
             taskQueue.add(task);
 
         });
@@ -184,7 +180,8 @@ public class AnsibleVisitor implements MultiVisitor, RelationVisitor {
         templateData.put("hosts", hosts);
 
         try {
-            fileAccess.write(AnsibleAreaLifecycle.FILE_NAME, TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
+            fileAccess.write(AnsibleAreaLifecycle.FILE_NAME,
+                    TemplateHelper.toString(cfg, "playbook_base.yml", templateData));
         } catch (IOException e) {
             logger.error("Failed to write Ansible file", e);
         }
