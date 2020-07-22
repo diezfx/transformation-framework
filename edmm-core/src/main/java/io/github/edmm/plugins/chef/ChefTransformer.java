@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.github.edmm.core.TemplateHelper;
+import io.github.edmm.core.TopologyGraphHelper;
 import io.github.edmm.core.plugin.PluginFileAccess;
-import io.github.edmm.core.plugin.TemplateHelper;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Artifact;
@@ -31,12 +31,14 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static io.github.edmm.plugins.chef.ChefLifecycle.*;
+import static io.github.edmm.plugins.chef.ChefLifecycle.COOKBOOKS_FOLDER;
+import static io.github.edmm.plugins.chef.ChefLifecycle.COOKBOOK_CHEFIGNORE_FILENAME;
+import static io.github.edmm.plugins.chef.ChefLifecycle.COOKBOOK_DEFAULT_RECIPE_FILENAME;
+import static io.github.edmm.plugins.chef.ChefLifecycle.COOKBOOK_FILES_FOLDER;
+import static io.github.edmm.plugins.chef.ChefLifecycle.COOKBOOK_METADATA_FILENAME;
+import static io.github.edmm.plugins.chef.ChefLifecycle.COOKBOOK_RECIPES_FOLDER;
+import static io.github.edmm.plugins.chef.ChefLifecycle.POLICIES_FOLDER;
+import static io.github.edmm.plugins.chef.ChefLifecycle.POLICY_FILENAME;
 
 public class ChefTransformer {
 

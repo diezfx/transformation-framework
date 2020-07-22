@@ -1,14 +1,28 @@
 package io.github.edmm.plugins.cloudify.azure;
 
-import io.github.edmm.core.plugin.BashScript;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import io.github.edmm.core.BashScript;
+import io.github.edmm.core.TemplateHelper;
+import io.github.edmm.core.TopologyGraphHelper;
 import io.github.edmm.core.plugin.PluginFileAccess;
-import io.github.edmm.core.plugin.TemplateHelper;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Operation;
 import io.github.edmm.model.Property;
-import io.github.edmm.model.component.*;
+import io.github.edmm.model.component.Compute;
+import io.github.edmm.model.component.Database;
+import io.github.edmm.model.component.Dbms;
+import io.github.edmm.model.component.MysqlDatabase;
+import io.github.edmm.model.component.MysqlDbms;
+import io.github.edmm.model.component.RootComponent;
+import io.github.edmm.model.component.Tomcat;
+import io.github.edmm.model.component.WebApplication;
 import io.github.edmm.model.relation.ConnectsTo;
 import io.github.edmm.plugins.cloudify.CloudifyVisitor;
 import io.github.edmm.plugins.cloudify.model.azure.Script;
@@ -17,9 +31,6 @@ import io.github.edmm.plugins.terraform.aws.TerraformAwsVisitor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
 
 import static io.github.edmm.model.component.WebServer.PORT;
 import static io.github.edmm.plugins.cloudify.CloudifyLifecycle.FILE_NAME;

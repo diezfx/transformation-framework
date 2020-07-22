@@ -1,10 +1,7 @@
 package io.github.edmm.plugins.chef;
 
 import io.github.edmm.core.plugin.AbstractLifecycle;
-import io.github.edmm.core.plugin.support.CheckModelResult;
 import io.github.edmm.core.transformation.TransformationContext;
-import io.github.edmm.model.visitor.VisitorHelper;
-import io.github.edmm.plugins.ComputeSupportVisitor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +17,11 @@ public class ChefLifecycle extends AbstractLifecycle {
     public static final String COOKBOOK_DEFAULT_RECIPE_FILENAME = "default.rb";
     public static final String COOKBOOK_METADATA_FILENAME = "metadata.rb";
     public static final String COOKBOOK_CHEFIGNORE_FILENAME = "chefignore";
-    private static final Logger logger = LoggerFactory.getLogger(ChefLifecycle.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(ChefLifecycle.class);
 
     public ChefLifecycle(TransformationContext context) {
         super(context);
-    }
-
-    @Override
-    public CheckModelResult checkModel() {
-        ComputeSupportVisitor visitor = new ComputeSupportVisitor(context);
-        VisitorHelper.visit(context.getModel().getComponents(), visitor);
-        return visitor.getResult();
     }
 
     @Override
