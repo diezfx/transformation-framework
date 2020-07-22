@@ -11,10 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * A generic Azure resource. It includes the values that are expected to exist in all concrete resource classes.
  */

@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import io.github.edmm.core.TemplateHelper;
+import io.github.edmm.core.TopologyGraphHelper;
 import io.github.edmm.core.plugin.PluginFileAccess;
-import io.github.edmm.core.plugin.TemplateHelper;
-import io.github.edmm.core.plugin.TopologyGraphHelper;
 import io.github.edmm.core.transformation.TransformationContext;
 import io.github.edmm.core.transformation.TransformationException;
 import io.github.edmm.model.Operation;
@@ -53,6 +53,7 @@ public class CFEngineTransformer implements ComponentVisitor, RelationVisitor {
     private final Graph<RootComponent, RootRelation> graph;
     private final PluginFileAccess fileAccess;
     private final Map<String, List<RootComponent>> runningOrder; //List<RootComponent> runningOrder
+
     private int last_ip = 0;
 
     public CFEngineTransformer(TransformationContext context) {

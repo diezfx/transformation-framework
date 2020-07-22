@@ -20,11 +20,12 @@ import static picocli.CommandLine.usage;
     },
     subcommands = {
         CommandLine.HelpCommand.class,
-        TransformCommand.class
+        TransformCommand.class,
+        DeployCommand.class,
     }
 )
 @SpringBootApplication(scanBasePackages = "io.github.edmm")
-@ImportResource({"classpath*:pluginContext.xml"})
+@ImportResource( {"classpath*:pluginContext.xml"})
 public class Application implements CommandLineRunner, Runnable, ExitCodeGenerator {
 
     public static final String PICOCLI_ANSI = "picocli.ansi";
@@ -36,14 +37,6 @@ public class Application implements CommandLineRunner, Runnable, ExitCodeGenerat
     @Autowired
     public Application(CommandLine.IFactory factory) {
         this.factory = factory;
-    }
-
-    public static void main(String[] args) {
-        AnsiConsole.systemInstall();
-        System.setProperty(PICOCLI_ANSI, String.valueOf(true));
-        int exitCode = SpringApplication.exit(SpringApplication.run(Application.class, args));
-        AnsiConsole.systemUninstall();
-        System.exit(exitCode);
     }
 
     @Override
@@ -59,5 +52,13 @@ public class Application implements CommandLineRunner, Runnable, ExitCodeGenerat
     @Override
     public int getExitCode() {
         return exitCode;
+    }
+
+    public static void main(String[] args) {
+        AnsiConsole.systemInstall();
+        System.setProperty(PICOCLI_ANSI, String.valueOf(true));
+        int exitCode = SpringApplication.exit(SpringApplication.run(Application.class, args));
+        AnsiConsole.systemUninstall();
+        System.exit(exitCode);
     }
 }
