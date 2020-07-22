@@ -25,12 +25,8 @@ import org.springframework.web.servlet.view.RedirectView;
 ))
 @Controller
 @SpringBootApplication(scanBasePackages = "io.github.edmm")
-@ImportResource({"classpath*:pluginContext.xml"})
+@ImportResource( {"classpath*:pluginContext.xml"})
 public class Application extends SpringBootServletInitializer {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
 
     @GetMapping("/")
     public RedirectView redirectRoot() {
@@ -40,5 +36,9 @@ public class Application extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(Application.class);
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
     }
 }

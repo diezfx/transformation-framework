@@ -16,7 +16,6 @@ import io.github.edmm.utils.Compress;
 import io.github.edmm.web.model.TransformationRequest;
 import io.github.edmm.web.model.TransformationResult;
 import io.github.edmm.web.service.TransformationHandler;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,11 +38,6 @@ import org.springframework.web.server.ResponseStatusException;
 import static io.github.edmm.core.transformation.TransformationContext.State.DONE;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import javax.validation.Valid;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
 
 @Slf4j
 @RestController
